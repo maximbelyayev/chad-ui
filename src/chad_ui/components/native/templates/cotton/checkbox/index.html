@@ -1,0 +1,120 @@
+<c-vars asChild defaultChecked value="on"></c-vars>
+
+<{% if not asChild %}button{% else %}div{% endif %}
+    x-data="{
+        checked: {% if defaultChecked %}{{ defaultChecked|lower }}{% else %}false{% endif %},
+        disabled: {% if attrs.disabled %}true{% else %}false{% endif %},
+        isFormControl: true,
+        init() {
+            this.isFormControl = {{ attrs.form|yesno:'true,false' }} ? true : this.$el.closest('form') !== null;
+            if ({{ asChild|yesno:'true,false' }}) {
+                this.$nextTick(() => this.forwardPropsToChild()); 
+            }
+        }, 
+        toggle() {
+            if (!this.disabled) this.checked = !this.checked;
+        },
+        getCheckedState() {
+            return this.checked ? 'checked' : 'unchecked';
+        },
+        forwardPropsToChild() {
+            const child = this.$el.firstElementChild
+            if (!child) return;
+
+            child.setAttribute('role', 'checkbox');
+            child.setAttribute('aria-checked', this.checked);
+            child.dataset.state = this.getCheckedState();
+            if (this.disabled) child.setAttribute('disabled', '');
+
+            this.$watch('checked', value => {
+                child.setAttribute('aria-checked', value);
+                child.dataset.state = this.getCheckedState();
+            });
+        },
+    }"
+    class="
+        peer
+        relative
+        {% if not asChild %}
+        border-input 
+        dark:bg-input/30 
+        data-[state=checked]:bg-primary 
+        data-[state=checked]:text-primary-foreground 
+        dark:data-[state=checked]:bg-primary 
+        data-[state=checked]:border-primary 
+        focus-visible:border-ring 
+        focus-visible:ring-ring/50 
+        aria-invalid:ring-destructive/20 
+        dark:aria-invalid:ring-destructive/40 
+        aria-invalid:border-destructive 
+        size-4 
+        shrink-0 
+        rounded-[4px] 
+        border 
+        shadow-xs 
+        transition-shadow 
+        outline-none 
+        focus-visible:ring-[3px] 
+        disabled:cursor-not-allowed 
+        disabled:opacity-50
+        {% endif %}
+        {% if class %}{{ class }}{% endif %}
+    "
+    {% if not asChild %}
+    type="button" 
+    role="checkbox"
+    :aria-checked="checked"
+    :data-state="checked ? 'checked' : 'unchecked'"
+        {% if attrs.disabled %}
+        disabled
+        {% endif %}
+    {% endif %}
+    {% if attrs.disabled %}
+    data-disabled
+    {% else %}
+    @click="toggle()"
+    {% endif %}
+    {% with form_attrs='name,required,form,value,checked,disabled,id' vars='asChild,defaultChecked' %}
+        {% for key, value in attrs.items %}
+            {% if key not in form_attrs and key not in vars %}
+                {{ key }}{% if value != True %}="{{ value }}"{% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endwith %}
+    {% if attrs.id %}
+    :id="isFormControl ? null : '{{ attrs.id }}'"
+    {% endif %}
+>   
+    {% if not asChild %}
+    <span 
+        x-show="checked"
+        :data-state="checked ? 'checked' : 'unchecked'"
+        class="grid place-content-center text-current transition-none" 
+        style="pointer-events: none;"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+            class="lucide lucide-check size-3.5" 
+        >
+            <path d="M20 6 9 17l-5-5"></path>
+        </svg>
+    </span>
+    {% else %}
+    {{ slot }}
+    {% endif %}
+    <template x-if="isFormControl">
+        <input
+            type="checkbox"
+            x-model="checked"
+            value="{{ value }}"
+            {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+            {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+            {% if attrs.form %}form="{{ attrs.form }}"{% endif %}
+            {% if attrs.required %}required{% endif %}
+            {% if attrs.disabled %}disabled{% endif %}
+            aria-hidden="true"
+            tab-index="-1"
+            class="left-1/2 top-1/2 -translate-x-[calc(50%-1px)] sr-only"
+        />
+    </template>
+    
+</{% if not asChild %}button{% else %}div{% endif %}>
