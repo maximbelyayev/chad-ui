@@ -101,23 +101,18 @@ def add(args: argparse.Namespace) -> None:
             
             if len(index_match) > 1:
                 errors.append(f"Multiple component directories found for '{component}'")
-                return False # approach 1
             
             root_dir = _find_component_root_dir(index_match[0])
             if root_dir is None:
                 errors.append(f"Could not find root directory for '{component}'")
                 return False
-            
-            # Two approaches to handling and printing errors: 
-            # 1. Fail fast: process dependencies until first error encountered, then print out to console.
-            # 2. Fail slow: process all dependencies, collect all errors, then finally print out to console.
-            # Current approach is 2 for more comprehensive error printing to reduce back-and-forth when issue is raised.
+
             deps = _get_dependencies(component)
             for dep in deps:
-                if not copy_with_dependencies(dep): return False # approach 1
-                #copy_with_dependencies(dep) # approach 2
+                copy_with_dependencies(dep)
                     
-            #if errors: return False # approach 2
+            if errors: 
+                return False
             
             try:
                 _copy(component, root_dir, arg_dst_dir, arg_overwrite)
