@@ -37,7 +37,6 @@ def cli() -> None:
     args = parser.parse_args()
     args.func(args)
 
-
 def index(args: argparse.Namespace) -> None:
     """
     CLI command to provide an index/list of the names of all components available for add by the user.
@@ -66,67 +65,85 @@ Third-party integrations:
 
     console.print(Panel(msg, title=f'{APP_NAME} components index', expand=False))
 
-
 def add(args: argparse.Namespace) -> None:
     """
     CLI command to add/copy a component to the user's workspace.
+
+    'add' is used to match shadcn/ui semantics.
     """
     arg_component = args.component[0]
     arg_dst_dir = Path(args.dest)
     arg_overwrite = args.overwrite
 
     copied = set()
-    missing_deps = set()
+    copying = list()
+    errors = []
 
-    #TODO: Address circular dependencies
-
-    def add_with_dependencies(component: str):
+    def copy_with_dependencies(component: str) -> bool:
         """
-        Recursively install a component and its dependencies.
+        Recursively copy a component and its dependencies.
         """
         if component in copied:
-            return
-    
-        index_match = _match_index(component)
-        if len(index_match) == 0:
-            if component != arg_component:
-                missing_deps.add(component)
-            else:
-                console.print(f"[red]ERROR: '{component}' not found in component index[/red]")
-            return
-        if len(index_match) > 1:
-            console.print(f"[yellow]WARNING: Multiple component directories found for '{component}'. Please report this issue.[/yellow]")
-            return
+            return True
+        if component in copying:
+            errors.append(f"Circular dependency detected between '{component}' and '{copying[-1]}'")
+            return False
         
-        root_dir = _find_component_root_dir(index_match[0])
-        if root_dir is None:
-            console.print(f"[red]ERROR: Could not find root directory for '{component}'[/red]")
-            return
-        
-        deps = _get_dependencies(component, root_dir)
-        for dep in deps:
-            add_with_dependencies(dep)
-
-        if not missing_deps:
+        copying.append(component)
+        try:
+            index_match = _match_index(component)
+            if len(index_match) == 0:
+                if component != arg_component:
+                    errors.append(f"Dependency '{component}' not found in component index")
+                else:
+                    errors.append(f"'{component}' not found in component index")
+                return False
+            
+            if len(index_match) > 1:
+                errors.append(f"Multiple component directories found for '{component}'")
+                return False # approach 1
+            
+            root_dir = _find_component_root_dir(index_match[0])
+            if root_dir is None:
+                errors.append(f"Could not find root directory for '{component}'")
+                return False
+            
+            # Two approaches to handling and printing errors: 
+            # 1. Fail fast: process dependencies until first error encountered, then print out to console.
+            # 2. Fail slow: process all dependencies, collect all errors, then finally print out to console.
+            # Current approach is 2 for more comprehensive error printing to reduce back-and-forth when issue is raised.
+            deps = _get_dependencies(component)
+            for dep in deps:
+                if not copy_with_dependencies(dep): return False # approach 1
+                #copy_with_dependencies(dep) # approach 2
+                    
+            #if errors: return False # approach 2
+            
             try:
                 _copy(component, root_dir, arg_dst_dir, arg_overwrite)
                 copied.add(component)
+                return True
             except Exception as e:
-                console.print(f"[red]ERROR: Failed to add component '{component}' - {e}[/red]")
-                return
+                errors.append(f"Copy operation failed for '{component}' - {e}")
+                return False
+            
+        finally:
+            copying.remove(component)
     
-    add_with_dependencies(arg_component)
-    if missing_deps:
-        console.print(f"[red]ERROR: Failed to add component '{arg_component}' - missing dependencies: {sorted(missing_deps)}[/red]")
-        console.print(f"[dim]Please report this issue.[/dim]")
+    success = copy_with_dependencies(arg_component)
+    if not success:
+        console.print(f"[bold red]ERROR: Failed to add component '{arg_component}'[/bold red]")
+        for error in errors:
+            console.print(f"[red] -> {error}[/red]")
+        console.print(f"[yellow]If this is unexpected behavior, please report this issue.[/yellow]")
 
-def _get_dependencies(component: str, root_dir: Path) -> list[str]:
+def _get_dependencies(component: str) -> list[str]:
     """
     Read the file from file_path to regex match cotton HTML syntax and return list of component dependencies.
     """
     dependencies = set()
     pattern = re.compile('<c-([a-zA-Z]\w+)[\s/>]')
-    match_exclusions = {component, 'vars'}
+    match_exclusions = {'vars'}
 
     html_file_paths = COMPONENTS_DIR.rglob(f'templates/cotton/{component}/*.html')
     for file_path in html_file_paths:
@@ -189,4 +206,4 @@ def _copy(component: str, src: Path, dst: Path, overwrite: bool = False):
                 files_copied += 1
 
     if files_copied > 0:
-        console.print(f"[bold green]Component '{component}' successfully installed.[/bold green]")
+        console.print(f"[bold green]Component '{component}' successfully added.[/bold green]")
