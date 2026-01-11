@@ -5,6 +5,7 @@ import shutil
 from rich import print
 from rich.console import Console
 from rich.panel import Panel
+import re
 
 APP_NAME = 'chad/ui'
 BASE_DIR = Path(__file__).parent
@@ -65,33 +66,77 @@ Third-party integrations:
 
     console.print(Panel(msg, title=f'{APP_NAME} components index', expand=False))
 
+
 def add(args: argparse.Namespace) -> None:
     """
-    CLI command to add/copy a component into the user's workspace.
+    CLI command to add/copy a component to the user's workspace.
     """
     arg_component = args.component[0]
     arg_dst_dir = Path(args.dest)
     arg_overwrite = args.overwrite
-    
-    index_match = _match_index(arg_component)
-    if len(index_match) == 0:
-        console.print(f"[red]ERROR: '{arg_component}' not found in component index[/red]")
-        return None
-    if len(index_match) > 1:
-        console.print(f"[yellow]WARNING: Unexpected state - Multiple component directories found for '{arg_component}'. Please report this issue.[/yellow]")
-        return None
-    
-    root_dir = _find_component_root_dir(index_match[0])
-    if root_dir is None:
-        console.print(f"[red]ERROR: Could not find root directory for '{arg_component}'[/red]")
-        return None
 
-    try:
-        _copy(arg_component, root_dir, arg_dst_dir, arg_overwrite)
-    except Exception as e:
-        console.print(f"[red]ERROR: Copy failed - {e}[/red]")
-        return None
+    copied = set()
+    missing_deps = set()
+
+    #TODO: Address circular dependencies
+
+    def add_with_dependencies(component: str):
+        """
+        Recursively install a component and its dependencies.
+        """
+        if component in copied:
+            return
     
+        index_match = _match_index(component)
+        if len(index_match) == 0:
+            if component != arg_component:
+                missing_deps.add(component)
+            else:
+                console.print(f"[red]ERROR: '{component}' not found in component index[/red]")
+            return
+        if len(index_match) > 1:
+            console.print(f"[yellow]WARNING: Multiple component directories found for '{component}'. Please report this issue.[/yellow]")
+            return
+        
+        root_dir = _find_component_root_dir(index_match[0])
+        if root_dir is None:
+            console.print(f"[red]ERROR: Could not find root directory for '{component}'[/red]")
+            return
+        
+        deps = _get_dependencies(component, root_dir)
+        for dep in deps:
+            add_with_dependencies(dep)
+
+        if not missing_deps:
+            try:
+                _copy(component, root_dir, arg_dst_dir, arg_overwrite)
+                copied.add(component)
+            except Exception as e:
+                console.print(f"[red]ERROR: Failed to add component '{component}' - {e}[/red]")
+                return
+    
+    add_with_dependencies(arg_component)
+    if missing_deps:
+        console.print(f"[red]ERROR: Failed to add component '{arg_component}' - missing dependencies: {sorted(missing_deps)}[/red]")
+        console.print(f"[dim]Please report this issue.[/dim]")
+
+def _get_dependencies(component: str, root_dir: Path) -> list[str]:
+    """
+    Read the file from file_path to regex match cotton HTML syntax and return list of component dependencies.
+    """
+    dependencies = set()
+    pattern = re.compile('<c-([a-zA-Z]\w+)[\s/>]')
+    match_exclusions = {component, 'vars'}
+
+    html_file_paths = COMPONENTS_DIR.rglob(f'templates/cotton/{component}/*.html')
+    for file_path in html_file_paths:
+        # Open file and find pattern
+        with file_path.open() as f:
+            matches = set(re.findall(pattern, f.read()))
+            dependencies.update(matches - match_exclusions)
+
+    return dependencies
+
 def _match_index(component: str) -> list[Path]:
     """
     Match paths to the 'index.html' file for a component.
@@ -113,10 +158,10 @@ def _copy(component: str, src: Path, dst: Path, overwrite: bool = False):
     """
     Perform the copy of component assets from its root dir to a dst dir specified by the user.
     """
-    src_templates: Path = src / 'templates' / 'cotton' / component
-    src_static: Path = src / 'static' / 'js' / component
-    dst_templates = Path(dst) / 'templates' / 'cotton' / component
-    dst_static = Path(dst) / 'static' / 'js' / component
+    src_templates = src / 'templates' / 'cotton' / component
+    src_static = src / 'static' / 'js' / component
+    dst_templates = dst / 'templates' / 'cotton' / component
+    dst_static = dst / 'static' / 'js' / component
 
     files_copied = 0
 
