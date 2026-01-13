@@ -1,6 +1,6 @@
 [project]
 name = "chad-ui"
-version = "0.0.6"
+version = "0.0.7"
 description = "Cotton/HTMX/AlpineJS Django components in the style of shadcn/ui"
 authors = [
     {name = "Maxim Belyayev",email = "maximbelyayev@gmail.com"}
