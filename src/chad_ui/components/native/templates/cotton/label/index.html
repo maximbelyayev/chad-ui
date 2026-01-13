@@ -1,0 +1,27 @@
+<c-vars asChild />
+
+<label
+    x-data="{
+        init() {
+            if ({{ asChild|yesno:'true,false' }}) this.$nextTick(() => this.asChild()); 
+        }, 
+        asChild() {
+            const child = this.$el.firstElementChild;
+            if (!child) return;
+            [...this.$el.attributes].forEach(attr => {
+                if (
+                    child.hasAttribute(attr.name) || 
+                    attr.name.startsWith('x-') || 
+                    attr.name === 'class'
+                ) return;
+                child.setAttribute(attr.name, attr.value);
+            });
+            child.classList.add(...this.$el.classList);
+            this.$el.replaceWith(child);
+        }
+    }"
+    class="text-sm leading-none font-medium select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 peer-data-[disabled]:cursor-not-allowed peer-data-[disabled]:opacity-70 {% if class %}{{ class }}{% endif %}"
+    {{ attrs }}
+>
+    {{ slot }}
+</label>
