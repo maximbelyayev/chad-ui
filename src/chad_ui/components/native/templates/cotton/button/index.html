@@ -47,18 +47,23 @@
         gap-2
         whitespace-nowrap
         rounded-md
+        text-sm
         font-medium
-        transition-colors
-        focus-visible:outline-hidden
-        focus-visible:ring-1
-        focus-visible:ring-ring
+        transition-all
+        disabled:pointer-events-none
         disabled:opacity-50
         [&_svg]:pointer-events-none
-        md:[&_svg]:size-4 [&_svg]:size-fl-sm
+        [&_svg:not([class*='size-'])]:size-4
+        shrink-0
         [&_svg]:shrink-0
-        cursor-pointer
-        relative
-        {% if variant == 'default' %}bg-brand-btn-bg text-primary-foreground shadow-sm hover:bg-primary/90
+        outline-none 
+        focus-visible:border-ring 
+        focus-visible:ring-ring/50 
+        focus-visible:ring-[3px] 
+        aria-invalid:ring-destructive/20 
+        dark:aria-invalid:ring-destructive/40 
+        aria-invalid:border-destructive
+        {% if variant == 'default' %}bg-primary text-primary-foreground shadow-sm hover:bg-primary/90
         {% elif variant == 'outline' %}border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground
         {% elif variant == 'ghost' %}hover:bg-accent hover:text-accent-foreground
         {% elif variant == 'destructive' %}bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90
