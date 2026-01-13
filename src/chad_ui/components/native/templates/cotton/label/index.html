@@ -2,10 +2,11 @@
 
 <label
     x-data="{
+        asChild: {{ asChild|yesno:'true,false' }},
         init() {
-            if ({{ asChild|yesno:'true,false' }}) this.$nextTick(() => this.asChild()); 
+            if ({{ asChild|yesno:'true,false' }}) this.$nextTick(() => this.initAsChild()); 
         }, 
-        asChild() {
+        initAsChild() {
             const child = this.$el.firstElementChild;
             if (!child) return;
             [...this.$el.attributes].forEach(attr => {
