@@ -5,7 +5,6 @@
         asChild: {{ asChild|yesno:'true,false' }},
         htmx: {{ htmx|yesno:'true, false'}},
         init() {
-            console.log(this.asChild, this.htmx);
             if (this.asChild) this.$nextTick(() => this.initAsChild());
         },
         initAsChild() {
