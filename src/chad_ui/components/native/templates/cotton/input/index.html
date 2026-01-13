@@ -1,0 +1,17 @@
+<c-vars field />
+
+<input
+    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
+    {% if field %}
+    id="{{ field.auto_id}}"
+    name="{{ field.name }}" 
+    {% if field.field.required %}required{% endif %}
+    {% if field.field.disabled %}disabled{% endif %}
+    {% if field.field.value %}value="{{ field.field.value }}"{% endif %}
+    {% if field.field.max_length %}maxlength="{{ field.field.max_length }}"{% endif %}
+    {% if field.field.min_length %}minlength="{{ field.field.min_length }}"{% endif %}
+    {% if field.field.empty_label %}placeholder="{{ field.field.empty_label }}"{% endif %}
+    type="{{ field.widget_type}}" 
+    {% endif %}
+/>
