@@ -8,7 +8,7 @@
     name="{{ field.name }}" 
     {% if field.field.required %}required{% endif %}
     {% if field.field.disabled %}disabled{% endif %}
-    {% if field.field.value %}value="{{ field.field.value }}"{% endif %}
+    {% if field.value %}value="{{ field.value }}"{% endif %}
     {% if field.field.max_length %}maxlength="{{ field.field.max_length }}"{% endif %}
     {% if field.field.min_length %}minlength="{{ field.field.min_length }}"{% endif %}
     {% if field.field.empty_label %}placeholder="{{ field.field.empty_label }}"{% endif %}
