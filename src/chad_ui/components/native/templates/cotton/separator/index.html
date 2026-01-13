@@ -1,0 +1,9 @@
+<c-vars orientation="horizontal" decorative />
+
+<div
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:h-auto {% if class %}{{ class }}{% endif %}"
+    data-orientation="{{ orientation|lower }}"
+    role="{% if decorative %}none{% else %}separator{% endif %}"
+    {{ attrs }}
+></div>
+
