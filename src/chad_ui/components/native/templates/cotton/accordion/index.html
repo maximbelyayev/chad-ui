@@ -1,0 +1,61 @@
+<c-vars asChild type="single" defaultValue="" collapsible disabled dir="ltr" orientation="vertical"></c-vars>
+
+<div
+    x-data="{
+        asChild: {{ asChild|yesno:'true,false' }},
+        type: '{{ type|lower }}',
+        defaultValue: '{{ defaultValue }}',
+        collapsible: {{ collapsible|yesno:'true,false' }},
+        disabled: {{ disabled|yesno:'true,false' }},
+        dir: '{{ dir|lower }}',
+        orientation: '{{ orientation|lower }}',
+        open: {},
+        init () {
+            if (this.asChild) this.$nextTick(() => this.initAsChild());
+            if (this.defaultValue) {
+                const defaultValues = this.defaultValue.split(',').map((value) => value.trim())
+                defaultValues.forEach(value => this.toggle(value));
+            }
+        },
+        initAsChild() {
+            const child = this.$el.firstElementChild;
+            if (!child) return;
+            [...this.$el.attributes].forEach(attr => {
+                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    const safeData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
+                    child.setAttribute('x-data', safeData);
+                    return;
+                }
+                child.setAttribute(attr.name, attr.value);
+            });
+            child.classList.add(...this.$el.classList);
+            this.$el.replaceWith(child);
+        },
+        setDisabled(el) {
+            if (el.matches('button, input, textarea, select, fieldset')) {
+                el.setAttribute('disabled', '');
+                el.setAttribute('aria-disabled', 'true');
+            }
+            el.setAttribute('data-disabled', '');
+        },
+        toggle(value) {
+            if (this.type === 'single') {
+                if (this.open[value] && !this.collapsible) return;
+                this.open = { [value]: !this.open[value] }
+            } else {
+                this.open[value] = !this.open[value];
+            }
+        },
+        isOpen(value) {
+            return !!this.open[value];
+        }
+    }"
+    data-orientation="{{ orientation|lower }}"
+    :dir="dir"
+    class="{% if class %}{{ class }}{% endif %}"
+    :class="orientation === 'horizontal' ? 'flex' : ''"
+    {{ attrs }}
+>
+    {{ slot }}
+</div>

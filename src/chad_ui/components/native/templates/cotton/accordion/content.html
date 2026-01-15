@@ -1,0 +1,31 @@
+<template x-if="orientation === 'vertical'">
+    <div
+        x-cloak
+        x-show="isOpen(value)"
+        x-collapse.duration.300ms
+        class="overflow-hidden text-sm"
+        {{ attrs }}
+    >
+        <div class="p-4 text-start{% if class %} {{ class }}{% endif %}">
+            {{ slot }}
+        </div>
+    </div>
+</template>
+<template x-if="orientation === 'horizontal'">
+    <div
+        x-cloak
+        x-show="isOpen(value)"
+        x-transition:enter="transition-all duration-300 ease-out"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-all duration-300 ease-in"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="overflow-auto overflow-x-hidden flex-1 h-full text-sm"
+        {{ attrs }}
+    >
+        <div class="p-4 text-start{% if class %} {{ class }}{% endif %}">
+            {{ slot }}
+        </div>
+    </div>
+</template>
