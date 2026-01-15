@@ -1,35 +1,39 @@
-<c-vars asChild defaultChecked value="on"></c-vars>
+<c-vars asChild defaultChecked value="on" />
 
 <{% if not asChild %}button{% else %}div{% endif %}
     x-data="{
+        asChild: {{ asChild|yesno:'true,false' }},
         checked: {% if defaultChecked %}{{ defaultChecked|lower }}{% else %}false{% endif %},
         disabled: {% if attrs.disabled %}true{% else %}false{% endif %},
         isFormControl: true,
         init() {
             this.isFormControl = {{ attrs.form|yesno:'true,false' }} ? true : this.$el.closest('form') !== null;
-            if ({{ asChild|yesno:'true,false' }}) {
-                this.$nextTick(() => this.forwardPropsToChild()); 
-            }
+            if (this.asChild) this.$nextTick(() => this.initAsChild()); 
         }, 
-        toggle() {
-            if (!this.disabled) this.checked = !this.checked;
-        },
-        getCheckedState() {
-            return this.checked ? 'checked' : 'unchecked';
-        },
-        forwardPropsToChild() {
+        initAsChild() {
             const child = this.$el.firstElementChild
             if (!child) return;
-
-            child.setAttribute('role', 'checkbox');
-            child.setAttribute('aria-checked', this.checked);
-            child.dataset.state = this.getCheckedState();
-            if (this.disabled) child.setAttribute('disabled', '');
+            [...this.$el.attributes].forEach(attr => {
+                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    const newData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
+                    child.setAttribute('x-data', newData);
+                    return;
+                }
+                child.setAttribute(attr.name, attr.value);
+            });
+            child.classList.add(...this.$el.classList);
 
             this.$watch('checked', value => {
                 child.setAttribute('aria-checked', value);
                 child.dataset.state = this.getCheckedState();
             });
+        },
+        toggle() {
+            if (!this.disabled) this.checked = !this.checked;
+        },
+        getCheckedState() {
+            return this.checked ? 'checked' : 'unchecked';
         },
     }"
     class="
@@ -99,7 +103,7 @@
         </svg>
     </span>
     {% else %}
-    {{ slot }}
+    {{ child }}
     {% endif %}
     <template x-if="isFormControl">
         <input

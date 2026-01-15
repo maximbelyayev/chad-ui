@@ -10,9 +10,7 @@
             const child = this.$el.firstElementChild;
             if (!child) return;
             [...this.$el.attributes].forEach(attr => {
-                if (
-                    child.hasAttribute(attr.name) || 
-                    attr.name.startsWith('x-') || 
+                if (child.hasAttribute(attr.name) || attr.name.startsWith('x-') || 
                     attr.name === 'class'
                 ) return;
                 child.setAttribute(attr.name, attr.value);

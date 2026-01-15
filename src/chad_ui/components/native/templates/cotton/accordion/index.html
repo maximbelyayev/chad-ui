@@ -1,4 +1,4 @@
-<c-vars asChild type="single" defaultValue="" collapsible disabled dir="ltr" orientation="vertical"></c-vars>
+<c-vars asChild type="single" defaultValue="" collapsible disabled dir="ltr" orientation="vertical" />
 
 <div
     x-data="{
@@ -23,8 +23,8 @@
             [...this.$el.attributes].forEach(attr => {
                 if (child.hasAttribute(attr.name) || attr.name === 'class') return;
                 if (attr.name === 'x-data') {
-                    const safeData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
-                    child.setAttribute('x-data', safeData);
+                    const newData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
+                    child.setAttribute('x-data', newData);
                     return;
                 }
                 child.setAttribute(attr.name, attr.value);

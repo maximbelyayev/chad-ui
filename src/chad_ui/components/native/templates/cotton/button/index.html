@@ -1,4 +1,4 @@
-<c-vars variant="default" size="default" asChild htmx></c-vars>
+<c-vars variant="default" size="default" asChild htmx />
 
 <button
     x-data="{
@@ -8,34 +8,39 @@
             if (this.asChild) this.$nextTick(() => this.initAsChild());
         },
         initAsChild() {
-            let slot, indicator, spinner;
+            let child, indicator, spinner;
             if (this.htmx) {
                 indicator = this.$el.firstElementChild;
-                slot = indicator?.firstElementChild;
+                child = indicator?.firstElementChild;
                 spinner = indicator?.nextElementSibling;
             }
             else {
-                slot = this.$el.firstElementChild;
+                child = this.$el.firstElementChild;
             }
-            if (!slot) return;
+            if (!child) return;
 
             [...this.$el.attributes].forEach(attr => {
-                if (slot.hasAttribute(attr.name) || attr.name.startsWith('x-') || attr.name === 'class') return;
-                slot.setAttribute(attr.name, attr.value);
+                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    const newData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
+                    child.setAttribute('x-data', newData);
+                    return;
+                }
+                child.setAttribute(attr.name, attr.value);
             });
-            slot.classList.add(...this.$el.classList);
+            child.classList.add(...this.$el.classList);
             
             if (this.htmx && indicator && spinner) {
-                const element = slot.cloneNode()
+                const element = child.cloneNode()
                 indicator = element.appendChild(indicator.cloneNode())
                 element.appendChild(spinner);
-                [...slot.childNodes].forEach(node => indicator.appendChild(node))
+                [...child.childNodes].forEach(node => indicator.appendChild(node))
 
                 this.$el.replaceWith(element);
                 htmx.process(element);
             }
             else {
-                this.$el.replaceWith(slot);
+                this.$el.replaceWith(child);
             }
         }
     }"
@@ -94,7 +99,7 @@
     <span class="htmx-indicator-hide">
         {{ slot }}
     </span>
-    <c-spinner />
+    <c-spinner class="absolute m-auto" />
     {% else %}
     {{ slot }}
     {% endif %}
