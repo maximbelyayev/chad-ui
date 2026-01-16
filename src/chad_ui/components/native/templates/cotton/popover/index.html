@@ -1,0 +1,14 @@
+<c-vars defaultOpen modal />
+
+<div x-data="{
+        open: {{ defaultOpen|yesno:'true,false' }},
+        modal: {{ modal|yesno:'true,false' }},
+        hidePopover() { this.open = false; },
+        togglePopover() { this.open = !this.open; },
+    }"
+    x-id="['popover-trigger', 'popover-content']"
+    class="{% if class %}{{ class }}{% endif %}"
+    {{ attrs }}
+>
+    {{ slot }}
+</div>

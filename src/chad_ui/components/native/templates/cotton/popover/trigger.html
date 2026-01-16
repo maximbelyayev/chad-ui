@@ -1,0 +1,14 @@
+<c-vars asChild /> <!--TODO: asChild prop forwarding behavior-->
+
+<div 
+    @click="togglePopover"
+    aria-haspopup="dialog"
+    :aria-expanded="open"
+    :aria-controls="$id('popover-content')"
+    :id="$id('popover-trigger')"
+    :data-state="open ? 'open': 'closed'"
+    class="w-fit{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
+>
+    {{ slot }}
+</div>
