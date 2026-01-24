@@ -1,4 +1,4 @@
-<c-vars disabled value />
+<c-vars disabled value></c-vars>
 
 <div
     x-data="{
@@ -8,13 +8,13 @@
     x-init="if (disabled) setDisabled($el);"
     :data-orientation="orientation" 
     :data-state="isOpen(value) ? 'open' : 'closed'"
-    class="flex transition-all duration-300 ease-in-out overflow-hidden{% if class %} {{ class }}{% endif %}"
+    class="flex transition-all duration-300 ease-in-out border-border{% if class %} {{ class }}{% endif %}"
     :class="
         orientation === 'horizontal' 
         ? isOpen(value)
-            ? 'flex-row flex-[4] min-w-0 border-e last:border-e-0' 
-            : 'flex-row flex-1 min-w-0 w-full border-e last:border-e-0'
-        : 'flex-col border-b last:border-b-0'
+            ? 'flex-row flex-4 min-w-0 not-last:border-r' 
+            : 'flex-row flex-1 min-w-0 w-full not-last:border-r'
+        : 'flex-col not-last:border-b'
     "
     {{ attrs }}
 >

@@ -2,11 +2,16 @@
     <div
         x-cloak
         x-show="isOpen(value)"
-        x-collapse.duration.300ms
+        x-collapse.duration.200ms
+        :data-orientation="orientation"
+        :data-open="isOpen(value) ? '' : null"
+        :data-closed="isOpen(value) ? null : ''"
+        role="region"
+        data-slot="accordion-content"
         class="overflow-hidden text-sm"
-        {{ attrs }}
+        style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
     >
-        <div class="p-4 text-start{% if class %} {{ class }}{% endif %}">
+        <div class="pt-0 pb-4 [&_a]:hover:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4{% if class %} {{ class }}{% endif %}">
             {{ slot }}
         </div>
     </div>
@@ -15,16 +20,21 @@
     <div
         x-cloak
         x-show="isOpen(value)"
-        x-transition:enter="transition-all duration-300 ease-out"
+        x-transition:enter="transition-opacity duration-300 ease-out"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        x-transition:leave="transition-all duration-300 ease-in"
+        x-transition:leave="transition-opacity duration-100 ease-in"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
+        :data-orientation="orientation"
+        :data-open="isOpen(value) ? '' : null"
+        :data-closed="isOpen(value) ? null : ''"
+        role="region"
+        data-slot="accordion-content"
         class="overflow-auto overflow-x-hidden flex-1 h-full text-sm"
         {{ attrs }}
     >
-        <div class="p-4 text-start{% if class %} {{ class }}{% endif %}">
+        <div class="pl-0 pr-4 [&_a]:hover:text-foreground [&_a]:underline [&_a]:underline-offset-3 [&_p:not(:last-child)]:mb-4{% if class %} {{ class }}{% endif %}">
             {{ slot }}
         </div>
     </div>

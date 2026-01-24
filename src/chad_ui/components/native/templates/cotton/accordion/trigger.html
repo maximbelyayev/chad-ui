@@ -1,10 +1,9 @@
-<h3 :data-orientation="orientation" :data-state="isOpen(value) ? 'open' : 'closed'"
-    class="duration-300 ease-in-out transition-[width]"
+<h3 :data-orientation="orientation" :data-open="isOpen(value) ? '' : null" :data-closed="isOpen(value) ? null : ''"
     :class="
         orientation === 'horizontal' 
         ? isOpen(value)
-            ? 'h-full w-16 shrink-0' 
-            : 'h-full w-full' 
+            ? 'h-full w-16 shrink-0 duration-300 ease-in-out transition-[width]' 
+            : 'h-full w-full duration-300 ease-in-out transition-[width]' 
         : 'flex'
     "
 >
@@ -15,18 +14,19 @@
         :data-state="isOpen(value) ? 'open' : 'closed'"
         :data-orientation="orientation"
         type="button"
-        class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-medium transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 text-start{% if class %} {{ class }}{% endif %}"
+        class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring *:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium hover:underline focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50{% if class %} {{ class }}{% endif %}"
         :class="
             orientation === 'horizontal'
-            ? 'w-full h-full flex flex-col items-center justify-between gap-2 p-4 [&[data-state=open]>svg]:rotate-90'
-            : 'w-full flex items-center justify-between gap-2 py-4  [&[data-state=open]>svg]:rotate-180'
+            ? 'w-full h-full flex flex-col items-center justify-between p-4 [&[data-state=open]>svg]:rotate-90'
+            : 'w-full flex items-start justify-between py-4 **:data-[slot=accordion-trigger-icon]:ml-auto [&[data-state=open]>svg]:rotate-180'
         "
-        {{ attrs }}
+        {{ attrs }} 
     >
-        <span class="text-sm" :class="orientation === 'horizontal' ? '[writing-mode:vertical-lr] order-last rotate-180' : ''">
+        <span class="text-sm" :class="orientation === 'horizontal' ? '[writing-mode:vertical-rl] order-last rotate-180' : ''">
             {{ slot }}
         </span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+            data-slot="accordion-trigger-icon"
             class="transition-transform duration-200 shrink-0"
             :class="
                 orientation === 'horizontal'
