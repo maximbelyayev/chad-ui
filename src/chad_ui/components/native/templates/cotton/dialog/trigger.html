@@ -1,0 +1,63 @@
+<c-vars asChild handle="show" ></c-vars>
+
+<div
+    x-data="{
+        root: null,
+        asChild: {{ asChild|yesno:'true,false' }},
+        handle: '{{ handle }}',
+        storedFrom: '{{ request.path|escapejs }}',
+        init () {
+            this.$nextTick(() => {
+                if (this.asChild) {
+                    this.initAsChild()
+                    return
+                }
+                if (!this.root) {
+                    const root = this.findDialogRoot();
+                    this.root = root;
+                }
+            });
+        },
+        initAsChild() {
+            const child = this.$el.firstElementChild;
+            if (!child) return;
+            [...this.$el.attributes].forEach(attr => {
+                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    const safeData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
+                    child.setAttribute('x-data', safeData);
+                    return;
+                }
+                child.setAttribute(attr.name, attr.value);
+            });
+            child.classList.add(...this.$el.classList);
+            this.$el.replaceWith(child);
+        },
+        findDialogRoot() {
+            const roots = Array.from(document.querySelectorAll('[x-data] [data-slot=dialog]'));
+            const root = roots.filter((root) => {
+                const rootData = Alpine.$data(root);
+                return rootData.handle === this.handle;
+            });
+            if (root.length != 1) return;
+            return root;
+        }
+    }"
+    @click.stop="
+    if (!$el.hasAttribute('disabled')) {
+        $el.blur(); 
+        if ($el.parentElement.getAttribute('data-slot') === 'dialog') {
+            showDialog();
+        } else if (root) {
+            $dispatch('{{ handle }}', { eventTrigger: $el })
+        } else {
+            console.warn('[chad-ui] Dialog trigger detached: invalid or missing `handle`.');
+        }
+    }"
+    :hx-vals="JSON.stringify({storedFrom})"
+    data-slot="dialog-trigger"
+    aria-haspopup="dialog"
+    {{ attrs }}    
+>
+    {{ slot }}
+</div>

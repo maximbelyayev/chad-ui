@@ -1,0 +1,91 @@
+<c-vars defaultOpen disablePointerDismissal handle="show" modal="true" />
+
+<div
+    x-data="{
+        id: '{{ attrs.id }}',
+        open: {{ defaultOpen|yesno:'true,false' }},
+        disablePointerDismissal: {{ disablePointerDismissal|yesno:'true,false' }},
+        handle: '{{ handle }}',
+        modal: '{{ modal|lower }}',
+        eventTrigger: null,
+        messageHandler: null,
+        hideDialogHandler: null,
+        isDescriptionOverflowing: false,
+
+        showDialog(event) {
+            this.open = true;
+            document.body.classList.add('overflow-hidden');
+            if (event?.detail?.eventTrigger) this.eventTrigger = event.detail.eventTrigger;
+            this.$nextTick(() => this.checkDescriptionOverflow());
+        },
+        hideDialog() {
+            this.open = false;
+            document.body.classList.remove('overflow-hidden');
+            if (this.hasHTMX()) {
+                setTimeout(() => {
+                    if (this.$refs.content) this.$refs.content.remove();
+                }, 100);
+            }
+            this.eventTrigger = null;
+        },
+        hasHTMX() {
+            const htmxAttrs = ['hx-get', 'hx-post', 'hx-put', 'hx-patch', 'hx-delete'];
+            const hasHTMX = el => 
+                el && htmxAttrs.some(attr => 
+                    el.hasAttribute(attr) || el.querySelector(`[${attr}]`)
+                )
+            return hasHTMX(this.eventTrigger) || false
+        },
+        checkDescriptionOverflow() {
+            if (!this.$refs.description) {
+                this.isDescriptionOverflowing = false;
+                return;
+            }
+            // Check if scrollable height is greater than visible height. 
+            // We add a 1px tolerance for sub-pixel rendering differences
+            this.isDescriptionOverflowing = el.scrollHeight > el.clientHeight + 1;
+        },
+        
+        init() {
+            if (!this.id) this.id = $id('chadui-dialog');
+
+            // Setup handlers
+            this.hideDialogHandler = (e) => this.hideDialog();
+
+            // Initial setup
+            this.$nextTick(() => {
+                // Handle default open setup
+                if (this.open) {
+                    this.$el.addEventListener('hideDialog', this.hideDialogHandler);
+                    this.checkDescriptionOverflow();
+                }
+
+            })
+
+            // Watch for changes to 'open' to manage side effects
+            this.$watch('open', isOpen => {
+                if (isOpen) {
+                    document.body.classList.add('overflow-hidden');
+                    this.$el.addEventListener('hideDialog', this.hideDialogHandler);
+                } else {
+                    document.body.classList.remove('overflow-hidden');
+                    this.$el.removeEventListener('hideDialog', this.hideDialogHandler);
+                }
+            })
+        },
+
+        destroy() {
+            this.$el.removeEventListener('hideDialog', this.hideDialogHandler);
+        }
+    }"
+    :id="id || $id('chadui-dialog')"
+    x-id="['chadui-dialog-content', 'chadui-dialog-title', 'chadui-dialog-description']"
+    data-slot="dialog"
+    @{{ handle }}.window="open ? hideDialog() : showDialog($event)"
+    @keydown.escape.window="if (open && !explicitClose) hideDialog()"
+    @resize.window="if (open) checkDescriptionOverflow()"
+    @htmx:after-swap.window="if(open) $nextTick(() => checkDescriptionOverflow())"
+    {{ attrs }}
+>   
+    {{ slot }}
+</div>

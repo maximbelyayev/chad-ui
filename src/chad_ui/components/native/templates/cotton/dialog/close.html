@@ -1,0 +1,28 @@
+<c-vars asChild />
+
+<div x-data="{
+        asChild: {{ asChild|yesno:'true,false' }},
+        init () {
+            if (this.asChild) this.$nextTick(() => this.initAsChild());
+        },
+        initAsChild() {
+            const child = this.$el.firstElementChild;
+            if (!child) return;
+            [...this.$el.attributes].forEach(attr => {
+                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    const safeData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
+                    child.setAttribute('x-data', safeData);
+                    return;
+                }
+                child.setAttribute(attr.name, attr.value);
+            });
+            child.classList.add(...this.$el.classList);
+            this.$el.replaceWith(child);
+        },
+    }"
+    @click.stop="hideDialog"
+    {{ attrs }}
+>
+    {{ slot }}
+</div>
