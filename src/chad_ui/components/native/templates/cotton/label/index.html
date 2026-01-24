@@ -1,25 +1,6 @@
-<c-vars asChild />
-
 <label
-    x-data="{
-        asChild: {{ asChild|yesno:'true,false' }},
-        init() {
-            if ({{ asChild|yesno:'true,false' }}) this.$nextTick(() => this.initAsChild()); 
-        }, 
-        initAsChild() {
-            const child = this.$el.firstElementChild;
-            if (!child) return;
-            [...this.$el.attributes].forEach(attr => {
-                if (child.hasAttribute(attr.name) || attr.name.startsWith('x-') || 
-                    attr.name === 'class'
-                ) return;
-                child.setAttribute(attr.name, attr.value);
-            });
-            child.classList.add(...this.$el.classList);
-            this.$el.replaceWith(child);
-        }
-    }"
-    class="text-sm leading-none font-medium select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 peer-data-[disabled]:cursor-not-allowed peer-data-[disabled]:opacity-70 {% if class %}{{ class }}{% endif %}"
+    data-slot="label"
+    class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50{% if class %} {{ class }}{% endif %}"
     {{ attrs }}
 >
     {{ slot }}
