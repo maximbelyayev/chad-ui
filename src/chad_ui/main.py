@@ -21,6 +21,7 @@ def cli() -> None:
     subparsers = parser.add_subparsers(
         title='commands',
         description=f'The command to provide to the {APP_NAME} command-line interface',
+        required=True
     )
 
     # 'index' subcommand
