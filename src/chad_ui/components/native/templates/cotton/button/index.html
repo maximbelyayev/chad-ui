@@ -44,41 +44,22 @@
             }
         }
     }"
-    class="
-        inline-flex
-        items-center
-        justify-center
-        whitespace-nowrap
-        rounded-md
-        text-sm
-        font-medium
-        transition-all
-        disabled:pointer-events-none
-        disabled:opacity-50
-        [&_svg]:pointer-events-none
-        [&_svg:not([class*='size-'])]:size-4
-        shrink-0
-        [&_svg]:shrink-0
-        outline-none 
-        focus-visible:border-ring 
-        focus-visible:ring-ring/50 
-        focus-visible:ring-[3px] 
-        aria-invalid:ring-destructive/20 
-        dark:aria-invalid:ring-destructive/40 
-        aria-invalid:border-destructive
-        {% if variant == 'default' %}bg-primary text-primary-foreground shadow-sm hover:bg-primary/90
-        {% elif variant == 'outline' %}border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground
-        {% elif variant == 'ghost' %}hover:bg-accent hover:text-accent-foreground
-        {% elif variant == 'destructive' %}bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90
-        {% elif variant == 'secondary' %}bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80
-        {% elif variant == 'link' %}text-primary underline-offset-4 hover:underline
+    class="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none
+        {% if variant == 'default' %}border-transparent bg-primary text-primary-foreground hover:bg-primary/80
+        {% elif variant == 'outline' %}border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground shadow-xs
+        {% elif variant == 'secondary' %}border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground
+        {% elif variant == 'ghost' %}border-transparent hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground
+        {% elif variant == 'destructive' %}border-transparent bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30
+        {% elif variant == 'link' %}border-transparent text-primary underline-offset-4 hover:underline
         {% endif %}
-        {% if size == 'default' %}h-9 gap-2 px-4 py-2 has-[>svg]:px-3
-        {% elif size == 'sm' %}h-8 gap-1.5 px-3 has-[>svg]:px-2.5
-        {% elif size == 'lg' %}h-10 gap-2 px-6 has-[>svg]:px-4
-        {% elif size == 'icon' %}size-9
-        {% elif size == 'icon-sm' %}size-8
-        {% elif size == 'icon-lg' %}size-10
+        {% if size == 'default' %}h-9 gap-1.5 rounded-md px-2.5 text-sm in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-4
+        {% elif size == 'xs' %}h-6 gap-1 rounded-[min(var(--radius-md),8px)] px-2 text-xs in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3
+        {% elif size == 'sm' %}h-8 gap-1 rounded-[min(var(--radius-md),10px)] px-2.5 text-sm in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-4
+        {% elif size == 'lg' %}h-10 gap-1.5 rounded-md px-2.5 text-sm as-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&_svg:not([class*='size-'])]:size-4
+        {% elif size == 'icon' %}size-9 rounded-md text-sm [&_svg:not([class*='size-'])]:size-4
+        {% elif size == 'icon-xs' %}size-6 rounded-[min(var(--radius-md),8px)] text-sm in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-3
+        {% elif size == 'icon-sm' %}size-8 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-4
+        {% elif size == 'icon-lg' %}size-10 rounded-md text-sm [&_svg:not([class*='size-'])]:size-4
         {% endif %}
         {% if class %}{{ class }}{% endif %}
     "
@@ -94,6 +75,8 @@
         {% endif %}
     {% endif %}
     {{ attrs }}
+    type="button"
+    tabindex="0"
 >
     {% if htmx %}
     <span class="htmx-indicator-hide">
