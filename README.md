@@ -17,7 +17,7 @@ It's a slightly different & opinionated flavor with:
 - 🧩 **Additional components** - File upload, filter, radio group, spinner, and more.
 - 🔌 **Third-party integrations** - AG Grid, TradingView widgets, etc.
 - 🛠️ **Backend integration** - Seamless async data fetching, client-side validation, and more, via HTMX.
-- 📱 **Enhanced patterns & design** - Radix-aligned composition & APIs, improved responsiveness and mobile interactivity, and visual feedback during async requests.
+- 📱 **Enhanced patterns & design** - Base UI-aligned composition & APIs, improved responsiveness and mobile interactivity, and visual feedback during async requests.
 
 If you want the core, basic shadcn/ui experience in Django, use shadcn-django. If you would like these additional features and enhancements, use chad/ui.
 
