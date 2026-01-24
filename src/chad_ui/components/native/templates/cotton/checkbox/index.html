@@ -1,84 +1,70 @@
-<c-vars asChild defaultChecked value="on" />
-
-<{% if not asChild %}button{% else %}div{% endif %}
+<c-vars defaultChecked indeterminate value="" nativeButton disabled readOnly render />
+<!--TODO: indeterminate, parent     -->
+<span
     x-data="{
-        asChild: {{ asChild|yesno:'true,false' }},
-        checked: {% if defaultChecked %}{{ defaultChecked|lower }}{% else %}false{% endif %},
-        disabled: {% if attrs.disabled %}true{% else %}false{% endif %},
+        checked: {{ defaultChecked|yesno:'true,false' }},
+        nativeButton: {{ nativeButton|yesno:'true,false' }},
+        disabled: {{ disabled|yesno:'true,false' }},
+        readOnly: {{ readOnly|yesno:'true,false' }},
+        render: {{ render|yesno:'true,false' }},
         isFormControl: true,
         init() {
             this.isFormControl = {{ attrs.form|yesno:'true,false' }} ? true : this.$el.closest('form') !== null;
-            if (this.asChild) this.$nextTick(() => this.initAsChild()); 
+            if (this.render) {
+                this.wrapper = this.$el;
+                this.$nextTick(() => this.$nextTick(() => this.initRender()));
+            }
         }, 
-        initAsChild() {
-            const child = this.$el.firstElementChild
+        initRender() {
+            const wrapper = this.wrapper || this.$el;
+            const child = wrapper.firstElementChild;
             if (!child) return;
-            [...this.$el.attributes].forEach(attr => {
+            if (this.nativeButton) child.setAttribute('type', 'button');
+            [...wrapper.attributes].forEach(attr => {
                 if (child.hasAttribute(attr.name) || attr.name === 'class') return;
                 if (attr.name === 'x-data') {
-                    const newData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
-                    child.setAttribute('x-data', newData);
+                    child.setAttribute('x-data', attr.value.replace(/render:\s*true/, 'render: false'));
                     return;
                 }
                 child.setAttribute(attr.name, attr.value);
             });
-            child.classList.add(...this.$el.classList);
-
-            this.$watch('checked', value => {
-                child.setAttribute('aria-checked', value);
-                child.dataset.state = this.getCheckedState();
+            child.classList.add(...wrapper.classList);
+            [...wrapper.childNodes].forEach(node => {
+                if (node !== child) {
+                    if (node.type === 'checkbox') this.hiddenInput = node;
+                    child.appendChild(node);
+                }
             });
+            if (this.hiddenInput) this.hiddenInput.checked = this.checked;
+            wrapper.replaceWith(child);
         },
         toggle() {
-            if (!this.disabled) this.checked = !this.checked;
+            if (!this.disabled && !this.readOnly) {
+                this.checked = !this.checked;
+                if (this.hiddenInput) this.hiddenInput.checked = this.checked;
+            }
         },
         getCheckedState() {
             return this.checked ? 'checked' : 'unchecked';
         },
     }"
-    class="
-        peer
-        relative
-        {% if not asChild %}
-        border-input 
-        dark:bg-input/30 
-        data-[state=checked]:bg-primary 
-        data-[state=checked]:text-primary-foreground 
-        dark:data-[state=checked]:bg-primary 
-        data-[state=checked]:border-primary 
-        focus-visible:border-ring 
-        focus-visible:ring-ring/50 
-        aria-invalid:ring-destructive/20 
-        dark:aria-invalid:ring-destructive/40 
-        aria-invalid:border-destructive 
-        size-4 
-        shrink-0 
-        rounded-[4px] 
-        border 
-        shadow-xs 
-        transition-shadow 
-        outline-none 
-        focus-visible:ring-[3px] 
-        disabled:cursor-not-allowed 
-        disabled:opacity-50
-        {% endif %}
-        {% if class %}{{ class }}{% endif %}
-    "
-    {% if not asChild %}
-    type="button" 
+    @click.stop="toggle"
+    @keyup.enter.self.stop="if (!nativeButton) toggle"
     role="checkbox"
+    :tabindex="disabled ? '-1' : '0'"
+    :data-checked="checked ? '' : null"
+    :data-unchecked="checked ? null : ''"
     :aria-checked="checked"
-    :data-state="checked ? 'checked' : 'unchecked'"
-        {% if attrs.disabled %}
-        disabled
-        {% endif %}
-    {% endif %}
+    data-slot="checkbox"
     {% if attrs.disabled %}
     data-disabled
-    {% else %}
-    @click="toggle()"
+    aria-disabled="true"
     {% endif %}
-    {% with form_attrs='name,required,form,value,checked,disabled,id' vars='asChild,defaultChecked' %}
+    {% if attrs.required %}
+    data-required
+    aria-required="true"
+    {% endif %}
+    {% with form_attrs='name,required,form,value,checked,disabled,id' vars='defaultChecked,indeterminate,value,nativeButton,disabled,readOnly,render' %}
         {% for key, value in attrs.items %}
             {% if key not in form_attrs and key not in vars %}
                 {{ key }}{% if value != True %}="{{ value }}"{% endif %}
@@ -88,37 +74,63 @@
     {% if attrs.id %}
     :id="isFormControl ? null : '{{ attrs.id }}'"
     {% endif %}
+    class="
+        border-input 
+        dark:bg-input/30 
+        data-checked:bg-primary 
+        data-checked:text-primary-foreground 
+        dark:data-checked:bg-primary 
+        data-checked:border-primary 
+        aria-invalid:aria-checked:border-primary 
+        aria-invalid:border-destructive 
+        dark:aria-invalid:border-destructive/50 
+        focus-visible:border-ring 
+        focus-visible:ring-ring/50
+        aria-invalid:ring-destructive/20 
+        dark:aria-invalid:ring-destructive/40 
+        flex size-4 
+        items-center 
+        justify-center 
+        rounded-[4px] border shadow-xs transition-shadow 
+        group-has-disabled/field:opacity-50 focus-visible:ring-[3px] aria-invalid:ring-[3px] 
+        peer relative shrink-0 outline-none after:absolute after:-inset-x-3 after:-inset-y-2 
+        disabled:cursor-not-allowed disabled:opacity-50
+        {% if class %}{{ class }}{% endif %}
+    "
 >   
-    {% if not asChild %}
+    {% if not render %}
     <span 
         x-show="checked"
-        :data-state="checked ? 'checked' : 'unchecked'"
-        class="grid place-content-center text-current transition-none" 
-        style="pointer-events: none;"
+        :data-checked="checked ? '' : null"
+        :data-unchecked="checked ? null : ''"
+        data-slot="checkbox-indicator"
+        class="[&>svg]:size-3.5 grid place-content-center text-current transition-none" 
     >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-            class="lucide lucide-check size-3.5" 
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+            aria-hidden="true"
         >
             <path d="M20 6 9 17l-5-5"></path>
         </svg>
     </span>
     {% else %}
-    {{ child }}
+    {{ slot }}
     {% endif %}
     <template x-if="isFormControl">
         <input
-            type="checkbox"
-            x-model="checked"
-            value="{{ value }}"
+            x-init="if (render) $nextTick(() => initRender())"
+            {% if attrs.disabled %}disabled{% endif %}
             {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+            tabindex="-1"
+            aria-hidden="true"
             {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+            type="checkbox"
+            :checked="checked"
+            @change="checked = $event.target.checked"
+            {% if attrs.value %}value="{{ value }}"{% endif %}
             {% if attrs.form %}form="{{ attrs.form }}"{% endif %}
             {% if attrs.required %}required{% endif %}
-            {% if attrs.disabled %}disabled{% endif %}
-            aria-hidden="true"
-            tab-index="-1"
-            class="left-1/2 top-1/2 -translate-x-[calc(50%-1px)] sr-only"
+            style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: absolute;"
         />
     </template>
-    
-</{% if not asChild %}button{% else %}div{% endif %}>
+</span>
