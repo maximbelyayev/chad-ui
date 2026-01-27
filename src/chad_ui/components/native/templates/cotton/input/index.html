@@ -1,17 +1,19 @@
-<c-vars field />
+<c-vars defaultValue field />
 
 <input
-    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive{% if class %} {{ class }}{% endif %}"
     {{ attrs }}
     {% if field %}
     id="{{ field.auto_id}}"
-    name="{{ field.name }}" 
+    name="{{ field.name }}"
+    type="{{ field.field.widget.input_type }}"
     {% if field.field.required %}required{% endif %}
-    {% if field.field.disabled %}disabled{% endif %}
-    {% if field.value %}value="{{ field.value }}"{% endif %}
-    {% if field.field.max_length %}maxlength="{{ field.field.max_length }}"{% endif %}
-    {% if field.field.min_length %}minlength="{{ field.field.min_length }}"{% endif %}
-    {% if field.field.empty_label %}placeholder="{{ field.field.empty_label }}"{% endif %}
-    type="{{ field.widget_type}}" 
+    {% if field.field.disabled %}disabled data-disabled{% endif %}
+    {% if field.value is not None %}value="{{ field.value|stringformat:'s' }}"
+    {% elif defaultValue %}value="{{ defaultValue|stringformat:'s' }}"
     {% endif %}
+    {% for name, value in field.field.widget.attrs.items %}
+        {% if value is not False %}{{ name }}{% if value is not True %}="{{ value|stringformat:'s' }}"{% endif %}{% endif %}
+    {% endfor %}
+    {% endif %}
+    class="dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-9 rounded-md border bg-transparent px-2.5 py-1 text-base shadow-xs transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50{% if class %} {{ class }}{% endif %}"
 />
