@@ -48,8 +48,8 @@
             return this.checked ? 'checked' : 'unchecked';
         },
     }"
-    @click.stop="toggle"
-    @keyup.enter.self.stop="if (!nativeButton) toggle"
+    @click.stop="toggle()"
+    @keyup.enter.self.stop="if (!nativeButton) toggle()"
     role="checkbox"
     :tabindex="disabled ? '-1' : '0'"
     :data-checked="checked ? '' : null"
@@ -75,7 +75,7 @@
     {% if attrs.id %}
     :id="isFormControl ? null : '{{ attrs.id }}'"
     {% endif %}
-    class="flex relative justify-center items-center border transition-colors outline-none disabled:opacity-50 disabled:cursor-not-allowed group-has-disabled/field:opacity-50 aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive aria-invalid:aria-checked:border-primary data-checked:border-primary data-checked:text-primary-foreground data-checked:bg-primary border-input peer size-4 rounded-[4px] shadow-xs shrink-0 after:absolute after:-inset-x-3 after:-inset-y-2 dark:aria-invalid:ring-destructive/40 dark:aria-invalid:border-destructive/50 dark:data-checked:bg-primary dark:bg-input/30 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring{% if class %} {{ class }}{% endif %}"
+    class="flex relative justify-center items-center border transition-shadow outline-none disabled:opacity-50 disabled:cursor-not-allowed group-has-disabled/field:opacity-50 aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive aria-invalid:aria-checked:border-primary data-checked:border-primary data-checked:text-primary-foreground data-checked:bg-primary border-input peer size-4 rounded-[4px] shadow-xs shrink-0 after:absolute after:-inset-x-3 after:-inset-y-2 dark:aria-invalid:ring-destructive/40 dark:aria-invalid:border-destructive/50 dark:data-checked:bg-primary dark:bg-input/30 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring{% if class %} {{ class }}{% endif %}"
 >   
     {% if not render %}
     <span 
