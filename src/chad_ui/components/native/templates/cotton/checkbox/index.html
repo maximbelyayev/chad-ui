@@ -1,4 +1,4 @@
-<c-vars defaultChecked indeterminate nativeButton disabled readOnly render />
+<c-vars defaultChecked indeterminate nativeButton disabled readOnly asChild />
 <!--TODO: indeterminate, parent -->
 <span
     x-data="{
@@ -6,16 +6,16 @@
         nativeButton: {{ nativeButton|yesno:'true,false' }},
         disabled: {{ disabled|yesno:'true,false' }},
         readOnly: {{ readOnly|yesno:'true,false' }},
-        render: {{ render|yesno:'true,false' }},
+        asChild: {{ asChild|yesno:'true,false' }},
         isFormControl: true,
         init() {
             this.isFormControl = {{ attrs.form|yesno:'true,false' }} ? true : this.$el.closest('form') !== null;
-            if (this.render) {
+            if (this.asChild) {
                 this.wrapper = this.$el;
-                this.$nextTick(() => this.$nextTick(() => this.initRender()));
+                this.$nextTick(() => this.$nextTick(() => this.initAsChild()));
             }
         }, 
-        initRender() {
+        initAsChild() {
             const wrapper = this.wrapper || this.$el;
             const child = wrapper.firstElementChild;
             if (!child) return;
@@ -23,7 +23,7 @@
             [...wrapper.attributes].forEach(attr => {
                 if (child.hasAttribute(attr.name) || attr.name === 'class') return;
                 if (attr.name === 'x-data') {
-                    child.setAttribute('x-data', attr.value.replace(/render:\s*true/, 'render: false'));
+                    child.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
                     return;
                 }
                 child.setAttribute(attr.name, attr.value);
@@ -65,7 +65,7 @@
     data-required
     aria-required="true"
     {% endif %}
-    {% with form_attrs='name,required,form,value,checked,disabled,id' vars='defaultChecked,indeterminate,value,nativeButton,disabled,readOnly,render' %}
+    {% with form_attrs='name,required,form,value,checked,disabled,id' vars='defaultChecked,indeterminate,value,nativeButton,disabled,readOnly,asChild' %}
         {% for key, value in attrs.items %}
             {% if key not in form_attrs and key not in vars %}
                 {{ key }}{% if value != True %}="{{ value }}"{% endif %}
@@ -77,7 +77,7 @@
     {% endif %}
     class="flex relative justify-center items-center border transition-shadow outline-none disabled:opacity-50 disabled:cursor-not-allowed group-has-disabled/field:opacity-50 aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive aria-invalid:aria-checked:border-primary data-checked:border-primary data-checked:text-primary-foreground data-checked:bg-primary border-input peer size-4 rounded-[4px] shadow-xs shrink-0 after:absolute after:-inset-x-3 after:-inset-y-2 dark:aria-invalid:ring-destructive/40 dark:aria-invalid:border-destructive/50 dark:data-checked:bg-primary dark:bg-input/30 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring{% if class %} {{ class }}{% endif %}"
 >   
-    {% if not render %}
+    {% if not asChild %}
     <span 
         x-show="checked"
         :data-checked="checked ? '' : null"
@@ -98,7 +98,7 @@
     {% endif %}
     <template x-if="isFormControl">
         <input
-            x-init="if (render) $nextTick(() => initRender())"
+            x-init="if (asChild) $nextTick(() => initAsChild())"
             {% if attrs.disabled %}disabled{% endif %}
             {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
             tabindex="-1"
