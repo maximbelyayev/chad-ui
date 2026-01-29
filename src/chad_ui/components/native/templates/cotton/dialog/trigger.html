@@ -1,37 +1,51 @@
-<c-vars asChild handle="show" ></c-vars>
+<c-vars handle="show" asChild />
 
 <div
     x-data="{
         root: null,
-        asChild: {{ asChild|yesno:'true,false' }},
         handle: '{{ handle }}',
-        storedFrom: '{{ request.path|escapejs }}',
+        asChild: {{ asChild|yesno:'true,false' }},
         init () {
             this.$nextTick(() => {
-                if (this.asChild) {
-                    this.initAsChild()
-                    return
-                }
-                if (!this.root) {
-                    const root = this.findDialogRoot();
-                    this.root = root;
-                }
+                if (this.initAsChild()) return;
+                this.root = this.findDialogRoot();
             });
         },
         initAsChild() {
+            if (!this.asChild) return false;
             const child = this.$el.firstElementChild;
-            if (!child) return;
+            if (!child || child.hasAttribute('x-data')) return false;
+
             [...this.$el.attributes].forEach(attr => {
                 if (child.hasAttribute(attr.name) || attr.name === 'class') return;
                 if (attr.name === 'x-data') {
-                    const safeData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
-                    child.setAttribute('x-data', safeData);
+                    child.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
                     return;
                 }
                 child.setAttribute(attr.name, attr.value);
             });
             child.classList.add(...this.$el.classList);
             this.$el.replaceWith(child);
+            return true;
+        },
+        initAsChild() {
+            if (!this.asChild) return false;
+            const child = this.$el.firstElementChild;
+            if (!child || child.hasAttribute('x-data')) return false;
+
+            [...this.$el.attributes].forEach(attr => {
+                if (attr.name === 'x-data') return;
+                if (attr.name === 'class') {
+                    child.classList.add(...this.$el.classList);
+                    return;
+                }
+                if (child.hasAttribute(attr.name)) return;
+                child.setAttribute(attr.name, attr.value);
+            });
+            
+            child.setAttribute('x-data', this.$el.getAttribute('x-data').replace(/asChild:\s*true/, 'asChild: false'));
+            this.$el.replaceWith(child);
+            return true;
         },
         findDialogRoot() {
             const roots = Array.from(document.querySelectorAll('[x-data] [data-slot=dialog]'));
@@ -40,23 +54,24 @@
                 return rootData.handle === this.handle;
             });
             if (root.length != 1) return;
-            return root;
+            return root[0];
         }
     }"
-    @click.stop="
-    if (!$el.hasAttribute('disabled')) {
-        $el.blur(); 
-        if ($el.parentElement.getAttribute('data-slot') === 'dialog') {
-            showDialog();
-        } else if (root) {
-            $dispatch('{{ handle }}', { eventTrigger: $el })
-        } else {
-            console.warn('[chad-ui] Dialog trigger detached: invalid or missing `handle`.');
+    @click.stop="if (!$el.hasAttribute('disabled')) {
+        const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
+        trigger.blur();
+        const dialogContent = $event.target.closest('[data-slot=dialog-content]');
+        if (dialogContent) {
+            dialogContent.blur();
+            dialogContent.removeAttribute('aria-hidden');
         }
+        if ($el.parentElement.getAttribute('data-slot') === 'dialog') showDialog();
+        else if (root) $dispatch(handle, { eventTrigger: trigger })
+        else console.warn('[chad-ui] Dialog trigger detached: invalid or missing `handle`.');
     }"
-    :hx-vals="JSON.stringify({storedFrom})"
-    data-slot="dialog-trigger"
     aria-haspopup="dialog"
+    data-slot="dialog-trigger"
+    class="{% if class %}{{ class }}{% endif %}"
     {{ attrs }}    
 >
     {{ slot }}
