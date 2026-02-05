@@ -1,0 +1,58 @@
+{% with component='dropdown-menu' %}
+
+<c-vars handle="show-{{ component }}" asChild openOnHover/>
+
+<div data-slot="{{ component }}-trigger"
+    x-data="{
+        handle: '{{ handle }}',
+        disabled: {{ disabled|yesno:'true,false' }},
+        openOnHover: {{ openOnHover|yesno:'true,false' }},
+        asChild: {{ asChild|yesno:'true,false' }},
+        component: '{{ component }}',
+        root: null,
+        detached: null,
+        findRoot() {
+            const p = this.$el.parentElement;
+            if (p.getAttribute('data-slot') === this.component) return p;
+            return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
+                .find(n => { try { return Alpine.$data(n).handle === this.handle } catch { return false } });
+        },
+        initTrigger() {
+            const r = this.findRoot();
+            if (this.asChild && r) {
+                const rData = Alpine.$data(r);
+                if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
+            }
+            this.root = r;
+            this.detached = (r !== this.$el.parentElement);
+            return false;
+        },
+        init () {
+            this.$nextTick(() => {
+                if (this.initTrigger()) return;
+            });
+        },
+        handleTrigger(event) {
+            if (this.disabled) return;
+            const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
+            trigger.blur();
+            const content = event.target.closest('[data-slot=dropdown-content]');
+            if (content) { content.removeAttribute('aria-hidden'); }
+            if (!this.detached) toggleMenu(event);
+            else if (this.root) $dispatch(this.handle)
+            else console.warn('[chad-ui] dropdown-menu: detached trigger has invalid or missing `handle`.');
+        }
+    }"
+    :id="$id('chad-ui_{{ component }}-trigger_r')"
+    @click="handleTrigger($event)"
+
+    type="button"
+    tabindex="0"
+    aria-haspopup="menu"
+    class="outline-hidden w-fit{% if class %} {{ class }}{% endif %}" 
+    {{ attrs }}
+>
+    {{ slot }}
+</div>
+
+{% endwith %}

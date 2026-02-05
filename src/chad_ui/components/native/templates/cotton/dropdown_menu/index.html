@@ -1,0 +1,71 @@
+{% with component='dropdown-menu' %}
+
+<c-vars defaultOpen handle="show-{{ component }}" modal />
+
+<div data-slot="{{ component }}" 
+    x-data="{
+        open: {{ defaultOpen|yesno:'true,false' }},
+        handle: '{{ handle }}',
+        modal: {{ modal|yesno:'true,false' }},
+        trigger: null,
+        component: '{{ component }}',
+        id: '{{ attrs.id }}',
+        initStore() {
+            this.$store['chad-ui'] ??= {};
+            this.$store['chad-ui'][this.component] ??= {};
+            this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
+        },
+        getStore(global = false) {
+            if (global) return this.$store['chad-ui'][this.component]
+            return this.$store['chad-ui'][this.component][`${this.id}`];
+        },
+        initAsChild(el) {
+            const c = el.firstElementChild;
+            if (!c || c.hasAttribute('x-data')) return false;
+            [...el.attributes].forEach(attr => {
+                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                c.setAttribute(attr.name, attr.value);
+            });
+            c.classList.add(...el.classList);
+            el.replaceWith(c);
+            return true;
+        },
+        initIndex() {
+            if (!this.id) this.id = $id(`chad-ui_${this.component}_r`);
+            this.initStore();
+        },
+        init() {
+            this.initIndex();
+            if (this.open) this.showMenu();
+        },
+        toggleMenu(event) {
+            if (this.open) this.hideMenu()
+            else this.showMenu(event)
+        },
+        showMenu(event) {
+            this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
+            this.open = true;
+        },
+        hideMenu() {
+            this.trigger = null;
+            this.open = false;
+        },   
+         
+    }"
+    @{{ handle }}.window="toggleMenu($event)"
+    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"
+    @keydown.escape.window="if (open) {
+        $event.preventDefault();
+        $event.stopImmediatePropagation();
+        hideMenu();
+    }"
+    x-id="[`chad-ui_${this.component}-trigger_r`, `chad-ui_${this.component}-content_r`, `chad-ui_${this.component}-label_r`]"
+>
+  {{ slot }}
+</div>
+
+{% endwith %}

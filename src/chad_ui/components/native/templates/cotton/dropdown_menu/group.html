@@ -1,0 +1,12 @@
+<div x-data="{ 
+        label: null,
+        init() {
+            this.$nextTick(() => this.label = this.$el.querySelector('[data-slot=dropdown-menu-label]')?.id)
+        }
+    }"
+    role="group"
+    data-slot="dropdown-menu-group"
+    :aria-labelledby="label ? label : null"
+>
+    {{ slot }}
+</div>
