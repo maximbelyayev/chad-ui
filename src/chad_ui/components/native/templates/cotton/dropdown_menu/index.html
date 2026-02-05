@@ -8,6 +8,11 @@
         handle: '{{ handle }}',
         modal: {{ modal|yesno:'true,false' }},
         trigger: null,
+
+        openedOnHover: null,
+        hoverOpenTimeout: null,
+        hoverCloseTimeout: null,
+
         component: '{{ component }}',
         id: '{{ attrs.id }}',
         initStore() {

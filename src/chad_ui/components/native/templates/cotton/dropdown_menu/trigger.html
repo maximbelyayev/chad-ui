@@ -8,6 +8,7 @@
         disabled: {{ disabled|yesno:'true,false' }},
         openOnHover: {{ openOnHover|yesno:'true,false' }},
         asChild: {{ asChild|yesno:'true,false' }},
+        
         component: '{{ component }}',
         root: null,
         detached: null,
@@ -44,8 +45,72 @@
         }
     }"
     :id="$id('chad-ui_{{ component }}-trigger_r')"
-    @click="handleTrigger($event)"
+    @click="
+        if (!root) { 
+            handleTrigger($event); 
+            return; 
+        }
+        
+        const rootData = Alpine.$data(root);
+        
+        // Cancel any pending hover open (scenario 0.b)
+        if (rootData.hoverOpenTimeout) {
+            clearTimeout(rootData.hoverOpenTimeout);
+            rootData.hoverOpenTimeout = null;
+        }
+        
+        // Cancel any pending hover close
+        if (rootData.hoverCloseTimeout) {
+            clearTimeout(rootData.hoverCloseTimeout);
+            rootData.hoverCloseTimeout = null;
+        }
+        
+        // If opened via hover, convert to click-open (scenario 0.a)
+        if (rootData.openedOnHover) {
+            rootData.openedOnHover = false;
+        }
+        
+        handleTrigger($event);
+    "
+    @mouseenter="
+        if (!openOnHover || !root) return;
+        const rootData = Alpine.$data(root);
 
+        if (rootData.open && !rootData.openedOnHover) return;
+
+        if (rootData.openedOnHover && rootData.trigger === $el) {
+            if (rootData.hoverCloseTimeout) {
+                clearTimeout(rootData.hoverCloseTimeout);
+                rootData.hoverCloseTimeout = null;
+            }
+            return;
+        };
+        if (rootData.hoverOpenTimeout) clearTimeout(rootData.hoverOpenTimeout);
+        const event = $event;
+        rootData.hoverOpenTimeout = setTimeout(() => {
+            handleTrigger(event);
+            rootData.trigger = $el;
+            rootData.openedOnHover = true;
+            rootData.hoverOpenTimeout = null;
+        }, 200);
+    "
+    @mouseleave="
+        if (!root) return;
+        const rootData = Alpine.$data(root);
+        if (rootData.hoverOpenTimeout) {
+            clearTimeout(rootData.hoverOpenTimeout)
+            rootData.hoverOpenTimeout = null;
+        }
+        if (rootData.openedOnHover) {
+            const event = $event;
+            rootData.hoverCloseTimeout = setTimeout(() => {
+                const triggerData = Alpine.$data(rootData.trigger);
+triggerData.handleTrigger(event);
+                rootData.openedOnHover = false;
+                rootData.hoverCloseTimeout = null;
+            }, 100);
+        }
+    "
     type="button"
     tabindex="0"
     aria-haspopup="menu"
