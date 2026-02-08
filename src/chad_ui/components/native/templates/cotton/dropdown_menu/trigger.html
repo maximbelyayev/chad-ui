@@ -1,6 +1,6 @@
 {% with component='dropdown-menu' %}
 
-<c-vars handle="show-{{ component }}" asChild openOnHover/>
+<c-vars handle="show-{{ component }}" openOnHover delay="100" closeDelay="0" asChild />
 
 <div data-slot="{{ component }}-trigger"
     x-data="{
@@ -8,7 +8,8 @@
         disabled: {{ disabled|yesno:'true,false' }},
         openOnHover: {{ openOnHover|yesno:'true,false' }},
         asChild: {{ asChild|yesno:'true,false' }},
-        
+        delay: {{ delay }},
+        closeDelay: {{ closeDelay }},
         component: '{{ component }}',
         root: null,
         detached: null,
@@ -59,12 +60,12 @@
             rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
             return;
         }
-        rootData.createHoverOpenTimeout($el, $event);
+        rootData.createHoverOpenTimeout($el, $event, delay);
     "
     @mouseleave="if (!root) return;
         const rootData = Alpine.$data(root);
         rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
-        if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, $event);
+        if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, $event, delay);
     "
     type="button"
     tabindex="0"

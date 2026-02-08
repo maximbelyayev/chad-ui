@@ -1,12 +1,13 @@
 {% with component='dropdown-menu' %}
 
-<c-vars defaultOpen handle="show-{{ component }}" modal />
+<c-vars defaultOpen handle="show-{{ component }}" loopFocus modal />
 
 <div data-slot="{{ component }}" 
     x-data="{
-        open: {{ defaultOpen|yesno:'true,false' }},
+        open: {{ defaultOpen|default:False|yesno:'true,false' }},
         handle: '{{ handle }}',
-        modal: {{ modal|yesno:'true,false' }},
+        loopFocus: {{ loopFocus|lower }},
+        modal: {{ modal|default:False|yesno:'true,false' }},
         trigger: null,
         content: null,
         openedOnHover: null,
@@ -67,22 +68,22 @@
             if (timeout) clearTimeout(timeout);
             return null;
         }, 
-        createHoverOpenTimeout(triggerEl, event) {
+        createHoverOpenTimeout(triggerEl, event, delay) {
             const triggerData = Alpine.$data(triggerEl);
             this.hoverOpenTimeout = setTimeout(() => {
                 triggerData.handleTrigger(event)
                 this.openedOnHover = true;
                 this.hoverOpenTimeout = this.destroyTimeout(this.hoverOpenTimeout);
-            }, 200)
+            }, delay)
         },
-        createHoverCloseTimeout(el, event) {
+        createHoverCloseTimeout(el, event, delay) {
             if (el === this.trigger) return this.initHoverPathHandler(el, event);
             const triggerData = Alpine.$data(this.trigger);
             this.hoverCloseTimeout = setTimeout(() => {
                 triggerData.handleTrigger(event);
                 this.openedOnHover = false;
                 this.hoverCloseTimeout = this.destroyTimeout(this.hoverCloseTimeout);
-            }, 200);
+            }, delay);
         },
         initHoverPathHandler(srcEl, mouseLeave) {
             this.corners = this.getTargetCorners(srcEl, mouseLeave);
