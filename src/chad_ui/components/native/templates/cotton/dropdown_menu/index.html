@@ -7,11 +7,13 @@
         open: {{ defaultOpen|yesno:'true,false' }},
         handle: '{{ handle }}',
         modal: {{ modal|yesno:'true,false' }},
-        trigger: null,
 
+        trigger: null,
+        content: null,
         openedOnHover: null,
         hoverOpenTimeout: null,
         hoverCloseTimeout: null,
+        corners: null,
 
         component: '{{ component }}',
         id: '{{ attrs.id }}',
@@ -45,7 +47,10 @@
         },
         init() {
             this.initIndex();
-            if (this.open) this.showMenu();
+            this.$nextTick(() => {
+                this.content = document.getElementById(this.id).querySelector(`[data-slot=${this.component}-content]`);
+                if (this.open) this.showMenu();
+            })
         },
         toggleMenu(event) {
             if (this.open) this.hideMenu()
@@ -59,7 +64,115 @@
             this.trigger = null;
             this.open = false;
         },   
-         
+        destroyTimeout(timeout) {
+            this.destroyHoverPathHandler();
+            if (timeout) clearTimeout(timeout);
+            return null;
+        }, 
+        createHoverOpenTimeout(triggerEl, event) {
+            const triggerData = Alpine.$data(triggerEl);
+            this.hoverOpenTimeout = setTimeout(() => {
+                triggerData.handleTrigger(event)
+                this.openedOnHover = true;
+                this.hoverOpenTimeout = this.destroyTimeout(this.hoverOpenTimeout);
+            }, 200)
+        },
+        createHoverCloseTimeout(el, event) {
+            if (el === this.trigger) {
+                this.initHoverPathHandler(el, event);
+            } else {
+                const triggerData = Alpine.$data(this.trigger);
+                this.hoverCloseTimeout = setTimeout(() => {
+                    triggerData.handleTrigger(event);
+                    this.openedOnHover = false;
+                    this.hoverCloseTimeout = this.destroyTimeout(this.hoverCloseTimeout);
+                }, 200);
+            }
+        },
+        initHoverPathHandler(srcEl, mouseLeave) {
+            this.corners = this.getTargetCorners(srcEl, mouseLeave);
+            this._hoverPathHandler = (e) => this.handleHoverPath(e, mouseLeave);
+            document.body.addEventListener('mousemove', this._hoverPathHandler);
+        },
+        destroyHoverPathHandler() {
+            if (this._hoverPathHandler) {
+                document.body.removeEventListener('mousemove', this._hoverPathHandler)
+                this._hoverPathHandler = null;
+            }
+        },
+        handleHoverPath(e, mouseLeave) {
+            const triangle = [mouseLeave, this.corners[0], this.corners[1]];
+            const inTriangle = this.isPointInTriangle(e, triangle);
+            if (!inTriangle && !this.hoverCloseTimeout) this.createHoverCloseTimeout(null, e);
+        },
+        isPointInTriangle(p, [p1, p2, p3]) {
+            const a = (a,b,c) => Math.abs((b.x-a.x)*(c.y-a.y) - (c.x-a.x)*(b.y-a.y));
+            return Math.abs(a(p1,p2,p3) - (a(p,p1,p2) + a(p,p2,p3) + a(p,p3,p1))) < 0.01;
+        },
+        getTargetCorners(srcElement, mouseLeave) {
+            const triggerRect = this.trigger.getBoundingClientRect();
+            const contentRect = this.content.getBoundingClientRect();
+            const contentData = Alpine.$data(this.content);
+            const anchorData = this.content.parentElement?._x_anchor;
+            let anchorRect = {};
+
+            if (['bottom', 'top'].includes(contentData.side)) {
+                anchorRect.top = anchorData.y;
+                anchorRect.left = anchorData.x + contentData.alignOffset;
+            } else {
+                anchorRect.top = anchorData.y + contentData.alignOffset;
+                anchorRect.left = anchorData.x;
+            }
+            anchorRect.bottom = anchorRect.top + contentRect.height;
+            anchorRect.right = anchorRect.left + contentRect.width;
+
+            const targetRect = srcElement === this.trigger ? anchorRect : triggerRect;
+            const srcRect = srcElement === this.trigger ? triggerRect : anchorRect;
+
+            const targetFullyBelow = targetRect.top >= srcRect.bottom;
+            const targetFullyAbove = targetRect.bottom <= srcRect.top;
+            const targetFullyRight = targetRect.left >= srcRect.right;
+            const targetFullyLeft = targetRect.right <= srcRect.left;
+
+            const mouseLeftOfTarget = mouseLeave.clientX < targetRect.left;
+            const mouseRightOfTarget = mouseLeave.clientX > targetRect.right;
+            const mouseAboveTarget = mouseLeave.clientY < targetRect.top;
+            const mouseBelowTarget = mouseLeave.clientY > targetRect.bottom;
+
+            const corners = {
+                tl: { x: targetRect.left, y: targetRect.top }, tr: { x: targetRect.right, y: targetRect.top },
+                bl: { x: targetRect.left, y: targetRect.bottom }, br: { x: targetRect.right, y: targetRect.bottom }
+            };
+
+            let cornerPair;
+            if (targetFullyBelow) {
+                if (targetFullyLeft) cornerPair = ['tr', 'br'];
+                else if (targetFullyRight) cornerPair = ['tl', 'bl'];
+                else if (mouseLeftOfTarget) cornerPair = ['bl', 'tr'];
+                else if (mouseRightOfTarget) cornerPair = ['br', 'tl'];
+                else cornerPair = ['tl', 'tr'];
+            } else if (targetFullyAbove) {
+                if (targetFullyLeft) cornerPair = ['br', 'tr'];
+                else if (targetFullyRight) cornerPair = ['bl', 'tl'];
+                else if (mouseLeftOfTarget) cornerPair = ['tl', 'br'];
+                else if (mouseRightOfTarget) cornerPair = ['tr', 'bl'];
+                else cornerPair = ['bl', 'br'];
+            } else if (targetFullyRight) {
+                if (mouseAboveTarget) cornerPair = ['bl', 'tr'];
+                else if (mouseBelowTarget) cornerPair = ['tl', 'br'];
+                else cornerPair = ['tl', 'bl'];
+            } else if (targetFullyLeft) {
+                if (mouseAboveTarget) cornerPair = ['br', 'tl'];
+                else if (mouseBelowTarget) cornerPair = ['tr', 'bl'];
+                else cornerPair = ['tr', 'br'];
+            }
+
+            const [c1, c2] = cornerPair;
+            return [corners[c1], corners[c2]];
+        },
+        destroy() {
+            this.destroyHoverPathHandler();
+        },
     }"
     @{{ handle }}.window="toggleMenu($event)"
     @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"

@@ -6,6 +6,11 @@
     <div x-data="{ 
             items: [],
             highlightedIndex: -1,
+            align: '{{ align }}',
+            alignOffset: {{ alignOffset }},
+            side: '{{ side }}',
+            sideOffset: {{ sideOffset }},
+
 
             anchor: null,
             initAnchor() {
@@ -88,24 +93,11 @@
                     : (highlightedIndex - 1 + items.length) % items.length;
                 handleFocus(items[highlightedIndex]);
                 "
-                @mouseenter="
-                    if (hoverCloseTimeout) {
-                        clearTimeout(hoverCloseTimeout)
-                        hoverCloseTimeout = null;
-                    }
-                "
-                @mouseleave="
-                    if (openedOnHover && trigger) {
-                        const triggerData = Alpine.$data(trigger)
-                        if (hoverCloseTimeout) clearTimeout(hoverCloseTimeout);
-                        const event = $event;
-                        hoverCloseTimeout = setTimeout(() => {
-                            triggerData.handleTrigger(event);
-                            openedOnHover = false;
-                            hoverCloseTimeout = null;
-                        }, 100);
-                    }
-                "
+                @mouseenter="hoverCloseTimeout = destroyTimeout(hoverCloseTimeout)"
+                @mouseleave="if (openedOnHover && trigger) {
+                    hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
+                    createHoverCloseTimeout($el, $event);
+                }"
                 x-trap="open"
                 x-transition:enter="transition-all ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
