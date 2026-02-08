@@ -1,8 +1,9 @@
-<c-vars defaultOpen disablePointerDismissal disableDismissalDuringHtmx handle="show-dialog" forceOverlay />
+{% with component='dialog' %}
 
-<div
+<c-vars defaultOpen disablePointerDismissal disableDismissalDuringHtmx handle="show-{{ component }}" forceOverlay />
+
+<div data-slot="{{ component }}"
     x-data="{
-        id: '{{ attrs.id }}',
         open: {{ defaultOpen|yesno:'true,false' }},
         disablePointerDismissal: {{ disablePointerDismissal|yesno:'true,false' }},
         disableDismissalDuringHtmx: {{ disableDismissalDuringHtmx|yesno:'true,false' }},
@@ -10,34 +11,67 @@
         forceOverlay: {{ forceOverlay|yesno:'true,false' }},
         nestedIndex: null,
         htmxAwaitingResponse: false,
-        eventTrigger: null,
         hideDialogHandler: null,
-
+        trigger: null,
+        component: '{{ component }}',
+        id: '{{ attrs.id }}',
+        initStore() {
+            this.$store['chad-ui'] ??= {};
+            this.$store['chad-ui'][this.component] ??= {};
+            this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
+        },
+        getStore(global = false) {
+            if (global) return this.$store['chad-ui'][this.component]
+            return this.$store['chad-ui'][this.component][`${this.id}`];
+        },
+        initAsChild(el) {
+            const c = el.firstElementChild;
+            if (!c || c.hasAttribute('x-data')) return false;
+            [...el.attributes].forEach(attr => {
+                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                c.setAttribute(attr.name, attr.value);
+            });
+            c.classList.add(...el.classList);
+            el.replaceWith(c);
+            return true;
+        },
+        initIndex() {
+            if (!this.id) this.id = $id(`chad-ui_${this.component}_r`);
+            this.initStore();
+        },
+        init() {
+            this.initIndex();
+            if (this.open) this.showDialog();
+        },
         showDialog(event) {
-            this.nestedIndex = this.getStore().maxIndex = this.getOpenDialogCount();
-            this.eventTrigger = event?.detail?.eventTrigger;
+            this.nestedIndex = this.getStore(true).maxIndex = this.getOpenDialogCount();
+            this.trigger = event?.detail?.trigger;
             document.body.classList.add('overflow-hidden');
             this.open = true;
         },
         hideDialog() {
             if (this.htmxAwaitingResponse && this.disableDismissalDuringHtmx) return;
-            if (this.hasHtmx(this.eventTrigger)) {
-                const dialogContent = document.querySelector(`#${this.id} [data-slot=dialog-content]`);
-                if (dialogContent) {
+            if (this.hasHtmx(this.trigger)) {
+                const content = document.querySelector(`#${this.id} [data-slot=${this.component}-content]`);
+                if (content) {
                     setTimeout(() => {
-                        dialogContent.querySelectorAll(':scope > :not([data-slot=dialog-close])').forEach(el => el.remove());
+                        content.querySelectorAll(`:scope > :not([data-slot=${this.component}-close])`).forEach(el => el.remove());
                     }, 100);
                 }
             }
             this.open = false;
-            this.eventTrigger = null;
+            this.trigger = null;
             setTimeout(() => {
                 this.nestedIndex = null;
-                this.getStore().maxIndex = this.getOpenDialogCount() - 1;
+                this.getStore(true).maxIndex = this.getOpenDialogCount() - 1;
             }, 100);
         },
         getOpenDialogCount() {
-            return document.querySelectorAll('[data-slot=dialog-content][data-open]').length;
+            return document.querySelectorAll(`[data-slot=${this.component}-content][data-open]`).length;
         },
         hasHtmx(el) {
             if (!el) return false;
@@ -46,28 +80,17 @@
                 el.hasAttribute(attr) || el.querySelector(`[${attr}]`)
             );
         },
-        initStore() {
-            this.$store['chad-ui'] ??= {};
-            this.$store['chad-ui'].dialog ??= {};
-        },
-        getStore() {
-            return this.$store['chad-ui'].dialog;
-        },
-        init() {
-            this.initStore();
-            if (!this.id) this.id = $id('chad-ui_dialog_r');
-            if (this.open) this.showDialog();
-        },
     }"
     @{{ handle }}.window="open ? hideDialog() : showDialog($event)"
-    @hide-dialog.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideDialog()"
-    @keydown.escape.window="if (open && (nestedIndex === getStore().maxIndex)) {
+    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideDialog()"
+    @keydown.escape.window="if (open && (nestedIndex === getStore(true).maxIndex)) {
         $event.preventDefault();
         $event.stopImmediatePropagation();
         hideDialog();
     }"
-    x-id="['chad-ui_dialog-title_r', 'chadui_dialog-description_r']"
-    data-slot="dialog"
+    x-id="[`chad-ui_${this.component}-title_r`, `chad-ui_${this.component}-description_r`]"
 >   
     {{ slot }}
 </div>
+
+{% endwith %}

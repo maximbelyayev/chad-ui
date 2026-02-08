@@ -1,78 +1,53 @@
-<c-vars handle="show" asChild />
+{% with component='dialog' %}
 
-<div
+<c-vars handle="show-{{ component }}" asChild />
+
+<div data-slot="{{ component }}-trigger"
     x-data="{
-        root: null,
         handle: '{{ handle }}',
+        disabled: {{ disabled|yesno:'true,false' }},
         asChild: {{ asChild|yesno:'true,false' }},
+        component: '{{ component }}',
+        root: null,
+        detached: null,
+        findRoot() {
+            const p = this.$el.parentElement;
+            if (p.getAttribute('data-slot') === this.component) return p;
+            return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
+                .find(n => { try { return Alpine.$data(n).handle === this.handle } catch { return false } });
+        },
+        initTrigger() {
+            const r = this.findRoot();
+            if (this.asChild && r) {
+                const rData = Alpine.$data(r);
+                if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
+            }
+            this.root = r;
+            this.detached = (r !== this.$el.parentElement);
+            return false;
+        },
         init () {
             this.$nextTick(() => {
-                if (this.initAsChild()) return;
-                this.root = this.findDialogRoot();
+                if (this.initTrigger()) return;
             });
         },
-        initAsChild() {
-            if (!this.asChild) return false;
-            const child = this.$el.firstElementChild;
-            if (!child || child.hasAttribute('x-data')) return false;
-
-            [...this.$el.attributes].forEach(attr => {
-                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
-                if (attr.name === 'x-data') {
-                    child.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
-                    return;
-                }
-                child.setAttribute(attr.name, attr.value);
-            });
-            child.classList.add(...this.$el.classList);
-            this.$el.replaceWith(child);
-            return true;
-        },
-        initAsChild() {
-            if (!this.asChild) return false;
-            const child = this.$el.firstElementChild;
-            if (!child || child.hasAttribute('x-data')) return false;
-
-            [...this.$el.attributes].forEach(attr => {
-                if (attr.name === 'x-data') return;
-                if (attr.name === 'class') {
-                    child.classList.add(...this.$el.classList);
-                    return;
-                }
-                if (child.hasAttribute(attr.name)) return;
-                child.setAttribute(attr.name, attr.value);
-            });
-            
-            child.setAttribute('x-data', this.$el.getAttribute('x-data').replace(/asChild:\s*true/, 'asChild: false'));
-            this.$el.replaceWith(child);
-            return true;
-        },
-        findDialogRoot() {
-            const roots = Array.from(document.querySelectorAll('[x-data] [data-slot=dialog]'));
-            const root = roots.filter((root) => {
-                const rootData = Alpine.$data(root);
-                return rootData.handle === this.handle;
-            });
-            if (root.length != 1) return;
-            return root[0];
+        handleTrigger(event) {
+            if (this.disabled) return;
+            const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
+            trigger.blur();
+            const content = event.target.closest(`[data-slot=${this.component}-content]`);
+            if (content) { content.removeAttribute('aria-hidden'); }
+            if (!this.detached) showDialog(event);
+            else if (this.root) $dispatch(this.handle)
+            else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
         }
     }"
-    @click.stop="if (!$el.hasAttribute('disabled')) {
-        const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
-        trigger.blur();
-        const dialogContent = $event.target.closest('[data-slot=dialog-content]');
-        if (dialogContent) {
-            dialogContent.blur();
-            dialogContent.removeAttribute('aria-hidden');
-        }
-        if ($el.parentElement.getAttribute('data-slot') === 'dialog') showDialog();
-        else if (root) $dispatch(handle, { eventTrigger: trigger })
-        else console.warn('[chad-ui] Dialog trigger detached: invalid or missing `handle`.');
-    }"
+    @click="handleTrigger($event);"
     aria-haspopup="dialog"
-    data-slot="dialog-trigger"
     class="{% if class %}{{ class }}{% endif %}"
     {{ attrs }}    
 >
     {{ slot }}
 </div>
+
+{% endwith %}

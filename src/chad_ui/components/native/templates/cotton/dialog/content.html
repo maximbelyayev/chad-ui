@@ -1,11 +1,13 @@
+{% with component='dialog' %}
+
 <c-vars showCloseButton="true" />
 
 <template x-teleport="body">
     <div 
-        x-data="{ closeButton: null, showCloseButton: '{{ showCloseButton|lower }}', htmxSwappingFromOutside: false, }"
+        x-data="{ closeButton: null, showCloseButton: {{ showCloseButton|lower }}, htmxSwappingFromOutside: false, }"
         :id="id"
         x-effect="if (open) $el.removeAttribute('aria-hidden');" 
-        data-slot="dialog-portal"
+        data-slot="{{ component }}-portal"
     >
         <div 
             x-show="open"
@@ -20,7 +22,7 @@
             x-transition:leave-end="opacity-0"
             x-effect="$el.style.setProperty('z-index', 50 + nestedIndex)"
             role="presentation"
-            data-slot="dialog-overlay"
+            data-slot="{{ component }}-overlay"
             class="fixed inset-0 z-50 duration-100 isolate"
             :class="nestedIndex == 0 || forceOverlay ? 'bg-black/10 supports-backdrop-filter:backdrop-blur-xs' : ''"
             style="user-select: none;"
@@ -29,8 +31,8 @@
         </div>
         <div
             x-show="open && !htmxSwappingFromOutside"
-            :aria-describedby="$id('chad-ui_dialog-description_r')"
-            :aria-labelledby="$id('chad-ui-dialog-title_r')"
+            :aria-describedby="$id(`chad-ui_${component}-description_r`)"
+            :aria-labelledby="$id(`chad-ui-${component}-title_r`)"
             :data-open="open ? '' : null"
             :data-closed="open ? null : ''"
             @htmx:before-request.window="
@@ -38,7 +40,7 @@
                     htmxAwaitingResponse = true;
                     if (!$el.contains($event.detail.elt)) {
                         htmxSwappingFromOutside = true;
-                        closeButton = $el.querySelector('[data-slot=dialog-close]');
+                        closeButton = $el.querySelector(`[data-slot=${component}-close]`);
                         eventTrigger = $event.detail.elt
                     }
                 }
@@ -54,7 +56,7 @@
             x-transition:leave-end="opacity-0 scale-95"
             x-effect="if (open) {
                 $el.style.setProperty('z-index', 50 + nestedIndex);
-                let offset = getStore().maxIndex - nestedIndex;
+                let offset = getStore(true).maxIndex - nestedIndex;
                 if (offset) {
                     $el.style.setProperty('transform', `translate(-50%, -50%) scale(${1 - 0.1 * offset})`);
                     $el.style.setProperty('translate', `0 calc(1.25rem * ${offset})`);
@@ -63,9 +65,8 @@
                     $el.style.removeProperty('translate');
                 }
             }"
-            tabindex="-1"
             role="dialog"
-            data-slot="dialog-content"
+            data-slot="{{ component }}-content"
             class="bg-background ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-6 rounded-xl p-6 text-sm ring-1 duration-100 sm:max-w-md fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none{% if class %} {{ class }}{% endif %}"
             :class="htmxSwappingFromOutside ? 'invisible': ''"
             
@@ -77,7 +78,7 @@
                     @click.stop="hideDialog"
                     type="button" 
                     tabindex="0"
-                    data-slot="dialog-close" 
+                    data-slot="{{ component }}-close" 
                     class="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-md absolute top-4 right-4"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
@@ -92,3 +93,5 @@
         </div>
     </div>
 </template>
+
+{% endwith %}
