@@ -7,14 +7,12 @@
         open: {{ defaultOpen|yesno:'true,false' }},
         handle: '{{ handle }}',
         modal: {{ modal|yesno:'true,false' }},
-
         trigger: null,
         content: null,
         openedOnHover: null,
         hoverOpenTimeout: null,
         hoverCloseTimeout: null,
         corners: null,
-
         component: '{{ component }}',
         id: '{{ attrs.id }}',
         initStore() {
@@ -78,16 +76,13 @@
             }, 200)
         },
         createHoverCloseTimeout(el, event) {
-            if (el === this.trigger) {
-                this.initHoverPathHandler(el, event);
-            } else {
-                const triggerData = Alpine.$data(this.trigger);
-                this.hoverCloseTimeout = setTimeout(() => {
-                    triggerData.handleTrigger(event);
-                    this.openedOnHover = false;
-                    this.hoverCloseTimeout = this.destroyTimeout(this.hoverCloseTimeout);
-                }, 200);
-            }
+            if (el === this.trigger) return this.initHoverPathHandler(el, event);
+            const triggerData = Alpine.$data(this.trigger);
+            this.hoverCloseTimeout = setTimeout(() => {
+                triggerData.handleTrigger(event);
+                this.openedOnHover = false;
+                this.hoverCloseTimeout = this.destroyTimeout(this.hoverCloseTimeout);
+            }, 200);
         },
         initHoverPathHandler(srcEl, mouseLeave) {
             this.corners = this.getTargetCorners(srcEl, mouseLeave);
@@ -101,74 +96,30 @@
             }
         },
         handleHoverPath(e, mouseLeave) {
-            const triangle = [mouseLeave, this.corners[0], this.corners[1]];
-            const inTriangle = this.isPointInTriangle(e, triangle);
-            if (!inTriangle && !this.hoverCloseTimeout) this.createHoverCloseTimeout(null, e);
+            const hoverPathInTriangle = this.isPointInTriangle(e, [mouseLeave, this.corners[0], this.corners[1]]);
+            if (!hoverPathInTriangle && !this.hoverCloseTimeout) this.createHoverCloseTimeout(null, e);
         },
         isPointInTriangle(p, [p1, p2, p3]) {
             const a = (a,b,c) => Math.abs((b.x-a.x)*(c.y-a.y) - (c.x-a.x)*(b.y-a.y));
             return Math.abs(a(p1,p2,p3) - (a(p,p1,p2) + a(p,p2,p3) + a(p,p3,p1))) < 0.01;
         },
-        getTargetCorners(srcElement, mouseLeave) {
-            const triggerRect = this.trigger.getBoundingClientRect();
-            const contentRect = this.content.getBoundingClientRect();
-            const contentData = Alpine.$data(this.content);
-            const anchorData = this.content.parentElement?._x_anchor;
-            let anchorRect = {};
-
-            if (['bottom', 'top'].includes(contentData.side)) {
-                anchorRect.top = anchorData.y;
-                anchorRect.left = anchorData.x + contentData.alignOffset;
-            } else {
-                anchorRect.top = anchorData.y + contentData.alignOffset;
-                anchorRect.left = anchorData.x;
-            }
-            anchorRect.bottom = anchorRect.top + contentRect.height;
-            anchorRect.right = anchorRect.left + contentRect.width;
-
-            const targetRect = srcElement === this.trigger ? anchorRect : triggerRect;
-            const srcRect = srcElement === this.trigger ? triggerRect : anchorRect;
-
-            const targetFullyBelow = targetRect.top >= srcRect.bottom;
-            const targetFullyAbove = targetRect.bottom <= srcRect.top;
-            const targetFullyRight = targetRect.left >= srcRect.right;
-            const targetFullyLeft = targetRect.right <= srcRect.left;
-
-            const mouseLeftOfTarget = mouseLeave.clientX < targetRect.left;
-            const mouseRightOfTarget = mouseLeave.clientX > targetRect.right;
-            const mouseAboveTarget = mouseLeave.clientY < targetRect.top;
-            const mouseBelowTarget = mouseLeave.clientY > targetRect.bottom;
-
-            const corners = {
-                tl: { x: targetRect.left, y: targetRect.top }, tr: { x: targetRect.right, y: targetRect.top },
-                bl: { x: targetRect.left, y: targetRect.bottom }, br: { x: targetRect.right, y: targetRect.bottom }
-            };
-
-            let cornerPair;
-            if (targetFullyBelow) {
-                if (targetFullyLeft) cornerPair = ['tr', 'br'];
-                else if (targetFullyRight) cornerPair = ['tl', 'bl'];
-                else if (mouseLeftOfTarget) cornerPair = ['bl', 'tr'];
-                else if (mouseRightOfTarget) cornerPair = ['br', 'tl'];
-                else cornerPair = ['tl', 'tr'];
-            } else if (targetFullyAbove) {
-                if (targetFullyLeft) cornerPair = ['br', 'tr'];
-                else if (targetFullyRight) cornerPair = ['bl', 'tl'];
-                else if (mouseLeftOfTarget) cornerPair = ['tl', 'br'];
-                else if (mouseRightOfTarget) cornerPair = ['tr', 'bl'];
-                else cornerPair = ['bl', 'br'];
-            } else if (targetFullyRight) {
-                if (mouseAboveTarget) cornerPair = ['bl', 'tr'];
-                else if (mouseBelowTarget) cornerPair = ['tl', 'br'];
-                else cornerPair = ['tl', 'bl'];
-            } else if (targetFullyLeft) {
-                if (mouseAboveTarget) cornerPair = ['br', 'tl'];
-                else if (mouseBelowTarget) cornerPair = ['tr', 'bl'];
-                else cornerPair = ['tr', 'br'];
-            }
-
-            const [c1, c2] = cornerPair;
-            return [corners[c1], corners[c2]];
+        getTargetCorners(s, e) {
+            let t = this.trigger, c = this.content, g = n => n.getBoundingClientRect(),
+                T = g(t), C = g(c), D = Alpine.$data(c), A = c.parentElement?._x_anchor || {x:0, y:0},
+                S = D.side, v = S == 'top' || S == 'bottom', o = D.alignOffset,
+                ax = A.x + (v ? o : 0), ay = A.y + (v ? 0 : o),
+                i = s === t,
+                l = i ? ax : T.left, u = i ? ay : T.top,
+                r = l + (i ? C.width : T.width), d = u + (i ? C.height : T.height),
+                L = i ? T.left : ax, U = i ? T.top : ay,
+                R = i ? T.right : ax + C.width, B = i ? T.bottom : ay + C.height,
+                k = [{x:l,y:u}, {x:r,y:u}, {x:l,y:d}, {x:r,y:d}],
+                x = e.clientX, y = e.clientY;
+            return u >= B ? (l >= R ? [k[0], k[2]] : r <= L ? [k[1], k[3]] : x < l ? [k[2], k[1]] : x > r ? [k[3], k[0]] : [k[0], k[1]])
+                : d <= U ? (l >= R ? [k[2], k[0]] : r <= L ? [k[3], k[1]] : x < l ? [k[0], k[3]] : x > r ? [k[1], k[2]] : [k[2], k[3]])
+                : l >= R ? (y < u ? [k[2], k[1]] : y > d ? [k[0], k[3]] : [k[0], k[2]])
+                : r <= L ? (y < u ? [k[3], k[0]] : y > d ? [k[1], k[2]] : [k[1], k[3]])
+                : [k[0], k[3]];
         },
         destroy() {
             this.destroyHoverPathHandler();
