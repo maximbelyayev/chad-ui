@@ -20,24 +20,18 @@
             },
             init () {
                 this.initContent()
-                this.$nextTick(() => {
-                    this.$nextTick(() => {
-                        this.items = this.indexItems()
-                    });
-                })
+                this.$nextTick(() => this.$nextTick(() => this.items = this.indexItems()));
                 this.$watch('open', open => {
-                    if (open) {
-                        this.highlightedIndex = -1;
-                    }
-                    else {
-                        this.items.forEach(i => this.removeFocus(i));
-                    }
+                    if (open) this.highlightedIndex = -1;
+                    else this.items.forEach(i => this.removeFocus(i))
                 })
             },
             indexItems() {
                 return Array.from($el.querySelectorAll(`[x-data][data-slot='${component}-item']`))
             },
             handleFocus(el) {
+                const index = this.items.indexOf(el);
+                if (index > -1) this.highlightedIndex = index;
                 this.items.filter(i => i !== el).forEach(i => this.removeFocus(i));
                 el.focus();
                 el.setAttribute('tabindex', 0);
@@ -113,7 +107,13 @@
                 tabindex="-1"
                 role="menu"
                 data-slot="{{ component }}-content"
-                class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
+                class="pointer-events-auto
+                ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 
+                overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden
+                {% if class %}
+                    {{ class }}
+                {% endif %}
+                "
                 {{ attrs }}
             >
                 {{ slot }}

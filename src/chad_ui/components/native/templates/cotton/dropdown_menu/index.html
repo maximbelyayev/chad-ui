@@ -4,10 +4,10 @@
 
 <div data-slot="{{ component }}" 
     x-data="{
-        open: {{ defaultOpen|default:False|yesno:'true,false' }},
+        open: {{ defaultOpen|yesno:'true,false' }},
         handle: '{{ handle }}',
         loopFocus: {{ loopFocus|lower }},
-        modal: {{ modal|default:False|yesno:'true,false' }},
+        modal: {{ modal|yesno:'true,false' }},
         trigger: null,
         content: null,
         openedOnHover: null,

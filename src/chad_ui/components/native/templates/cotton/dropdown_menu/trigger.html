@@ -7,9 +7,9 @@
         handle: '{{ handle }}',
         disabled: {{ disabled|yesno:'true,false' }},
         openOnHover: {{ openOnHover|yesno:'true,false' }},
-        asChild: {{ asChild|yesno:'true,false' }},
         delay: {{ delay }},
         closeDelay: {{ closeDelay }},
+        asChild: {{ asChild|yesno:'true,false' }},
         component: '{{ component }}',
         root: null,
         detached: null,
@@ -38,11 +38,11 @@
             if (this.disabled) return;
             const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
             trigger.blur();
-            const content = event.target.closest('[data-slot=dropdown-content]');
+            const content = event.target.closest(`[data-slot=${this.component}-content]`);
             if (content) { content.removeAttribute('aria-hidden'); }
             if (!this.detached) toggleMenu(event);
             else if (this.root) $dispatch(this.handle)
-            else console.warn('[chad-ui] dropdown-menu: detached trigger has invalid or missing `handle`.');
+            else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
         }
     }"
     :id="$id('chad-ui_{{ component }}-trigger_r')"
