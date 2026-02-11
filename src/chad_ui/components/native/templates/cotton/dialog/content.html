@@ -4,10 +4,23 @@
 
 <template x-teleport="body">
     <div 
-        x-data="{ closeButton: null, showCloseButton: {{ showCloseButton|lower }}, htmxSwappingFromOutside: false, }"
-        :id="id"
+        x-data="{ 
+            closeButton: null, 
+            showCloseButton: {{ showCloseButton|lower }}, 
+            htmxSwappingFromOutside: false, 
+            ariaLabelledBy: null,
+            ariaDescribedBy: null,
+            updateARIA() {
+                this.ariaLabelledBy = this.$el.querySelector(`[data-slot=${this.component}-title]`)?.id;
+                this.ariaDescribedBy = this.$el.querySelector(`[data-slot=${this.component}-description]`)?.id;
+            },
+            init() { 
+                this.$nextTick(() => this.updateARIA());
+            }      
+        }"
+        :id="`${id}-portal`"
         x-effect="if (open) $el.removeAttribute('aria-hidden');" 
-        data-slot="{{ component }}-portal"
+        @click.stop
     >
         <div 
             x-show="open"
@@ -23,16 +36,16 @@
             x-effect="$el.style.setProperty('z-index', 50 + nestedIndex)"
             role="presentation"
             data-slot="{{ component }}-overlay"
-            class="fixed inset-0 z-50 duration-100 isolate"
             :class="nestedIndex == 0 || forceOverlay ? 'bg-black/10 supports-backdrop-filter:backdrop-blur-xs' : ''"
+            class="fixed inset-0 z-50 duration-100 isolate"
             style="user-select: none;"
         >
             <c-spinner class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"/>
         </div>
         <div
             x-show="open && !htmxSwappingFromOutside"
-            :aria-describedby="$id(`chad-ui_${component}-description_r`)"
-            :aria-labelledby="$id(`chad-ui-${component}-title_r`)"
+            :aria-labelledby="ariaLabelledBy"
+            :aria-describedby="ariaDescribedBy"
             :data-open="open ? '' : null"
             :data-closed="open ? null : ''"
             @htmx:before-request.window="
@@ -46,8 +59,12 @@
                 }
             "
             @htmx:before-on-load.window="if ($el.contains($event.detail.target)); htmxAwaitingResponse = false;"
-            @htmx:after-settle.self="htmxSwappingFromOutside = false; if (closeButton) $el.appendChild(closeButton);"
-            x-trap.inert.noscroll="open && !htmxAwaitingResponse"
+            @htmx:after-settle.self="
+                htmxSwappingFromOutside = false; 
+                if (closeButton) $el.appendChild(closeButton);
+                updateARIA();
+            "
+            x-trap.inert.noscroll="open && !htmxSwappingFromOutside"
             x-transition:enter="transition-[opacity,scale] ease-out"
             x-transition:enter-start="opacity-0 scale-95"
             x-transition:enter-end="opacity-100 scale-100"
@@ -56,7 +73,7 @@
             x-transition:leave-end="opacity-0 scale-95"
             x-effect="if (open) {
                 $el.style.setProperty('z-index', 50 + nestedIndex);
-                let offset = getStore(true).maxIndex - nestedIndex;
+                let offset = getStore().maxIndex - nestedIndex;
                 if (offset) {
                     $el.style.setProperty('transform', `translate(-50%, -50%) scale(${1 - 0.1 * offset})`);
                     $el.style.setProperty('translate', `0 calc(1.25rem * ${offset})`);
@@ -67,9 +84,8 @@
             }"
             role="dialog"
             data-slot="{{ component }}-content"
-            class="bg-background ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-6 rounded-xl p-6 text-sm ring-1 duration-100 sm:max-w-md fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none{% if class %} {{ class }}{% endif %}"
             :class="htmxSwappingFromOutside ? 'invisible': ''"
-            
+            class="bg-background ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-6 rounded-xl p-6 text-sm ring-1 duration-100 sm:max-w-md fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none{% if class %} {{ class }}{% endif %}"
             {{ attrs }}
         >
             {{ slot }}

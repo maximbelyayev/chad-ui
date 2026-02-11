@@ -1,6 +1,7 @@
 {% with component='dropdown-menu' %}
+{% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars handle="show-{{ component }}" openOnHover delay="100" closeDelay="0" asChild />
+<c-vars handle openOnHover delay="100" closeDelay="0" asChild />
 
 <div data-slot="{{ component }}-trigger"
     x-data="{
@@ -13,11 +14,12 @@
         component: '{{ component }}',
         root: null,
         detached: null,
+        id: '{{ attrs.id }}',
         findRoot() {
             const p = this.$el.parentElement;
             if (p.getAttribute('data-slot') === this.component) return p;
             return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
-                .find(n => { try { return Alpine.$data(n).handle === this.handle } catch { return false } });
+                .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
         },
         initTrigger() {
             const r = this.findRoot();
@@ -27,9 +29,10 @@
             }
             this.root = r;
             this.detached = (r !== this.$el.parentElement);
+            if (!this.id) this.id = `${r.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
             return false;
         },
-        init () {
+        init() {
             this.$nextTick(() => {
                 if (this.initTrigger()) return;
             });
@@ -41,11 +44,11 @@
             const content = event.target.closest(`[data-slot=${this.component}-content]`);
             if (content) { content.removeAttribute('aria-hidden'); }
             if (!this.detached) toggleMenu(event);
-            else if (this.root) $dispatch(this.handle)
+            else if (this.root) $dispatch(this.handle);
             else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
         }
     }"
-    :id="$id('chad-ui_{{ component }}-trigger_r')"
+    :id="id"
     @click="
         const rootData = Alpine.$data(root);
         rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
@@ -53,7 +56,8 @@
         if (rootData.openedOnHover) rootData.openedOnHover = false;
         handleTrigger($event);
     "
-    @mouseenter="if (!openOnHover || !root) return;
+    @mouseenter="
+        if (!openOnHover || !root) return;
         const rootData = Alpine.$data(root);
         if (rootData.open && !rootData.openedOnHover) return;
         if (rootData.openedOnHover && rootData.trigger === $el) {
@@ -62,7 +66,8 @@
         }
         rootData.createHoverOpenTimeout($el, $event, delay);
     "
-    @mouseleave="if (!root) return;
+    @mouseleave="
+        if (!root) return;
         const rootData = Alpine.$data(root);
         rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
         if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, $event, delay);

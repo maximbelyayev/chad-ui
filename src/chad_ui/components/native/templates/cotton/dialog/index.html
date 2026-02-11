@@ -1,6 +1,7 @@
 {% with component='dialog' %}
+{% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars defaultOpen disablePointerDismissal disableDismissalDuringHtmx handle="show-{{ component }}" forceOverlay />
+<c-vars defaultOpen disablePointerDismissal disableDismissalDuringHtmx handle forceOverlay />
 
 <div data-slot="{{ component }}"
     x-data="{
@@ -13,6 +14,7 @@
         htmxAwaitingResponse: false,
         hideDialogHandler: null,
         trigger: null,
+        content: null,
         component: '{{ component }}',
         id: '{{ attrs.id }}',
         initStore() {
@@ -21,8 +23,8 @@
             this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
         },
         getStore(global = false) {
-            if (global) return this.$store['chad-ui'][this.component]
-            return this.$store['chad-ui'][this.component][`${this.id}`];
+            if (global) return this.$store['chad-ui']
+            return this.$store['chad-ui'][this.component];
         },
         initAsChild(el) {
             const c = el.firstElementChild;
@@ -40,34 +42,34 @@
             return true;
         },
         initIndex() {
-            if (!this.id) this.id = $id(`chad-ui_${this.component}_r`);
+            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
             this.initStore();
+            this.$nextTick(() => {
+                this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
+            })
         },
         init() {
             this.initIndex();
             if (this.open) this.showDialog();
         },
         showDialog(event) {
-            this.nestedIndex = this.getStore(true).maxIndex = this.getOpenDialogCount();
-            this.trigger = event?.detail?.trigger;
-            document.body.classList.add('overflow-hidden');
+            this.nestedIndex = this.getStore().maxIndex = this.getOpenDialogCount();
+            this.trigger = event.target
             this.open = true;
         },
         hideDialog() {
             if (this.htmxAwaitingResponse && this.disableDismissalDuringHtmx) return;
-            if (this.hasHtmx(this.trigger)) {
-                const content = document.querySelector(`#${this.id} [data-slot=${this.component}-content]`);
-                if (content) {
-                    setTimeout(() => {
-                        content.querySelectorAll(`:scope > :not([data-slot=${this.component}-close])`).forEach(el => el.remove());
-                    }, 100);
-                }
+            if (this.hasHtmx(this.trigger) && this.content) {
+                setTimeout(() => {
+                    this.content.querySelectorAll(`:scope > :not([data-slot=${this.component}-close])`).forEach(el => el.remove());
+                }, 100);
             }
             this.open = false;
             this.trigger = null;
             setTimeout(() => {
                 this.nestedIndex = null;
-                this.getStore(true).maxIndex = this.getOpenDialogCount() - 1;
+                this.getStore().maxIndex = this.getOpenDialogCount() - 1;
+                this.returnFocus();
             }, 100);
         },
         getOpenDialogCount() {
@@ -76,19 +78,19 @@
         hasHtmx(el) {
             if (!el) return false;
             const htmxAttrs = ['hx-get', 'hx-post', 'hx-put', 'hx-patch', 'hx-delete'];
-            return htmxAttrs.some(attr => 
-                el.hasAttribute(attr) || el.querySelector(`[${attr}]`)
-            );
+            return htmxAttrs.some(attr => el.hasAttribute(attr) || el.querySelector(`[${attr}]`));
+        },
+        returnFocus() {
+            this.getStore(true).lastFocusedEl?.focus();
         },
     }"
     @{{ handle }}.window="open ? hideDialog() : showDialog($event)"
     @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideDialog()"
-    @keydown.escape.window="if (open && (nestedIndex === getStore(true).maxIndex)) {
+    @keydown.escape.window="if (open && (nestedIndex === getStore().maxIndex)) {
         $event.preventDefault();
         $event.stopImmediatePropagation();
         hideDialog();
     }"
-    x-id="[`chad-ui_${this.component}-title_r`, `chad-ui_${this.component}-description_r`]"
 >   
     {{ slot }}
 </div>

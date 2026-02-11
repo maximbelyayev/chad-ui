@@ -18,16 +18,16 @@
             initContent() {
                 this.anchor = this.initAnchor()
             },
-            init () {
+            init() {   
                 this.initContent()
                 this.$nextTick(() => this.$nextTick(() => this.items = this.indexItems()));
                 this.$watch('open', open => {
-                    if (open) this.highlightedIndex = -1;
+                    if (open) { htmx.process($el); this.highlightedIndex = -1; }
                     else this.items.forEach(i => this.removeFocus(i))
                 })
             },
             indexItems() {
-                return Array.from($el.querySelectorAll(`[x-data][data-slot='${component}-item']`))
+                return Array.from($el.querySelectorAll(`[data-slot='${component}-item']`))
             },
             handleFocus(el) {
                 const index = this.items.indexOf(el);
@@ -35,7 +35,8 @@
                 this.items.filter(i => i !== el).forEach(i => this.removeFocus(i));
                 el.focus();
                 el.setAttribute('tabindex', 0);
-                el.setAttribute('data-highlighted', '')                
+                el.setAttribute('data-highlighted', '')    
+                getStore(true).lastFocusedEl = el;  
             },
             removeFocus(el) {
                 el.blur();
@@ -43,11 +44,9 @@
                 el.removeAttribute('data-highlighted')
             }        
         }"
-        :id="id"
-        x-effect="
-            if (trigger) anchor = trigger;
-            if (open) $el.removeAttribute('aria-hidden');
-        "
+        :id="`${id}-portal`"
+        x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
+        @htmx:before-on-load.window="if ($event.detail.target.contains(anchor)) this.anchor = anchor;"
         class="fixed inset-0 z-10 pointer-events-none overflow-clip"
     >
         <div
@@ -70,11 +69,9 @@
         >
             <div
                 x-show="open"
-                x-watch
-                :id="$id(`chad-ui_${component}-content_r`)"
                 :data-open="open ? '' : null"
                 :data-closed="open ? null : ''"
-                @click.away="open = false"
+                @click.away="open = false;"
                 @keydown.down.prevent="if (items.length === 0) return;
                     if (highlightedIndex === -1) highlightedIndex = 0;
                     else if (highlightedIndex === items.length - 1) {
@@ -97,7 +94,7 @@
                     hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
                     createHoverCloseTimeout($el, $event, triggerData.closeDelay);
                 }"
-                x-trap="open"
+                x-trap="open && trap"
                 x-transition:enter="transition-all ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
                 x-transition:enter-end="opacity-100 scale-100"
@@ -107,13 +104,7 @@
                 tabindex="-1"
                 role="menu"
                 data-slot="{{ component }}-content"
-                class="pointer-events-auto
-                ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 
-                overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden
-                {% if class %}
-                    {{ class }}
-                {% endif %}
-                "
+                class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
                 {{ attrs }}
             >
                 {{ slot }}

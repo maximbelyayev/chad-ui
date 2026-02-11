@@ -1,6 +1,7 @@
 {% with component='dialog' %}
+{% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars handle="show-{{ component }}" asChild />
+<c-vars handle asChild />
 
 <div data-slot="{{ component }}-trigger"
     x-data="{
@@ -10,11 +11,12 @@
         component: '{{ component }}',
         root: null,
         detached: null,
+        id: '{{ attrs.id }}',
         findRoot() {
             const p = this.$el.parentElement;
             if (p.getAttribute('data-slot') === this.component) return p;
             return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
-                .find(n => { try { return Alpine.$data(n).handle === this.handle } catch { return false } });
+                .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
         },
         initTrigger() {
             const r = this.findRoot();
@@ -24,9 +26,10 @@
             }
             this.root = r;
             this.detached = (r !== this.$el.parentElement);
+            if (!this.id) this.id = `${r.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
             return false;
         },
-        init () {
+        init() {
             this.$nextTick(() => {
                 if (this.initTrigger()) return;
             });

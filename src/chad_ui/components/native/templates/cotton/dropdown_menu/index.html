@@ -1,19 +1,21 @@
 {% with component='dropdown-menu' %}
+{% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars defaultOpen handle="show-{{ component }}" loopFocus modal />
+<c-vars defaultOpen handle loopFocus="true" modal />
 
 <div data-slot="{{ component }}" 
     x-data="{
-        open: {{ defaultOpen|yesno:'true,false' }},
+        open: {{ defaultOpen|default:False|yesno:'true,false' }},
         handle: '{{ handle }}',
         loopFocus: {{ loopFocus|lower }},
-        modal: {{ modal|yesno:'true,false' }},
-        trigger: null,
-        content: null,
+        modal: {{ modal|default:False|yesno:'true,false' }},
         openedOnHover: null,
         hoverOpenTimeout: null,
         hoverCloseTimeout: null,
-        corners: null,
+        hoverTargetCorners: null,
+        trap: false,
+        trigger: null,
+        content: null,
         component: '{{ component }}',
         id: '{{ attrs.id }}',
         initStore() {
@@ -22,8 +24,8 @@
             this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
         },
         getStore(global = false) {
-            if (global) return this.$store['chad-ui'][this.component]
-            return this.$store['chad-ui'][this.component][`${this.id}`];
+            if (global) return this.$store['chad-ui']
+            return this.$store['chad-ui'][this.component];
         },
         initAsChild(el) {
             const c = el.firstElementChild;
@@ -41,19 +43,19 @@
             return true;
         },
         initIndex() {
-            if (!this.id) this.id = $id(`chad-ui_${this.component}_r`);
+            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
             this.initStore();
+            this.$nextTick(() => {
+                this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
+            })
         },
         init() {
             this.initIndex();
-            this.$nextTick(() => {
-                this.content = document.getElementById(this.id).querySelector(`[data-slot=${this.component}-content]`);
-                if (this.open) this.showMenu();
-            })
+            if (this.open) this.showMenu();
         },
         toggleMenu(event) {
-            if (this.open) this.hideMenu()
-            else this.showMenu(event)
+            if (this.open) { this.trap = false; this.hideMenu(); }
+            else { this.trap = true; this.showMenu(event); }
         },
         showMenu(event) {
             this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
@@ -86,7 +88,7 @@
             }, delay);
         },
         initHoverPathHandler(srcEl, mouseLeave) {
-            this.corners = this.getTargetCorners(srcEl, mouseLeave);
+            this.hoverTargetCorners = this.getHoverTargetCorners(srcEl, mouseLeave);
             this._hoverPathHandler = (e) => this.handleHoverPath(e, mouseLeave);
             document.body.addEventListener('mousemove', this._hoverPathHandler);
         },
@@ -97,14 +99,14 @@
             }
         },
         handleHoverPath(e, mouseLeave) {
-            const hoverPathInTriangle = this.isPointInTriangle(e, [mouseLeave, this.corners[0], this.corners[1]]);
+            const hoverPathInTriangle = this.isPointInTriangle(e, [mouseLeave, this.hoverTargetCorners[0], this.hoverTargetCorners[1]]);
             if (!hoverPathInTriangle && !this.hoverCloseTimeout) this.createHoverCloseTimeout(null, e);
         },
         isPointInTriangle(p, [p1, p2, p3]) {
             const a = (a,b,c) => Math.abs((b.x-a.x)*(c.y-a.y) - (c.x-a.x)*(b.y-a.y));
             return Math.abs(a(p1,p2,p3) - (a(p,p1,p2) + a(p,p2,p3) + a(p,p3,p1))) < 0.01;
         },
-        getTargetCorners(s, e) {
+        getHoverTargetCorners(s, e) {
             let t = this.trigger, c = this.content, g = n => n.getBoundingClientRect(),
                 T = g(t), C = g(c), D = Alpine.$data(c), A = c.parentElement?._x_anchor || {x:0, y:0},
                 S = D.side, v = S == 'top' || S == 'bottom', o = D.alignOffset,
@@ -126,14 +128,16 @@
             this.destroyHoverPathHandler();
         },
     }"
+    :id="id"
     @{{ handle }}.window="toggleMenu($event)"
     @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"
-    @keydown.escape.window="if (open) {
+    @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
         $event.preventDefault();
         $event.stopImmediatePropagation();
         hideMenu();
     }"
-    x-id="[`chad-ui_${this.component}-trigger_r`, `chad-ui_${this.component}-content_r`, `chad-ui_${this.component}-label_r`]"
+    x-id="[`${this.id}-label`, `${this.id}-item`]"
+    {{ attrs }}
 >
   {{ slot }}
 </div>

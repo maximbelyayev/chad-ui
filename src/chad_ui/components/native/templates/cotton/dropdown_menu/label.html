@@ -1,8 +1,8 @@
 <div 
-    :id="$id(`${id}_label_r`)"
+    :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-label`)"
     role="presentation"
     data-slot="dropdown-menu-label"
-    class="text-muted-foreground px-2 py-1.5 text-xs font-medium data-[inset]:pl-8{% if class %} {{ class }}{% endif %}" 
+    class="text-muted-foreground px-2 py-1.5 text-xs font-medium data-inset:pl-8{% if class %} {{ class }}{% endif %}" 
     {{ attrs }}
 >
     {{ slot }}
