@@ -1,14 +1,155 @@
-<c-vars defaultOpen modal />
+{% with component='popover' %}
+{% firstof handle 'handle-'|add:component as handle %}
 
-<div x-data="{
-        open: {{ defaultOpen|yesno:'true,false' }},
-        modal: {{ modal|yesno:'true,false' }},
-        hidePopover() { this.open = false; },
-        togglePopover() { this.open = !this.open; },
+<c-vars defaultOpen handle modal />
+
+<div data-slot="{{ component }}" 
+    x-data="{
+        open: {{ defaultOpen|default:False|yesno:'true,false' }},
+        handle: '{{ handle }}',
+        modal: {{ modal|default:False|yesno:'true,false' }},
+        openedOnHover: null,
+        hoverOpenTimeout: null,
+        hoverCloseTimeout: null,
+        hoverTargetCorners: null,
+        trap: false,
+        trigger: null,
+        content: null,
+        component: '{{ component }}',
+        id: '{{ attrs.id }}',
+        initStore() {
+            this.$store['chad-ui'] ??= {};
+            this.$store['chad-ui'][this.component] ??= {};
+            this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
+        },
+        getStore(global = true) {
+            if (global) return this.$store['chad-ui']
+            return this.$store['chad-ui'][this.component];
+        },
+        initAsChild(el) {
+            const c = el.firstElementChild;
+            if (!c || c.hasAttribute('x-data')) return false;
+            [...el.attributes].forEach(attr => {
+                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                c.setAttribute(attr.name, attr.value);
+            });
+            c.classList.add(...el.classList);
+            el.replaceWith(c);
+            return true;
+        },
+        initIndex() {
+            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+            this.initStore();
+            this.$nextTick(() => {
+                this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
+            })
+        },
+        init() {
+            this.initIndex();
+            if (this.open) this.showMenu();
+        },
+        toggleMenu(event) {
+            if (this.open) { this.trap = false; this.hideMenu(); }
+            else { this.trap = true; this.showMenu(event); }
+        },
+        showMenu(event) {
+            this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
+            this.open = true;
+        },
+        hideMenu() {
+            this.trigger = null;
+            this.open = false;
+        },   
+        destroyTimeout(timeout) {
+            this.destroyHoverPathHandler();
+            if (timeout) clearTimeout(timeout);
+            return null;
+        }, 
+        createHoverOpenTimeout(triggerEl, event, delay) {
+            const triggerData = Alpine.$data(triggerEl);
+            this.hoverOpenTimeout = setTimeout(() => {
+                triggerData.handleTrigger(event)
+                this.openedOnHover = true;
+                this.hoverOpenTimeout = this.destroyTimeout(this.hoverOpenTimeout);
+            }, delay)
+        },
+        createHoverCloseTimeout(el, event, delay) {
+            if (el === this.trigger) return this.initHoverPathHandler(el, event);
+            const triggerData = Alpine.$data(this.trigger);
+            this.hoverCloseTimeout = setTimeout(() => {
+                triggerData.handleTrigger(event);
+                this.openedOnHover = false;
+                this.hoverCloseTimeout = this.destroyTimeout(this.hoverCloseTimeout);
+            }, delay);
+        },
+        initHoverPathHandler(srcEl, mouseLeave) {
+            this.hoverTargetCorners = this.getHoverTargetCorners(srcEl, mouseLeave);
+            this._hoverPathHandler = (e) => this.handleHoverPath(e, mouseLeave);
+            document.body.addEventListener('mousemove', this._hoverPathHandler);
+        },
+        destroyHoverPathHandler() {
+            if (this._hoverPathHandler) {
+                document.body.removeEventListener('mousemove', this._hoverPathHandler)
+                this._hoverPathHandler = null;
+            }
+        },
+        handleHoverPath(e, mouseLeave) {
+            const hoverPathInTriangle = this.isPointInTriangle(e, [mouseLeave, this.hoverTargetCorners[0], this.hoverTargetCorners[1]]);
+            if (!hoverPathInTriangle && !this.hoverCloseTimeout) this.createHoverCloseTimeout(null, e);
+        },
+        isPointInTriangle(p, [p1, p2, p3]) {
+            const a = (a,b,c) => Math.abs((b.x-a.x)*(c.y-a.y) - (c.x-a.x)*(b.y-a.y));
+            return Math.abs(a(p1,p2,p3) - (a(p,p1,p2) + a(p,p2,p3) + a(p,p3,p1))) < 0.01;
+        },
+        getHoverTargetCorners(s, e) {
+            let t = this.trigger, c = this.content, g = n => n.getBoundingClientRect(),
+                T = g(t), C = g(c), D = Alpine.$data(c), A = c.parentElement?._x_anchor || {x:0, y:0},
+                S = D.side, v = S == 'top' || S == 'bottom', o = D.alignOffset,
+                ax = A.x + (v ? o : 0), ay = A.y + (v ? 0 : o),
+                i = s === t,
+                l = i ? ax : T.left, u = i ? ay : T.top,
+                r = l + (i ? C.width : T.width), d = u + (i ? C.height : T.height),
+                L = i ? T.left : ax, U = i ? T.top : ay,
+                R = i ? T.right : ax + C.width, B = i ? T.bottom : ay + C.height,
+                k = [{x:l,y:u}, {x:r,y:u}, {x:l,y:d}, {x:r,y:d}],
+                x = e.clientX, y = e.clientY;
+            return u >= B ? (l >= R ? [k[0], k[2]] : r <= L ? [k[1], k[3]] : x < l ? [k[2], k[1]] : x > r ? [k[3], k[0]] : [k[0], k[1]])
+                : d <= U ? (l >= R ? [k[2], k[0]] : r <= L ? [k[3], k[1]] : x < l ? [k[0], k[3]] : x > r ? [k[1], k[2]] : [k[2], k[3]])
+                : l >= R ? (y < u ? [k[2], k[1]] : y > d ? [k[0], k[3]] : [k[0], k[2]])
+                : r <= L ? (y < u ? [k[3], k[0]] : y > d ? [k[1], k[2]] : [k[1], k[3]])
+                : [k[0], k[3]];
+        },
+        destroy() {
+            this.destroyHoverPathHandler();
+        },
+        toggleContent(event) {
+            if (this.open) { this.trap = false; this.hideMenu(); }
+            else { this.trap = true; this.showMenu(event); }
+        },
+        showContent(event) {
+            this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
+            this.open = true;
+        },
+        hideContent() {
+            this.trigger = null;
+            this.open = false;
+        }
     }"
-    x-id="['popover-trigger', 'popover-content']"
-    class="{% if class %}{{ class }}{% endif %}"
+    :id="id"
+    @{{ handle }}.window="toggleContent($event)"
+    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideContent()"
+    @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
+        $event.preventDefault();
+        $event.stopImmediatePropagation();
+        hideContent();
+    }"
     {{ attrs }}
 >
     {{ slot }}
 </div>
+
+{% endwith %}

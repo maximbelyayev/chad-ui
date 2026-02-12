@@ -29,7 +29,7 @@
             }
             this.root = r;
             this.detached = (r !== this.$el.parentElement);
-            if (!this.id) this.id = `${r.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
+            if (!this.id) this.id = $id(`${r.id}-trigger`) || $id(`chad-ui_r_${this.component}-trigger`);
             return false;
         },
         init() {
@@ -75,7 +75,7 @@
     type="button"
     tabindex="0"
     aria-haspopup="menu"
-    class="outline-hidden w-fit{% if class %} {{ class }}{% endif %}" 
+    class="{% if class %}{{ class }}{% endif %}" 
     {{ attrs }}
 >
     {{ slot }}

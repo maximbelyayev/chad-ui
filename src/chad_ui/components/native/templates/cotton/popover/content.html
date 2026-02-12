@@ -1,11 +1,38 @@
-<c-vars asChild side="bottom" sideOffset="5" align="center" alignOffset="0" />
+{% with component='popover' %}
+
+<c-vars align="center" alignOffset="0" side="bottom" sideOffset="5" />
 
 <template x-teleport="body">
-    <div>
+    <div x-data="{ 
+            align: '{{ align }}',
+            alignOffset: {{ alignOffset }},
+            side: '{{ side }}',
+            sideOffset: {{ sideOffset }},
+            anchor: null,
+            contentId: '{{ attrs.id }}',
+            initAnchor() {
+                return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
+                    .find(n => { try { return Alpine.$data(n).id === id || Alpine.$data(n).handle === handle } catch { return false } });
+            },
+            initContent() {
+                this.anchor = this.initAnchor();
+                if (!this.contentId) this.contentId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
+            },
+            init() {   
+                this.initContent()
+                this.$watch('open', open => {
+                    if (open) htmx.process($el);
+                })
+            }   
+        }"
+        :id="`${id}-portal`"
+        x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
+        @htmx:before-on-load.window="if ($event.detail.target.contains(anchor)) this.anchor = anchor;"
+        class="fixed inset-0 z-10 pointer-events-none overflow-clip"
+    >
         <div
             x-cloak
             x-show="modal && open"
-            @click="hidePopover"
             x-transition:enter="transition-opacity ease-out duration-200"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
@@ -13,34 +40,43 @@
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             aria-hidden="true"
-            class="overscroll-contain fixed inset-0 z-40 bg-background/80 backdrop-blur-xs"
+            class="fixed inset-0 duration-100 isolate bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+            :class="openedOnHover ? 'pointer-events-none' : 'pointer-events-auto'"
         ></div>
         <div
-            x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="document.getElementById($id('popover-trigger'))"
+            x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
             style="transform: translate({% if side == 'right' or side == 'left'%}0,{{ alignOffset }}px{% else %}{{ alignOffset }}px,0{% endif %});"
-            class="z-50"
+            class="pointer-events-none"
         >
             <div
-                x-cloak
                 x-show="open"
-                @click.stop
-                @click.away="!modal && hidePopover()"
-                @keydown.escape.window="hidePopover"
-                x-trap.inert.noscroll="modal && open"
+                :id="contentId"
+                :data-open="open ? '' : null"
+                :data-closed="open ? null : ''"
+                @click.away="open = false;"
+                @mouseenter="hoverCloseTimeout = destroyTimeout(hoverCloseTimeout)"
+                @mouseleave="if (openedOnHover && trigger) {
+                    triggerData = Alpine.$data(trigger)
+                    hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
+                    createHoverCloseTimeout($el, $event, triggerData.closeDelay);
+                }"
+                x-trap="open && trap"
                 x-transition:enter="transition-all ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
                 x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="transition-all ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                role="dialog"
-                :aria-modal="modal ? 'true' : 'false'"
-                :id="$id('popover-content')"
                 tabindex="-1"
-                class="p-4 rounded-md border shadow-md bg-popover text-popover-foreground outline-hidden{% if class %} {{ class }}{% endif %}"
+                role="menu"
+                data-slot="{{ component }}-content"
+                class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
+                {{ attrs }}
             >
                 {{ slot }}
             </div>
         </div>
     </div>
 </template>
+
+{% endwith %}
