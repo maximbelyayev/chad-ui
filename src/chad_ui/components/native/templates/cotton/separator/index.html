@@ -1,9 +1,11 @@
-<c-vars orientation="horizontal" decorative />
+<c-vars orientation="horizontal" />
 
 <div
-    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:h-auto {% if class %}{{ class }}{% endif %}"
+    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch{% if class %} {{ class }}{% endif %}"
     data-orientation="{{ orientation|lower }}"
-    role="{% if decorative %}none{% else %}separator{% endif %}"
+    role="separator"
+    aria-orientation="{{ orientation|lower }}"
+    data-slot="separator"
     {{ attrs }}
 ></div>
 
