@@ -48,18 +48,18 @@
             :aria-describedby="ariaDescribedBy"
             :data-open="open ? '' : null"
             :data-closed="open ? null : ''"
-            @htmx:before-request.window="
-                if ($el.contains($event.detail.target)) {
+            @htmx:before:request.window="
+                if ($el.contains($event.detail?.ctx?.target)) {
                     htmxAwaitingResponse = true;
-                    if (!$el.contains($event.detail.elt)) {
+                    if (!$el.contains($event.detail?.ctx?.sourceElement)) {
                         htmxSwappingFromOutside = true;
                         closeButton = $el.querySelector(`[data-slot=${component}-close]`);
-                        eventTrigger = $event.detail.elt
+                        eventTrigger = $event.detail?.ctx?.elt
                     }
                 }
             "
-            @htmx:before-on-load.window="if ($el.contains($event.detail.target)); htmxAwaitingResponse = false;"
-            @htmx:after-settle.self="
+            @htmx:before:init.window="if ($el.contains($event.detail?.ctx?.target)); htmxAwaitingResponse = false;"
+            @htmx:after:settle.self="
                 htmxSwappingFromOutside = false; 
                 if (closeButton) $el.appendChild(closeButton);
                 updateARIA();

@@ -46,7 +46,7 @@
         }"
         :id="`${id}-portal`"
         x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
-        @htmx:before-on-load.window="if ($event.detail.target.contains(anchor)) this.anchor = anchor;"
+        @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
         class="fixed inset-0 z-10 pointer-events-none overflow-clip"
     >
         <div
