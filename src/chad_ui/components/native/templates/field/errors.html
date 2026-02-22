@@ -1,0 +1,16 @@
+{% with component='field' %}
+{% firstof handle 'handle-'|add:component as handle %}
+
+<c-vars handle />
+
+<div 
+    x-data="{ handle: '{{ handle }}' }"
+    role="alert"
+    data-slot="field-error"
+    class="text-destructive text-sm font-normal{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
+>
+    <ul class="flex flex-col gap-1 ml-4 list-disc"></ul>
+</div>
+
+{% endwith %}

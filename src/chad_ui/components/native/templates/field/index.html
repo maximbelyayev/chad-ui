@@ -1,0 +1,53 @@
+{% with component='field' %}
+{% firstof handle 'handle-'|add:component as handle %}
+
+<c-vars field handle validationUrl="" validationMode="submit" orientation="vertical" />
+
+<div data-slot="field"
+    x-data="{
+        handle: '{{ handle }}',
+        validationUrl: '{{ validationUrl }}',
+        validationMode: '{{ validationMode|lower }}',
+        fieldId: '{{ field.id_for_label}}',
+        label: '{{ field.label }}',
+        errors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        findFieldError() {
+            const ul = this.$el.querySelector('[data-slot=field-error] ul')
+            if (ul) return ul;
+            return Array.from(document.querySelectorAll(`[x-data][data-slot='field-error']`))
+                .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
+        },
+        renderErrors(e) {
+            this._errorElt = this.findFieldError();
+            if (!this._errorElt) return;
+            this.clearErrors();
+            const input = this.$el.querySelector('input, select, textarea');
+            if (input && !input.value) return;
+            this.errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                this._errorElt.appendChild(li);
+            });
+        },
+        clearErrors() {
+            this._errorElt.innerHTML = '';
+        },
+        init() {
+            this._renderHandler = (e) => this.renderErrors(e);
+            this.$el.addEventListener('htmx:after:swap', this._renderHandler);
+            this.$nextTick(() => this.renderErrors());
+        },
+        destroy() {
+            this.$el.removeEventListener('htmx:after:swap', this._renderHandler);
+        }
+    }"
+    id="{% if attrs.id %}{{ attrs.id }}{% else %}{{ field.id_for_label}}-field{% endif %}"
+    role="group"
+    data-orientation="{{ orientation|lower }}"
+    class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full{% if orientation == 'vertical' %} flex-col *:w-full [&>.sr-only]:w-auto{% elif orientation == 'horizontal' %} flex-row items-center *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% elif orientation == 'responsive' %} flex-col *:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:*:data-[slot=field-label]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% endif %}{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
+>
+    {{ slot }}
+</div>
+
+{% endwith %}
