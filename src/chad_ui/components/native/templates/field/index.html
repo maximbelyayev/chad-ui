@@ -1,13 +1,14 @@
 {% with component='field' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars field handle validationUrl="" validationMode="submit" orientation="vertical" />
+<c-vars field handle validationMode="submit" validationDebounceTime="300" validationStyle orientation="vertical" />
 
 <div data-slot="field"
     x-data="{
         handle: '{{ handle }}',
-        validationUrl: '{{ validationUrl }}',
         validationMode: '{{ validationMode|lower }}',
+        validationDebounceTime: {{ validationDebounceTime }}, 
+        validationStyle: {{ validationStyle|yesno:'true,false' }}, 
         fieldId: '{{ field.id_for_label}}',
         label: '{{ field.label }}',
         errors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
@@ -23,13 +24,17 @@
             this.clearErrors();
             const input = this.$el.querySelector('input, select, textarea');
             if (input && !input.value) return;
-            this.errors.forEach(error => {
-                const li = document.createElement('li');
-                li.textContent = error;
-                this._errorElt.appendChild(li);
-            });
+            if (this.errors.length != 0) {
+                this.errors.forEach(error => {
+                    const li = document.createElement('li');
+                    li.textContent = error;
+                    this._errorElt.appendChild(li);
+                });
+                if (this.validationStyle) this.$el.setAttribute('data-invalid', 'true');
+            }
         },
         clearErrors() {
+            this.$el.removeAttribute('data-invalid');
             this._errorElt.innerHTML = '';
         },
         init() {
