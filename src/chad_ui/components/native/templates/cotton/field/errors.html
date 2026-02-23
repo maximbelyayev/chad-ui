@@ -1,10 +1,11 @@
 {% with component='field' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars handle />
+<c-vars errorLimit handle />
 
 <div 
-    x-data="{ handle: '{{ handle }}' }"
+    x-data="{ errorLimit: '{{ errorLimit }}', handle: '{{ handle }}', show: false }"
+    x-show="show"
     role="alert"
     data-slot="field-error"
     class="text-destructive text-sm font-normal{% if class %} {{ class }}{% endif %}"
