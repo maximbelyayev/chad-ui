@@ -1,0 +1,10 @@
+<div 
+    data-slot="field-separator" 
+    data-content="{{ slot|yesno:'true,false' }}" 
+    class="-my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2 relative{% if class %} {{ class }}{% endif %}"
+>
+    <c-separator class="absolute inset-0 top-1/2" />
+    <span class="block relative px-2 mx-auto text-muted-foreground bg-background w-fit" data-slot="field-separator-content">
+        {{ slot }}
+    </span>
+</div>

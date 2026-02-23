@@ -1,14 +1,14 @@
 {% with component='field' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars field handle validationMode="submit" validationDebounceTime="200" validationStyle orientation="vertical" />
+<c-vars field handle validationMode="submit" validationDebounceTime="200" invalidStyling orientation="vertical" />
 
 <div data-slot="field"
     x-data="{
         handle: '{{ handle }}',
         validationMode: '{{ validationMode|lower }}',
         validationDebounceTime: {{ validationDebounceTime }}, 
-        validationStyle: {{ validationStyle|yesno:'true,false' }}, 
+        invalidStyling: {{ invalidStyling|yesno:'true,false' }}, 
         fieldId: '{{ field.id_for_label}}',
         label: '{{ field.label }}',
         errors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
@@ -33,7 +33,7 @@
                     li.textContent = error;
                     this._errorElt.appendChild(li);
                 });
-                if (this.validationStyle) this.$el.setAttribute('data-invalid', 'true');
+                if (this.invalidStyling) this.$el.setAttribute('data-invalid', 'true');
             }
         },
         init() {

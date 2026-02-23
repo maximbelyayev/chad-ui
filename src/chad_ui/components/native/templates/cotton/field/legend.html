@@ -1,0 +1,10 @@
+<c-vars variant="legend" />
+
+<div
+    data-slot="field-legend"
+    data-variant="{{ variant }}"
+    class="mb-3 font-medium data-[variant=label]:text-sm data-[variant=legend]:text-base{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
+>
+    {{ slot }}
+</div>
