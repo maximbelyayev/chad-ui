@@ -4,10 +4,10 @@
     {{ attrs }}
     {% if field %}
     x-data="{
-        root: null,
+        field: null,
         trigger: '{{ hx_trigger|escapejs }}',
-        value: '{{ field.value|escapejs }}',
-        findRoot() {
+        value: '{% if field.value is not None %}{{ field.value|escapejs }}{% endif %}',
+        findField() {
             const p = this.$el.parentElement;
             if (p.getAttribute('data-slot') === 'field') return p;
         },
@@ -21,10 +21,10 @@
         resetHtmxForValidation(mode) {
             this.flushHtmxEventListeners();
             if (['blur', 'change'].includes(mode)) {
-                const rData = Alpine.$data(this.root);
-                delete this.$el._htmx;            
+                delete this.$el._htmx;   
+                const fData = Alpine.$data(this.field); 
                 const trigger = mode === 'change' 
-                    ? `input[target.value.length > 0] delay:${rData.validationDebounceTime}ms` 
+                    ? `input[target.value.length > 0] delay:${fData.validationDebounceTime}ms` 
                     : 'blur';
                 if (!this.trigger) this.$el.setAttribute('hx-trigger', trigger);
                 htmx.process(this.$el);
@@ -32,14 +32,14 @@
         },
         init() {
             this.$nextTick(() => {
-                this.root = this.findRoot();
+                this.field = this.findField();
                 this.resetHtmxForValidation(validationMode);
             });
         }
     }"
     :value="value ? value : null"
-    :hx-target="root ? `#${root.id}` : null"
-    :hx-select="root ? `#${root.id}` : null"
+    :hx-target="field ? `#${field.id}` : null"
+    :hx-select="field ? `#${field.id}` : null"
     hx-swap="outerMorph"
     @input.self.stop="if (!$event.target.value) clearErrors();"
     id="{{ field.id_for_label}}"

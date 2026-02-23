@@ -1,7 +1,7 @@
 {% with component='field' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars field handle validationMode="submit" validationDebounceTime="300" validationStyle orientation="vertical" />
+<c-vars field handle validationMode="submit" validationDebounceTime="200" validationStyle orientation="vertical" />
 
 <div data-slot="field"
     x-data="{
@@ -18,12 +18,15 @@
             return Array.from(document.querySelectorAll(`[x-data][data-slot='field-error']`))
                 .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
         },
+        clearErrors() {
+            $el.setAttribute('data-invalid', 'nig');
+            this._errorElt.innerHTML = '';
+        },
         renderErrors(e) {
+            this._input = this.$el.querySelector('input, select, textarea');
             this._errorElt = this.findFieldError();
-            if (!this._errorElt) return;
+            if (!this._errorElt || (this._input && !this._input.value)) return;
             this.clearErrors();
-            const input = this.$el.querySelector('input, select, textarea');
-            if (input && !input.value) return;
             if (this.errors.length != 0) {
                 this.errors.forEach(error => {
                     const li = document.createElement('li');
@@ -32,10 +35,6 @@
                 });
                 if (this.validationStyle) this.$el.setAttribute('data-invalid', 'true');
             }
-        },
-        clearErrors() {
-            this.$el.removeAttribute('data-invalid');
-            this._errorElt.innerHTML = '';
         },
         init() {
             this._renderHandler = (e) => this.renderErrors(e);
