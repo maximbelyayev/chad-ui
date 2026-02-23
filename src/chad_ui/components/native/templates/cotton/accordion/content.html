@@ -1,8 +1,15 @@
 <template x-if="orientation === 'vertical'">
     <div
         x-cloak
+        x-data="{
+            id: '{{ attrs.id }}',
+            init() {
+                if (!this.id) this.id = $id(`chad-ui_r_accordion-content`);
+            }
+        }"
         x-show="isOpen(value)"
         x-collapse.duration.200ms
+        :id="id"
         :data-orientation="orientation"
         :data-open="isOpen(value) ? '' : null"
         :data-closed="isOpen(value) ? null : ''"
@@ -19,6 +26,13 @@
 <template x-if="orientation === 'horizontal'">
     <div
         x-cloak
+        x-data="{
+            id: '{{ attrs.id }}',
+            init() {
+                if (!this.id) this.id = $id(`chad-ui_r_accordion-content`);
+            }
+        }"
+        :id="id"
         x-show="isOpen(value)"
         x-transition:enter="transition-opacity duration-300 ease-out"
         x-transition:enter-start="opacity-0"

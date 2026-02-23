@@ -3,12 +3,30 @@
 <div
     x-data="{
         disabled: disabled ? disabled : {{ disabled|yesno:'true,false' }},
-        value: '{{ value }}'
+        value: '{{ value }}',
+        header: null,
+        trigger: null,
+        content: null,
+        init() {
+            this.$nextTick(() => {
+                this.header = $el.querySelector('h3')
+                this.trigger = $el.querySelector('[data-slot=accordion-trigger]')
+                this.content = $el.querySelector('[data-slot=accordion-content]')
+                Array.from([$el, this.header, this.trigger, this.content]).forEach(el => {
+                    el.setAttribute('data-index', getIndex($el))
+                })
+            })
+            this.$watch('open', open => {
+                if (open[this.value]) this.trigger.setAttribute('aria-controls', this.content?.id)
+                else this.trigger.removeAttribute('aria-controls')
+            })
+            if (this.disabled) setDisabled($el)
+        }
     }"
-    x-init="if (disabled) setDisabled($el);"
     :data-orientation="orientation" 
-    :data-state="isOpen(value) ? 'open' : 'closed'"
-    class="flex transition-all duration-300 ease-in-out border-border{% if class %} {{ class }}{% endif %}"
+    :data-open="isOpen(value) ? '' : null"
+    :data-closed="isOpen(value) ? null : ''"
+    data-slot="accordion-item"
     :class="
         orientation === 'horizontal' 
         ? isOpen(value)
@@ -16,6 +34,7 @@
             : 'flex-row flex-1 min-w-0 w-full not-last:border-r'
         : 'flex-col not-last:border-b'
     "
+    class="flex transition-all duration-300 ease-in-out border-border{% if class %} {{ class }}{% endif %}"
     {{ attrs }}
 >
     {{ slot }}
