@@ -1,20 +1,21 @@
 {% with component='select' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars field defaultValue defaultOpen items modal />
+<c-vars field defaultValue defaultOpen items modal multiple />
 
 <div data-slot="{{ component }}" 
     x-data="{
-        value: '{% if field.value %}{{ field.value }}{% else %}{{ defaultValue }}{% endif %}',
+        value: '{% if defaultValue %}{{ defaultValue }}{% elif field.value %}{{ field.value }}{% endif %}',
         open: {{ defaultOpen|yesno:'true,false' }},
-        modal: {{ modal|default:False|yesno:'true,false' }},
+        items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}}{% elif items %}{{ items }}{% else %}null{% endif %},
+        modal: {{ modal|yesno:'true,false' }},
+        multiple: {{ multiple|yesno:'true,false' }},
         trap: false,
         trigger: null,
         content: null,
         selectedValue: '',
         selectedText: '',
         itemValues: [],
-        items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}}{% elif items %}{{ items }}{% else %}null{% endif %},
         component: '{{ component }}',
         id: '{{ attrs.id }}',
         initStore() {

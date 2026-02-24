@@ -1,6 +1,6 @@
 {% with component='select' %}
 
-<c-vars side="bottom" sideOffset="4" align="center" alignOffset="0" alignItemWithTrigger="true" />
+<c-vars side="bottom" sideOffset="4" align="center" alignOffset="100" alignItemWithTrigger="false" />
 
 <template x-teleport="body">
     <div x-data="{ 
@@ -9,6 +9,8 @@
             align: '{{ align }}',
             alignOffset: {{ alignOffset }},
             alignItemWithTrigger: '{{ alignItemWithTrigger|lower }}',
+            width: null,
+            alignment: '',
             items: [],
             highlightedIndex: -1,
             anchor: null,
@@ -16,11 +18,8 @@
                 return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
                     .find(n => { try { return Alpine.$data(n).id.includes(id) } catch { return false } });
             },
-            initContent() {
-                this.anchor = this.initAnchor()
-            },
             init() {  
-                this.initContent() 
+                this.anchor = this.initAnchor() 
                 this.$nextTick(() => {
                     this.items = this.indexItems();
                 });
@@ -45,7 +44,8 @@
                 el.blur();
                 el.setAttribute('tabindex', -1);
                 el.removeAttribute('data-highlighted')
-            }        
+            },
+            
         }"
         :id="`${id}-portal`"
         x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
@@ -66,16 +66,30 @@
         ></div>
         <div
             x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
-            style="transform: translate({% if side == 'right' or side == 'left'%}0,{{ alignOffset }}px{% else %}{{ alignOffset }}px,0{% endif %});"
+            style="transform: translate(`${this.translation}`);"
             class="pointer-events-none"
         >
             <div
                 x-data="{
                     init() {
-                        $el.style.width = `${anchor.offsetWidth}px`;
+                        this.$nextTick(() => this.handleAlignment(anchor.offsetWidth))
+                    },
+                    handleAlignment(width) {
+                        if (!Number(width) || Number(width) <= 0) return;
+                        let translation;
+                        if (['top', 'bottom'].includes(this.side)) {
+                            translation = `${this.alignOffset}px, 0`
+                            $el.style.width = `${width}px`;
+                        }
+                        else {
+                            translation = `0, ${this.alignOffset}px`
+                            $el.style.width = '100%'
+                        }
+                        this.translation = translation
                     }
                 }"
                 x-show="open"
+                x-effect="handleAlignment(width)"
                 :data-open="open ? '' : null"
                 :data-closed="open ? null : ''"
                 @click.away="open = false;"
