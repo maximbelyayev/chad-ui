@@ -2,7 +2,7 @@
 
 <span
     class="block truncate {% if class %}{{ class }}{% endif %}"
-    x-text="selectedText || '{{ this.value }}' || '{{ placeholder }}'"
+    x-text="selectedTexts.join(', ') || '{{ this.value }}' || '{{ placeholder }}'"
     {{ attrs }}
 >
 </span>

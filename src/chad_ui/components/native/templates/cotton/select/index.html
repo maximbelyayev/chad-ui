@@ -5,7 +5,8 @@
 
 <div data-slot="{{ component }}" 
     x-data="{
-        value: '{% if defaultValue %}{{ defaultValue }}{% elif field.value %}{{ field.value }}{% endif %}',
+        defaultValue: '{% if defaultValue %}{{ defaultValue }}{% elif field.value %}{{ field.value }}{% endif %}',
+        selected: {},
         open: {{ defaultOpen|yesno:'true,false' }},
         items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}}{% elif items %}{{ items }}{% else %}null{% endif %},
         modal: {{ modal|yesno:'true,false' }},
@@ -13,8 +14,7 @@
         trap: false,
         trigger: null,
         content: null,
-        selectedValue: '',
-        selectedText: '',
+        selectedTexts: [],
         itemValues: [],
         component: '{{ component }}',
         id: '{{ attrs.id }}',
@@ -47,15 +47,17 @@
             this.initStore();
             this.$nextTick(() => {
                 this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
-                const selectedItem = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
-                    .find(item => Alpine.$data(item).itemValue == this.value)
-                this.selectedText = selectedItem.firstElementChild?.innerHTML.trim();
             })
         },
         init() {
             this.initIndex();
             this.$nextTick(() => {
-                this.itemValues = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`)).map(item => Alpine.$data(item).itemValue)
+                this.itemValues = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
+                    .map(item => Alpine.$data(item).itemValue);
+                if (this.defaultValue) {
+                    const defaultValues = this.defaultValue.split(',').map((value) => value.trim());
+                    defaultValues.forEach(value => this.toggle(value));
+                }
             })
         },
         toggleContent(event) {
@@ -70,12 +72,16 @@
             this.trigger = null;
             this.open = false;
         },
-        select(value) {
-            this.value = value;
-            const selectedItem = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
-                .find(item => Alpine.$data(item).itemValue == this.value)
-            this.selectedText = selectedItem.firstElementChild.innerHTML.trim();
-        }
+        toggle(value) {
+            if (!this.multiple) {
+                this.selected = { [value]: !this.selected[value] };
+            } else {
+                this.selected[value] = !this.selected[value];
+            }
+            const selectedItems = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
+                .filter(item => this.selected[Alpine.$data(item).itemValue]);
+            this.selectedTexts = selectedItems.map(item => item.firstElementChild?.textContent?.trim()).filter(Boolean);
+        },
     }"
     :id="id"
     @{{ handle }}.window="toggleContent($event)"
@@ -86,15 +92,14 @@
         hideContent();
     }"
     x-id="[`${this.id}-label`, `${this.id}-item`]"
-    {{ attrs }}
 >
     {{ slot }}
     {% if field %}
-        <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" :value="value"
-            x-data="{ previousValue: value }"
+        <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" :multiple="multiple ? '' : null" :value="multiple ? null : value"
+            x-data="{ prevSelected: selected }"
             x-effect="
-            if (value !== previousValue) {
-                previousValue = value;
+            if (selected !== prevSelected) {
+                prevSelected = selected;
                 $nextTick(() => {
                     htmx.trigger($el, 'change');
                 });
@@ -103,7 +108,7 @@
             {{ attrs|cut:"disabled" }}
         >
             <template x-for="val in itemValues">
-                <option :value="val" :selected="val == value"></option>
+                <option :value="val" :selected="selected[val]"></option>
             </template>
         </select>
     {% endif %}

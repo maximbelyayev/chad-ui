@@ -20,9 +20,10 @@
                 document.activeElement?.blur();
                 if (event.target === $el) $el.firstElementChild?.click();
                 else event.target.blur();
-                if (this.closeOnClick) hideContent();
-                select(this.itemValue);
+                if (this.closeOnClick && !multiple) hideContent();
+                toggle(this.itemValue);
                 this._handling = false;
+                //handleFocus($el) // how to handle for keydown.enter?
             });
         },
     }"
@@ -43,7 +44,7 @@
         {{ slot }}
     </div>
     <span 
-        x-show="value == itemValue"
+        x-show="selected[itemValue]"
         class="flex absolute right-2 justify-center items-center pointer-events-none size-4" 
         data-selected="" 
     >
