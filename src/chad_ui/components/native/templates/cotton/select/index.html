@@ -1,0 +1,111 @@
+{% with component='select' %}
+{% firstof handle 'handle-'|add:component as handle %}
+
+<c-vars field defaultValue defaultOpen items modal />
+
+<div data-slot="{{ component }}" 
+    x-data="{
+        value: '{% if field.value %}{{ field.value }}{% else %}{{ defaultValue }}{% endif %}',
+        open: {{ defaultOpen|yesno:'true,false' }},
+        modal: {{ modal|default:False|yesno:'true,false' }},
+        trap: false,
+        trigger: null,
+        content: null,
+        selectedValue: '',
+        selectedText: '',
+        itemValues: [],
+        items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}}{% elif items %}{{ items }}{% else %}null{% endif %},
+        component: '{{ component }}',
+        id: '{{ attrs.id }}',
+        initStore() {
+            this.$store['chad-ui'] ??= {};
+            this.$store['chad-ui'][this.component] ??= {};
+            this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
+        },
+        getStore(global = false) {
+            if (global) return this.$store['chad-ui']
+            return this.$store['chad-ui'][this.component];
+        },
+        initAsChild(el) {
+            const c = el.firstElementChild;
+            if (!c || c.hasAttribute('x-data')) return false;
+            [...el.attributes].forEach(attr => {
+                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                c.setAttribute(attr.name, attr.value);
+            });
+            c.classList.add(...el.classList);
+            el.replaceWith(c);
+            return true;
+        },
+        initIndex() {
+            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+            this.initStore();
+            this.$nextTick(() => {
+                this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
+                const selectedItem = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
+                    .find(item => Alpine.$data(item).itemValue == this.value)
+                this.selectedText = selectedItem.firstElementChild?.innerHTML.trim();
+            })
+        },
+        init() {
+            this.initIndex();
+            this.$nextTick(() => {
+                this.itemValues = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`)).map(item => Alpine.$data(item).itemValue)
+            })
+        },
+        toggleContent(event) {
+            if (this.open) { this.trap = false; this.hideContent(); }
+            else { this.trap = true; this.showContent(event); }
+        },
+        showContent(event) {
+            this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
+            this.open = true;
+        },
+        hideContent() {
+            this.trigger = null;
+            this.open = false;
+        },
+        select(value) {
+            this.value = value;
+            const selectedItem = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
+                .find(item => Alpine.$data(item).itemValue == this.value)
+            this.selectedText = selectedItem.firstElementChild.innerHTML.trim();
+        }
+    }"
+    :id="id"
+    @{{ handle }}.window="toggleContent($event)"
+    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"
+    @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
+        $event.preventDefault();
+        $event.stopImmediatePropagation();
+        hideContent();
+    }"
+    x-id="[`${this.id}-label`, `${this.id}-item`]"
+    {{ attrs }}
+>
+    {{ slot }}
+    {% if field %}
+        <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" :value="value"
+            x-data="{ previousValue: value }"
+            x-effect="
+            if (value !== previousValue) {
+                previousValue = value;
+                $nextTick(() => {
+                    htmx.trigger($el, 'change');
+                });
+            }
+            "
+            {{ attrs|cut:"disabled" }}
+        >
+            <template x-for="val in itemValues">
+                <option :value="val" :selected="val == value"></option>
+            </template>
+        </select>
+    {% endif %}
+</div>
+
+{% endwith %}
