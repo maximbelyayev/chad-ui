@@ -10,7 +10,7 @@
         init() {
             this.$nextTick(() => {
                 this.header = $el.querySelector('h3')
-                this.trigger = $el.querySelector('[data-slot=accordion-trigger]')
+                this.trigger = this.header.querySelector('[data-slot=accordion-trigger]') || this.header.querySelector('button') // ! for datagrid
                 this.content = $el.querySelector('[data-slot=accordion-content]')
                 Array.from([$el, this.header, this.trigger, this.content]).forEach(el => {
                     el.setAttribute('data-index', getIndex($el))

@@ -24,11 +24,17 @@
             $el.setAttribute('data-invalid', null);
         },
         renderErrors(e) {
-            this._input = this.$el.querySelector('input, select, textarea');
+            this._input = this.$el.querySelectorAll('input, select, textarea');
+            if (this._input.length !== 1) throw new Error(`[chad-ui] field (id: '${$el.id}') expects exactly one form control.`);
+            this._input = this._input[0]
             this._errorElt = this.findErrorElt();
-            if (!this._errorElt || (this._input && !this._input.value)) return;
-            this.clearErrors();
-            if (this.fieldErrors.length != 0) {
+            if (this._errorElt) this.clearErrors();
+            this.input = this._input.closest(`[data-slot=${this._input.tagName.toLowerCase()}]`)
+            if (!this.input) return;
+            const iData = Alpine.$data(this.input);
+            iData.unsetErrorStyle();
+            if (this.fieldErrors.length > 0 && this._input.value) {
+                
                 const eData = Alpine.$data(this._errorElt);
                 const errorLimit = Number.isInteger(Number(eData.errorLimit)) && Number(eData.errorLimit) > 0 ? Number(eData.errorLimit) : Infinity;
                 if (errorLimit !== 0) eData.show = true;
@@ -37,7 +43,10 @@
                     li.textContent = error;
                     this._errorElt.appendChild(li);
                 });
-                if (this.invalidStyling) this.$el.setAttribute('data-invalid', 'true');
+                if (this.invalidStyling) {
+                    this.$el.setAttribute('data-invalid', 'true');
+                    iData.setErrorStyle();
+                };
             }
         },
         init() {

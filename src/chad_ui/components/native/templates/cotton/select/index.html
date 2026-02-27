@@ -5,6 +5,7 @@
 
 <div data-slot="{{ component }}" 
     x-data="{
+        field: null,
         defaultValue: '{% if defaultValue %}{{ defaultValue }}{% elif field.value %}{{ field.value }}{% endif %}',
         selected: {},
         open: {{ defaultOpen|yesno:'true,false' }},
@@ -45,6 +46,7 @@
         initIndex() {
             if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
             this.initStore();
+            this.trigger = $el.querySelector(`[data-slot=${this.component}-trigger]`);
             this.$nextTick(() => {
                 this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
             })
@@ -52,6 +54,7 @@
         init() {
             this.initIndex();
             this.$nextTick(() => {
+                this.field = this.findField();
                 this.itemValues = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
                     .map(item => Alpine.$data(item).itemValue);
                 if (this.defaultValue) {
@@ -59,6 +62,16 @@
                     defaultValues.forEach(value => this.toggle(value));
                 }
             })
+        },
+        findField() {
+            const p = this.$el.closest('[data-slot=field]');
+            if (p.hasAttribute('x-data')) return p;
+        },
+        setErrorStyle() {
+            if (this.trigger) this.trigger.setAttribute('aria-invalid', 'true');
+        },
+        unsetErrorStyle() {
+            if (this.trigger) this.trigger.removeAttribute('aria-invalid');
         },
         toggleContent(event) {
             if (this.open) { this.trap = false; this.hideContent(); }
@@ -86,25 +99,23 @@
     :id="id"
     @{{ handle }}.window="toggleContent($event)"
     @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"
-    @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
-        $event.preventDefault();
-        $event.stopImmediatePropagation();
-        hideContent();
-    }"
     x-id="[`${this.id}-label`, `${this.id}-item`]"
 >
     {{ slot }}
     {% if field %}
         <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" :multiple="multiple ? '' : null" :value="multiple ? null : value"
-            x-data="{ prevSelected: selected }"
-            x-effect="
-            if (selected !== prevSelected) {
-                prevSelected = selected;
-                $nextTick(() => {
-                    htmx.trigger($el, 'change');
+            x-init="
+            $nextTick(() => {
+                $watch('selected', () => {
+                htmx.trigger($el, 'change');
                 });
-            }
+            });
             "
+            id="{{ field.id_for_label}}"
+            :value="value ? value : null"
+            :hx-target="field ? `#${field.id}` : null"
+            :hx-select="field ? `#${field.id}` : null"
+            hx-swap="outerMorph"
             {{ attrs|cut:"disabled" }}
         >
             <template x-for="val in itemValues">

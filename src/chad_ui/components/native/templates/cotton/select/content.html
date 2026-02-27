@@ -89,7 +89,8 @@
                     }
                 }"
                 x-show="open"
-                x-effect="handleAlignment(width)"
+                x-effect="handleAlignment(width);"
+                @htmx:before:init.window="if ($event.target.contains(anchor)) handleAlignment(anchor.offsetWidth);"
                 :data-open="open ? '' : null"
                 :data-closed="open ? null : ''"
                 @click.away="open = false;"
@@ -107,6 +108,11 @@
                     } else highlightedIndex--;
                     handleFocus(items[highlightedIndex]);
                 "
+                @keydown.escape.window="if (open && $event.target.contains(content)) {
+                    $event.preventDefault();
+                    $event.stopImmediatePropagation();
+                    hideContent();
+                }"
                 x-trap="open && trap"
                 x-transition:enter="transition-all ease-out duration-100"
                 x-transition:enter-start="opacity-0 scale-99 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
