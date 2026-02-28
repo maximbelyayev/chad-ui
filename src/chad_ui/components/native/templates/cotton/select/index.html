@@ -28,23 +28,9 @@
             if (global) return this.$store['chad-ui']
             return this.$store['chad-ui'][this.component];
         },
-        initAsChild(el) {
-            const c = el.firstElementChild;
-            if (!c || c.hasAttribute('x-data')) return false;
-            [...el.attributes].forEach(attr => {
-                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
-                if (attr.name === 'x-data') {
-                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
-                    return;
-                }
-                c.setAttribute(attr.name, attr.value);
-            });
-            c.classList.add(...el.classList);
-            el.replaceWith(c);
-            return true;
-        },
         initIndex() {
-            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+            this.field = this.findField();
+            if (!this.id) this.id = this.getStore()?.fields?.[`${this.field.id}`] || $id(`chad-ui_r_${this.component}`);
             this.initStore();
             this.trigger = $el.querySelector(`[data-slot=${this.component}-trigger]`);
             this.$nextTick(() => {
@@ -54,14 +40,18 @@
         init() {
             this.initIndex();
             this.$nextTick(() => {
-                this.field = this.findField();
+                //this.field = this.findField();
                 this.itemValues = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
                     .map(item => Alpine.$data(item).itemValue);
                 if (this.defaultValue) {
                     const defaultValues = this.defaultValue.split(',').map((value) => value.trim());
                     defaultValues.forEach(value => this.toggle(value));
                 }
-            })
+            });
+        },
+        destroy() {
+            this.getStore()['fields'] ??= {};
+            this.getStore()['fields'][this.field.id] ??= this.id;
         },
         findField() {
             const p = this.$el.closest('[data-slot=field]');
@@ -94,6 +84,14 @@
             const selectedItems = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
                 .filter(item => this.selected[Alpine.$data(item).itemValue]);
             this.selectedTexts = selectedItems.map(item => item.firstElementChild?.textContent?.trim()).filter(Boolean);
+            const select = $el.querySelector('select');
+            if (select && this.field) {
+                const fieldId = this.field.id;
+                select.setAttribute('hx-target', `#${fieldId}`);
+                select.setAttribute('hx-select', `#${fieldId}`);
+                htmx.process(select);
+                //htmx.trigger(select, 'change');  // manually fire after everything is ready
+            }
         },
     }"
     :id="id"
@@ -103,23 +101,38 @@
 >
     {{ slot }}
     {% if field %}
-        <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" :multiple="multiple ? '' : null" :value="multiple ? null : value"
-            x-init="
-            $nextTick(() => {
-                $watch('selected', () => {
-                htmx.trigger($el, 'change');
-                });
-            });
-            "
-            id="{{ field.id_for_label}}"
-            :value="value ? value : null"
-            :hx-target="field ? `#${field.id}` : null"
-            :hx-select="field ? `#${field.id}` : null"
-            hx-swap="outerMorph"
-            {{ attrs|cut:"disabled" }}
+        <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" 
+                :multiple="multiple ? '' : null" 
+                x-data="{
+                    init() {
+                        $watch('selected', (selected, oldSelected) => {
+                            if (getStore()[`${id}`].formSubmit) {
+                                getStore()[`${id}`].formSubmit = false;
+                                Alpine.$data(field).renderErrors();
+                                return;
+                            };
+                            if (Object.keys(selected).length > 0) {
+                                htmx.trigger($el, 'change');
+                            }
+                        });
+                    }
+                }"
+                id="{{ field.id_for_label}}"
+                hx-swap="outerMorph"
+                required
+                {{ attrs|cut:"disabled"|cut:"hx-trigger" }}
+                @htmx:before:swap.window="
+                    if ($event.detail?.ctx?.sourceEvent instanceof SubmitEvent) {
+                        getStore()[`${id}`].formSubmit = true;
+                        formSubmit = true;
+                    }
+                "
         >
             <template x-for="val in itemValues">
-                <option :value="val" :selected="selected[val]"></option>
+                <option 
+                    :value="val"
+                    :selected="selected && selected[val] === true"
+                ></option>
             </template>
         </select>
     {% endif %}
