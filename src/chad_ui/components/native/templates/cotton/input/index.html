@@ -37,8 +37,8 @@
             }
         },
         init() {
+            this.field = this.findField();
             this.$nextTick(() => {
-                this.field = this.findField();
                 this.resetHtmxForValidation(validationMode);
             });
         }

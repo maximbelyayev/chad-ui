@@ -12,6 +12,23 @@
         fieldId: '{{ field.id_for_label}}',
         fieldLabel: '{{ field.label }}',
         fieldErrors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        initStore() {
+            this.$store['chad-ui'] ??= {};
+            this.$store['chad-ui'][this.component] ??= {};
+            this.$store['chad-ui'][this.component][`${$el.id}`] ??= {};
+        },
+        getStore(global = false) {
+            if (global) return this.$store['chad-ui']
+            return this.$store['chad-ui'][this.component];
+        },
+        findControl() {
+            let control = this.$el.querySelectorAll('input, select');
+            if (control.length !== 1) throw new Error(`[chad-ui] field (id: '${$el.id}') expects exactly one form control.`);
+            this._control = control[0];
+            control = control[0].closest(`[data-slot=${control[0].tagName.toLowerCase()}]`)
+            if (!control || !control.id) throw new Error(`[chad-ui] field (id: '${$el.id}') expects a form control with the correct 'data-slot' attribute.`);
+            this.control = control
+        },
         findErrorElt() {
             const ul = this.$el.querySelector('[data-slot=field-error] ul')
             if (ul) return ul;
@@ -23,18 +40,12 @@
             this._errorElt.innerHTML = '';
             $el.setAttribute('data-invalid', null);
         },
-        renderErrors(e) {
-            this._input = this.$el.querySelectorAll('input, select, textarea');
-            if (this._input.length !== 1) throw new Error(`[chad-ui] field (id: '${$el.id}') expects exactly one form control.`);
-            this._input = this._input[0]
+        renderErrors() {
             this._errorElt = this.findErrorElt();
             if (this._errorElt) this.clearErrors();
-            this.input = this._input.closest(`[data-slot=${this._input.tagName.toLowerCase()}]`)
-            if (!this.input) return;
-            const iData = Alpine.$data(this.input);
-            iData.unsetErrorStyle();
-            if (this.fieldErrors.length > 0 && this._input.value) {
-                
+            const cData = Alpine.$data(this.control);
+            cData.unsetErrorStyle();
+            if (this.fieldErrors.length > 0 && this._control.value) {
                 const eData = Alpine.$data(this._errorElt);
                 const errorLimit = Number.isInteger(Number(eData.errorLimit)) && Number(eData.errorLimit) > 0 ? Number(eData.errorLimit) : Infinity;
                 if (errorLimit !== 0) eData.show = true;
@@ -45,19 +56,30 @@
                 });
                 if (this.invalidStyling) {
                     this.$el.setAttribute('data-invalid', 'true');
-                    iData.setErrorStyle();
+                    cData.setErrorStyle();
                 };
             }
         },
+        checkFormSubmit(e) {
+            const ctx = e.detail?.ctx;
+            if (ctx?.sourceEvent instanceof SubmitEvent && ctx.sourceElement instanceof HTMLFormElement) {
+                this.getStore()[`${$el.id}`].formSubmit = true;
+            } else this.getStore()[`${$el.id}`].formSubmit = false;
+        },
         init() {
-            this._renderHandler = (e) => this.renderErrors(e);
-            this.$el.addEventListener('htmx:after:swap', this._renderHandler);
-            this.$nextTick(() => this.renderErrors());
+            this.initStore();
+            this._renderHandler = () => this.renderErrors();
+            $el.addEventListener('htmx:after:swap', this._renderHandler);
+            this.$nextTick(() => {
+                this.findControl();
+                this.renderErrors();
+            });
         },
         destroy() {
-            this.$el.removeEventListener('htmx:after:swap', this._renderHandler);
+            $el.removeEventListener('htmx:after:swap', this._renderHandler);
         }
     }"
+    @htmx:before:swap.window="checkFormSubmit($event);"
     id="{% if attrs.id %}{{ attrs.id }}{% else %}{{ field.id_for_label}}-field{% endif %}"
     role="group"
     data-orientation="{{ orientation|lower }}"
