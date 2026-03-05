@@ -1,0 +1,27 @@
+<c-vars variant="default" asChild />
+
+<span data-slot="badge"
+    x-data="{
+        asChild: {{ asChild|yesno:'true,false' }},
+        initAsChild(el) {
+            const c = el.firstElementChild;
+            if (!c || c.hasAttribute('x-data')) return false;
+            [...el.attributes].forEach(attr => {
+                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                c.setAttribute(attr.name, attr.value);
+            });
+            c.classList.add(...el.classList);
+            el.replaceWith(c);
+            return true;
+        },
+        init() { if (this.asChild) this.initAsChild(this.$el); }
+    }"
+    data-variant="{{ variant|lower }}"
+    class="h-5 gap-1 rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge{% if variant == 'secondary' %} bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80{% elif variant == 'destructive' %} bg-destructive/10 text-destructive dark:bg-destructive/20{% elif variant == 'outline' %} border-border text-foreground [a]:hover:bg-muted{% elif variant == 'ghost' %} hover:bg-muted hover:text-muted-foreground{% elif variant == 'link' %} text-primary underline-offset-4 hover:underline{% else %} bg-primary text-primary-foreground [a]:hover:bg-primary/80{% endif %}{% if class %} {{ class }}{% endif %}"
+>
+    {{ slot }}
+</span>
