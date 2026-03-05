@@ -27,13 +27,12 @@
         init() {
             if (this.initTrigger()) return;
         },
-        handleTrigger(event) {
+        handleTrigger() {
             if (this.disabled) return;
             const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
             trigger.blur();
-            const content = event.target.closest(`[data-slot=${this.component}-content]`);
             if (content) { content.removeAttribute('aria-hidden'); }
-            toggleContent(event);
+            toggleContent();
         },
         handleResize(size) {
             if (!content || !size.width || !size.height) return;
@@ -42,7 +41,7 @@
     }"
     x-resize="handleResize({ width: $width, height: $height});"
     :id="id"
-    @click="handleTrigger($event)"
+    @click="handleTrigger()"
     type="button"
     tabindex="0"
     aria-haspopup="listbox"

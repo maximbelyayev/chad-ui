@@ -1,6 +1,6 @@
 {% with component='select' %}
 
-<c-vars side="bottom" sideOffset="4" align="center" alignOffset="100" alignItemWithTrigger="false" />
+<c-vars side="bottom" sideOffset="4" align="center" alignOffset="0" />
 
 <template x-teleport="body">
     <div x-data="{ 
@@ -8,9 +8,7 @@
             sideOffset: {{ sideOffset }},
             align: '{{ align }}',
             alignOffset: {{ alignOffset }},
-            alignItemWithTrigger: '{{ alignItemWithTrigger|lower }}',
             width: null,
-            alignment: '',
             items: [],
             highlightedIndex: -1,
             anchor: null,
@@ -24,13 +22,17 @@
                     this.items = this.indexItems();
                 });
                 this.$watch('open', open => {
-                    if (open) { htmx.process($el); this.highlightedIndex = -1; }
-                    else this.items.forEach(i => this.removeFocus(i))
+                    if (open) { 
+                        htmx.process($el);
+                        const lastValue = Object.keys(selected).findLast(value => selected[value]);
+                        if (!lastValue) return;
+                        this.highlightedIndex = values.indexOf(lastValue);
+                        this.handleFocus(this.items[this.highlightedIndex]);
+                    }
+                    else this.$nextTick(() => this.anchor?.focus());
                 })
             },
-            indexItems() {
-                return Array.from($el.querySelectorAll(`[data-slot=${component}-item]`))
-            },
+            indexItems: () => Array.from($el.querySelectorAll(`[data-slot=${component}-item]`)),
             handleFocus(el) {
                 const index = this.items.indexOf(el);
                 if (index > -1) this.highlightedIndex = index;
@@ -45,7 +47,6 @@
                 el.setAttribute('tabindex', -1);
                 el.removeAttribute('data-highlighted')
             },
-            
         }"
         :id="`${id}-portal`"
         x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
@@ -54,15 +55,9 @@
     >
         <div
             x-cloak
-            x-show="modal && open"
-            x-transition:enter="transition-opacity ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition-opacity ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
+            x-show="open && modal"
             aria-hidden="true"
-            class="fixed inset-0 duration-100 pointer-events-auto isolate bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+            class="fixed inset-0 duration-100 pointer-events-auto isolate"
         ></div>
         <div
             x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
@@ -79,13 +74,15 @@
                         let translation;
                         if (['top', 'bottom'].includes(this.side)) {
                             translation = `${this.alignOffset}px, 0`
+                            $el.style.transform = `translate(${translation.trim()})`
                             $el.style.width = `${width}px`;
+                            
                         }
                         else {
                             translation = `0, ${this.alignOffset}px`
+                            $el.style.transform = `translate(${translation.trim()})`
                             $el.style.width = '100%'
                         }
-                        this.translation = translation
                     }
                 }"
                 x-show="open"
@@ -93,7 +90,7 @@
                 @htmx:before:init.window="if ($event.target.contains(anchor)) handleAlignment(anchor.offsetWidth);"
                 :data-open="open ? '' : null"
                 :data-closed="open ? null : ''"
-                @click.away="open = false;"
+                @click.away="hideContent()"
                 @keydown.down.prevent="if (items.length === 0) return;
                     if (highlightedIndex === -1) highlightedIndex = 0;
                     else if (highlightedIndex === items.length - 1) {
@@ -108,12 +105,12 @@
                     } else highlightedIndex--;
                     handleFocus(items[highlightedIndex]);
                 "
-                @keydown.escape.window="if (open && $event.target.contains(content)) {
+                @keydown.escape.window="if (open) {
                     $event.preventDefault();
                     $event.stopImmediatePropagation();
                     hideContent();
                 }"
-                x-trap="open && trap"
+                x-trap="open"
                 x-transition:enter="transition-all ease-out duration-100"
                 x-transition:enter-start="opacity-0 scale-99 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
                 x-transition:enter-end="opacity-100 scale-100"
