@@ -1,0 +1,22 @@
+[project]
+name = "docs"
+version = "0.1.0"
+description = "docs for chad-ui"
+authors = [
+    {name = "Maxim Belyayev",email = "maximbelyayev@gmail.com"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "django-vite (>=3.1.0,<4.0.0)",
+    "django-environ (>=0.13.0,<0.14.0)",
+    "whitenoise (>=6.12.0,<7.0.0)",
+    "django-cotton (>=2.6.1,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"

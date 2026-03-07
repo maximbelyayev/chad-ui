@@ -1,0 +1,23 @@
+{% load static %}
+{% load django_vite %}
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" href="{% static 'img/favicon-3.png' %}" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {% vite_hmr_client %}
+        {% vite_asset 'js/main.js' %}
+        <title>chad-ui</title>
+    </head>
+    <body class="group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)] theme-default">
+        <div data-slot="layout" class="flex relative z-10 flex-col min-h-svh bg-background">
+            {% include 'docs/header.html' %}
+            <main class="flex flex-col flex-1">
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
+    </body>
+</html>
