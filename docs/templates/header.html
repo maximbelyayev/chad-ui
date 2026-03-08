@@ -3,8 +3,8 @@
 <header class="sticky top-0 z-50 w-full bg-background">
     <div class="px-6 container-wrapper 3xl:fixed:px-0">
         <div class="flex h-14 items-center **:data-[slot=separator]:h-4! 3xl:fixed:container">
-            <c-button variant="ghost" size="icon" class="text-django-primary hover:bg-django-secondary!" asChild>
-                <a href="#">
+            <c-button variant="ghost" size="icon" class="text-django-primary dark:text-django-secondary dark:hover:bg-django-primary! hover:bg-django-secondary!" asChild>
+                <a href="{% url 'home' %}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class="size-5">
                         <rect width="256" height="256" fill="none"></rect>
                         <line x1="208" y1="128" x2="128" y2="208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"></line>
@@ -26,11 +26,11 @@
             <div class="flex gap-2 items-center ml-auto md:flex-1 md:justify-end">
                 <c-button variant="ghost" size="icon" asChild>
                     <a target="_blank" rel="noreferrer" href="https://github.com/maximbelyayev/chad-ui">
-                        {% include 'svg/GitHub_Invertocat_Black.svg' %}
+                        {% include 'svg/github.html' %}
                     </a>
                 </c-button>
                 <c-separator orientation="vertical" class="data-[orientation=vertical]:self-auto!" />
-                <c-button variant="ghost" size="icon">
+                <c-button variant="ghost" size="icon" id="theme-toggle">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
                         class="size-4.5"

@@ -1,4 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="border-grid">
+    <div class="container-wrapper">
+        <div class="container flex flex-col gap-2 items-center py-8 px-6 text-center md:py-16 lg:py-20 xl:gap-4">
+            <c-badge variant="secondary">chad/ui: Cotton | HTMX | Alpine | Django components</c-badge>
+            <h1 class="text-3xl font-semibold tracking-tight lg:font-semibold xl:text-5xl xl:tracking-tighter leading-tighter text-balance text-primary lg:leading-[1.1]">
+                The Foundation for your Django Design System
+            </h1>
+            <p class="max-w-4xl text-base sm:text-lg text-balance text-foreground">
+                A set of beautifully designed components that you can customize, extend, and build on. Start here then make it your own. Open Source. Open Code.
+            </p>
+            <div class="flex w-full items-center justify-center gap-2 pt-2 **:data-[slot=button]:shadow-none">
+                <c-button size="sm" class="h-[31px]" asChild>
+                    <a href="{% url 'docs:installation' %}">
+                        Get Started
+                    </a>
+                </c-button>
+                <c-button variant="ghost" size="sm" asChild>
+                    <a href="{% url 'docs:components' %}">
+                        View Components
+                    </a>
+                </c-button>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
