@@ -14,20 +14,34 @@
             </c-button>
             <nav class="hidden gap-0 items-center lg:flex">
                 <c-button variant="ghost" size="sm" asChild>
-                    <a href="#">Docs</a>
+                    <a href="{% url 'docs:installation' %}">Docs</a>
                 </c-button>
                 <c-button variant="ghost" size="sm" asChild>
-                    <a href="#">Components</a>
+                    <a href="{% url 'docs:components' %}">Components</a>
                 </c-button>
                 <c-button variant="ghost" size="sm" asChild>
-                    <a href="#">Blocks</a>
+                    <a href="{% url 'docs:blocks' %}">Blocks</a>
                 </c-button>
             </nav>
             <div class="flex gap-2 items-center ml-auto md:flex-1 md:justify-end">
                 <c-button variant="ghost" size="icon" asChild>
                     <a target="_blank" rel="noreferrer" href="https://github.com/maximbelyayev/chad-ui">
-                        {% include 'docs/svg/GitHub_Invertocat_Black.svg' %}
+                        {% include 'svg/GitHub_Invertocat_Black.svg' %}
                     </a>
+                </c-button>
+                <c-separator orientation="vertical" class="data-[orientation=vertical]:self-auto!" />
+                <c-button variant="ghost" size="icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                        class="size-4.5"
+                    >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                        <path d="M12 3l0 18"></path>
+                        <path d="M12 9l4.65 -4.65"></path>
+                        <path d="M12 14.3l7.37 -7.37"></path>
+                        <path d="M12 19.6l8.85 -8.85"></path>
+                    </svg>
                 </c-button>
             </div>
         </div>

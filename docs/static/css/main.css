@@ -119,6 +119,10 @@ html[data-theme="dark"] {
     --color-django-secondary: var(--django-secondary);
 }
 
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
 [x-cloak] { display: none !important; }
 
 .htmx-indicator {
