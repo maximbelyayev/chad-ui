@@ -1,7 +1,77 @@
-<div 
-    data-slot="sidebar-wrapper" 
-    style="--sidebar-width:calc(var(--spacing) * 72);--sidebar-width-icon:3rem" 
-    class="group/sidebar-wrapper flex w-full has-data-[variant=inset]:bg-sidebar min-h-min flex-1 items-start px-0 [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--top-spacing:calc(var(--spacing)*4)] 3xl:fixed:container 3xl:fixed:px-3"
+<c-vars cookieName="sidebar_state" cookieMaxAge="604800" mobileBreakpoint="" width="16rem" widthMobile="18rem" widthIcon="3rem" keyboardShortcut="b" defaultOpen />
+
+<div data-slot="sidebar-wrapper" 
+    x-data="{
+        mobileBreakpoint: '{{ mobileBreakpoint }}',
+        cookieName: '{{ cookieName }}',
+        cookieMaxAge: '{{ cookieMaxAge }}',
+        width: '{{ width }}',
+        widthMobile: '{{ widthMobile }}',
+        widthIcon: '{{ widthIcon }}',
+        keyboardShortcut: '{{ keyboardShortcut }}',
+        state: null,
+        open: {{ defaultOpen|yesno:'true,false' }},
+        openMobile: {{ defaultOpen|yesno:'true,false' }},
+        isMobile: false,
+        initStore() {
+            Alpine.store('chad-ui', { ...$store['chad-ui'], });
+            Alpine.store('isMobile',  window.innerWidth < this._mobileBreakpoint);
+        },
+        getCookie() {
+            return document.cookie.match(`${this.cookieName}=([a-z]+)`)?.[1]
+        },
+        setCookie(open) {
+            if (!Number(this.cookieMaxAge)) return;
+            document.cookie = `${this.cookieName}=${open}; path=/; max-age=${this.cookieMaxAge}`
+        },
+        setOpen(bool) {
+            this.open = bool;
+            this.setCookie(this.open);
+        },
+        setOpenMobile(bool) {
+            this.openMobile = bool;
+        },
+        setIsMobile(width) {
+            this.isMobile = width < this._mobileBreakpoint;
+            $store.isMobile = this.isMobile;
+        },
+        toggleSidebar() {
+            this.isMobile ? this.setOpenMobile(!this.openMobile) : this.setOpen(!this.open);
+        },
+        handleKeydown(e) {
+            if (e.key === this.keyboardShortcut && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault()
+                this.toggleSidebar();
+            }
+        },
+        getTailwindBreakpoint(breakpoint = 'md') {
+            const fallbacks = { sm: 640, md: 768, lg: 1024, xl: 1280, '2xl': 1536 };
+            if (!(breakpoint in fallbacks)) return;
+            const style = getComputedStyle(document.documentElement);
+            const value = style.getPropertyValue(`--breakpoint-${breakpoint}`).trim();
+            const n = parseFloat(value), r = parseFloat(style.fontSize);
+            if (value.endsWith('px'))  return n;
+            if (value.endsWith('vw'))  return n / 100 * window.innerWidth;
+            if (value.endsWith('vh'))  return n / 100 * window.innerHeight;
+            if (value.endsWith('em') || value.endsWith('rem')) return n * r;
+            return fallbacks[breakpoint];
+        },
+        init() {
+            this._mobileBreakpoint = Number(this.mobileBreakpoint) || this.getTailwindBreakpoint(this.mobileBreakpoint) || this._mobileBreakpoint || 768;
+            this.initStore();
+            const cookie = this.getCookie();
+            if (cookie) this.setOpen(cookie === 'true');
+            this.state = this.open ? 'expanded' : 'collapsed';
+            this.$watch('open', (open) => {
+                open ? this.state = 'expanded' : this.state = 'collapsed';
+            });
+        },
+    }"
+    x-resize.document="setIsMobile($width)"
+    @keydown.window="handleKeydown($event)"
+    class="group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar{% if class %} {{ class }}{% endif %}"
+    :style="`--sidebar-width: ${width}; --sidebar-width-icon: ${widthIcon}`"
+    {{ attrs }}
 >
     {{ slot }}
 </div>

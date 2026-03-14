@@ -1,0 +1,34 @@
+<c-vars mobileBreakpoint="" />
+
+<div x-data="{
+        mobileBreakpoint: '{{ mobileBreakpoint }}',
+        initStore() {
+            Alpine.store('chad-ui', { ...$store['chad-ui'] });
+            Alpine.store('isMobile',  window.innerWidth < this._mobileBreakpoint);
+        },
+        setIsMobile(width) {
+            $store.isMobile = width < this._mobileBreakpoint;
+        },
+        getTailwindBreakpoint(breakpoint = 'md') {
+            const fallbacks = { sm: 640, md: 768, lg: 1024, xl: 1280, '2xl': 1536 };
+            if (!(breakpoint in fallbacks)) return;
+            const style = getComputedStyle(document.documentElement);
+            const value = style.getPropertyValue(`--breakpoint-${breakpoint}`).trim();
+            const n = parseFloat(value), r = parseFloat(style.fontSize);
+            if (value.endsWith('px'))  return n;
+            if (value.endsWith('vw'))  return n / 100 * window.innerWidth;
+            if (value.endsWith('vh'))  return n / 100 * window.innerHeight;
+            if (value.endsWith('em') || value.endsWith('rem')) return n * r;
+            return fallbacks[breakpoint];
+        },
+        init() {
+            this._mobileBreakpoint = Number(this.mobileBreakpoint) || this.getTailwindBreakpoint(this.mobileBreakpoint) || 768;
+            this.initStore();
+        },
+    }"
+    x-resize.document="setIsMobile($width)"
+    data-slot="layout"
+    class="relative z-10 min-h-svh bg-background{% if class %} {{ class }}{% endif %}"
+>
+    {{ slot }}
+</div>
