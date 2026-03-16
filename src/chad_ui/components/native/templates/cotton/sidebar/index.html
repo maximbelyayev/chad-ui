@@ -1,39 +1,72 @@
-{% with component='sidebar' %}
-
 <c-vars side="left" variant="sidebar" collapsible="none" />
 
 {% if collapsible == 'none' %}
 <div
     data-slot="sidebar"
     class="flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
 >
     {{ slot }}
 </div>
 {% else %}
-<div 
-    data-slot="sidebar"
-    class="hidden md:block group peer text-sidebar-foreground{% if class %} {{ class }}{% endif %}"
+<template x-if="isMobile"
+    x-data="{
+        side: '{{ side }}',
+        variant: '{{ variant }}',
+        collapsible: '{{ collapsible }}',
+    }"
 >
-    <div
-        data-slot="sidebar-gap"
-        :class="variant === 'floating' || variant === 'inset' ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]' : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)'"
-        class="relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180"
-    />
-    <div
-        data-slot="sidebar-container"
+    <c-sheet>
+        <c-sheet.content
+            data-sidebar="sidebar"
+            data-slot="sidebar"
+            data-mobile="true"
+            class="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            :style="`--sidebar-width: ${widthMobile};"
+            side="side"
+        >
+            <c-sheet.header class="sr-only">
+                <c-sheet.title>Sidebar</c-sheet.title>
+                <c-sheet.description>Displays the mobile sidebar.</c-sheet.description>
+            </c-sheet.header>
+            <div className="flex flex-col w-full h-full">{{ slot }}</div>
+        </c-sheet.content>
+    </c-sheet>
+</template>
+<template x-if="!isMobile"
+    x-data="{
+        side: '{{ side }}',
+        variant: '{{ variant }}',
+        collapsible: '{{ collapsible }}',
+    }"
+>
+    <div data-slot="sidebar"
+        :data-state="state"
+        :data-collapsible="state === 'collapsed' ? collapsible : ''"
+        :data-variant="variant"
         :data-side="side"
-        :class="variant === 'floating' || variant === 'inset' ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]' : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l'"
-        class="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex"
+        class="hidden md:block group peer text-sidebar-foreground{% if class %} {{ class }}{% endif %}"
+        {{ attrs }}
     >
         <div
-            data-sidebar="sidebar"
-            data-slot="sidebar-inner"
-            class="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+            data-slot="sidebar-gap"
+            :class="variant === 'floating' || variant === 'inset' ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]' : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)'"
+            class="relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180"
+        />
+        <div
+            data-slot="sidebar-container"
+            :data-side="side"
+            :class="variant === 'floating' || variant === 'inset' ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]' : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l'"
+            class="fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex"
         >
-            {{ slot }}
+            <div
+                data-sidebar="sidebar"
+                data-slot="sidebar-inner"
+                class="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+            >
+                {{ slot }}
+            </div>
         </div>
     </div>
-</div>
+</template>
 {% endif %}
-
-{% endwith %}
