@@ -18,11 +18,11 @@
         component: '{{ component }}',
         id: '{{ attrs.id }}',
         initStore() {
-            this.$store['chad-ui'] ??= {};
+            Alpine.store('chad-ui', { ...$store['chad-ui'] })
             this.$store['chad-ui'][this.component] ??= {};
             this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
         },
-        getStore(global = true) {
+        getStore(global = false) {
             if (global) return this.$store['chad-ui']
             return this.$store['chad-ui'][this.component];
         },

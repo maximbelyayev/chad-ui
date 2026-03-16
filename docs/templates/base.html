@@ -13,12 +13,12 @@
         <title>{% block head_title %}The Foundation for your Django Design System{% endblock %} - chad/ui</title>
     </head>
     <body class="group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)] theme-default">
-        <div data-slot="layout" class="flex relative z-10 flex-col min-h-svh bg-background">
+        <c-layout mobileBreakpoint="lg" class="flex flex-col">
             {% include 'header.html' %}
             <main class="flex flex-col flex-1">
                 {% block content %}
                 {% endblock %}
             </main>
-        </div>
+        </c-layout>
     </body>
 </html>

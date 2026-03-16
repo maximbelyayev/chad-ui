@@ -3,7 +3,50 @@
 <header class="sticky top-0 z-50 w-full bg-background">
     <div class="px-6 container-wrapper 3xl:fixed:px-0">
         <div class="flex h-14 items-center **:data-[slot=separator]:h-4! 3xl:fixed:container">
-            <c-button variant="ghost" size="icon" class="text-django-primary dark:text-django-secondary dark:hover:bg-django-primary! hover:bg-django-secondary!" asChild>
+            <c-popover>
+                <c-popover.trigger asChild x-show="$store.isMobile" >
+                    <c-button variant="ghost" class="hover:bg-transparent">
+                        <div class="flex relative justify-center items-center w-4 h-8">
+                            <div class="relative size-4">
+                                <span class="block absolute left-0 w-4 h-0.5 transition-all duration-100 bg-foreground" :class="open ? 'top-[0.4rem] -rotate-45' : 'top-1'"></span>
+                                <span class="block absolute left-0 w-4 h-0.5 transition-all duration-100 bg-foreground" :class="open ? 'top-[0.4rem] rotate-45' : 'top-2.5'"></span>
+                            </div>
+                            <span class="sr-only">Toggle Menu</span>
+                        </div>
+                        <span class="flex items-center h-8 text-lg font-medium leading-none">Menu</span>
+                    </c-button>
+                </c-popover.trigger>
+                <c-popover.content side="bottom" x-show="open && $store.isMobile" class="ring-0! min-h-dvh w-dvw bg-background/90! backdrop-blur!" alignOffset="-5">
+                    <div class="flex overflow-auto flex-col gap-12 py-6 px-6" >
+                        <div class="flex flex-col gap-4">
+                            <div class="text-sm font-medium text-muted-foreground">Menu</div>
+                            <div class="flex flex-col gap-3">
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'home' %}">Home</a>
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:installation' %}">Docs</a>
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:components' %}">Components</a>
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:blocks' %}">Blocks</a>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="text-sm font-medium text-muted-foreground">Sections</div>
+                            <div class="flex flex-col gap-3">
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:intro' %}">Introduction</a>
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:components' %}">Components</a>
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:installation' %}">Installation</a>
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="#">Theming</a>
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="#">CLI</a>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="text-sm font-medium text-muted-foreground">Components</div>
+                            <div class="flex flex-col gap-3">
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:accordion' %}">Accordion</a>
+                            </div>
+                        </div>
+                    </div>
+                </c-popover.content>
+            </c-popover>
+            <c-button x-show="!$store.isMobile" variant="ghost" size="icon" class="text-django-primary dark:text-django-secondary dark:hover:bg-django-primary! hover:bg-django-secondary!" asChild>
                 <a href="{% url 'home' %}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class="size-5">
                         <rect width="256" height="256" fill="none"></rect>
