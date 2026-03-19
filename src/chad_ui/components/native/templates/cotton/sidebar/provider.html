@@ -10,12 +10,28 @@
         widthIcon: '{{ widthIcon }}',
         keyboardShortcut: '{{ keyboardShortcut }}',
         state: null,
+        settledState: null,
         open: {{ defaultOpen|yesno:'true,false' }},
         openMobile: {{ defaultOpen|yesno:'true,false' }},
         isMobile: false,
         initStore() {
             Alpine.store('chad-ui', { ...$store['chad-ui'], });
             Alpine.store('isMobile',  window.innerWidth < this._mobileBreakpoint);
+        },
+        initAsChild(el) {
+            const c = el.firstElementChild;
+            if (!c || c.hasAttribute('x-data')) return false;
+            [...el.attributes].forEach(attr => {
+                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                c.setAttribute(attr.name, attr.value);
+            });
+            c.classList.add(...el.classList);
+            el.replaceWith(c);
+            return true;
         },
         getCookie() {
             return document.cookie.match(`${this.cookieName}=([a-z]+)`)?.[1]
@@ -62,6 +78,7 @@
             const cookie = this.getCookie();
             if (cookie) this.setOpen(cookie === 'true');
             this.state = this.open ? 'expanded' : 'collapsed';
+            this.settledState = this.open ? 'expanded' : 'collapsed';
             this.$watch('open', (open) => {
                 open ? this.state = 'expanded' : this.state = 'collapsed';
             });

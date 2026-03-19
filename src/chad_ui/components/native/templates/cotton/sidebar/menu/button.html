@@ -1,11 +1,92 @@
-<a 
+{% with component='sidebar' %}
+
+<c-vars tooltip="" size="default" variant="default" isActive asChild />
+
+{% if tooltip %}
+<c-tooltip>
+    <c-tooltip.trigger class="w-full" ::disabled="settledState !== 'collapsed' ? '' : null" asChild>
+        <button
+            x-data="{
+                isActive: {{ isActive|yesno:'true,false' }},
+                asChild: {{ asChild|yesno:'true,false' }},
+                component: '{{ component }}',
+                findProvider() {
+                    return $el.closest(`[x-data][data-slot='${this.component}-wrapper']`);
+                },
+                initChild() {
+                    const r = this.findProvider();
+                    if (this.asChild && r) {
+                        const rData = Alpine.$data(r);
+                        if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
+                    }
+                    return false;
+                },
+                init() {
+                    if (this.initChild()) return;
+                },
+            }"
+            data-slot="sidebar-menu-button" 
+            data-sidebar="menu-button" 
+            data-size="{{ size }}" 
+            :data-active="isActive ? '' : null" 
+            class="peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate
+                {% if size == 'default' %}h-8 text-sm group-data-[collapsible=icon]:p-2!
+                {% elif size == 'sm' %}h-7 text-xs group-data-[collapsible=icon]:p-2!
+                {% elif size == 'lg' %}h-12 text-sm group-data-[collapsible=icon]:p-0!
+                {% endif %}
+                {% if variant == 'default' %}
+                {% elif variant == 'outline' %}bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]
+                {% endif %}
+                {% if class %}{{ class }}{% endif %}
+            "
+            {{ attrs }}
+        >   
+            {{ slot }}
+        </button>
+    </c-tooltip.trigger>
+    <c-tooltip.content side="right" align="center" ::hidden="settledState !== 'collapsed' || $store.isMobile">
+        {{ tooltip }}
+    </c-tooltip.content>
+</c-tooltip>
+{% else %}
+<button
+    x-data="{
+        isActive: {{ isActive|yesno:'true,false' }},
+        asChild: {{ asChild|yesno:'true,false' }},
+        component: '{{ component }}',
+        findProvider() {
+            return $el.closest(`[x-data][data-slot='${this.component}-wrapper']`);
+        },
+        initChild() {
+            const r = this.findProvider();
+            if (this.asChild && r) {
+                const rData = Alpine.$data(r);
+                if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
+            }
+            return false;
+        },
+        init() {
+            if (this.initChild()) return;
+        },
+    }"
     data-slot="sidebar-menu-button" 
     data-sidebar="menu-button" 
-    data-size="default" 
-    data-active="false" 
-    class="peer/menu-button flex items-center gap-2 rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&amp;&gt;span:last-child]:truncate [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative h-[30px] w-fit overflow-visible border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48"
+    data-size="{{ size }}" 
+    :data-active="isActive ? '' : null" 
+    class="peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate
+        {% if size == 'default' %}h-8 text-sm group-data-[collapsible=icon]:p-2!
+        {% elif size == 'sm' %}h-7 text-xs group-data-[collapsible=icon]:p-2!
+        {% elif size == 'lg' %}h-12 text-sm group-data-[collapsible=icon]:p-0!
+        {% endif %}
+        {% if variant == 'default' %}
+        {% elif variant == 'outline' %}bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]
+        {% endif %}
+        {% if class %}{{ class }}{% endif %}
+    "
     {{ attrs }}
->
-    <span class="flex absolute inset-0 bg-transparent w-(--sidebar-menu-width)"></span>
+>   
     {{ slot }}
-</a>
+</button>
+{% endif %}
+
+{% endwith %}

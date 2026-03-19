@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="flex flex-col flex-1 px-2 container-wrapper">
-    <c-sidebar.provider class="min-h-min! flex-1 items-start px-0 [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--top-spacing:calc(var(--spacing)*4)] 3xl:fixed:container 3xl:fixed:px-3" style="--sidebar-width:calc(var(--spacing) * 72); --sidebar-width-icon:3rem">
+    <c-sidebar.provider width="18rem" widthIcon="3rem" class="min-h-min! flex-1 items-start px-0 [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--top-spacing:calc(var(--spacing)*4)] 3xl:fixed:container 3xl:fixed:px-3" style="--sidebar-width:calc(var(--spacing) * 72); --sidebar-width-icon:3rem">
         {% include 'docs/sidebar.html' %}
         <div class="w-full h-full">
             <div data-slot="docs" class="flex items-stretch pb-8 xl:w-full scroll-mt-24 text-[1.05rem] sm:text-[15px]">
@@ -12,6 +12,16 @@
                         {% block content_docs %}
                         {% endblock content_docs %}
                     </div>
+                    <c-tooltip>
+                        <c-tooltip.trigger asChild>
+                            <c-button variant="outline">Hover</c-button>
+                        </c-tooltip.trigger>
+                        <c-tooltip.content>
+                            <div class="flex flex-row">
+                                <p>Add to library</p>
+                            </div>
+                        </c-tooltip.content>
+                    </c-tooltip>
                 </div>
             </div>
         </div>

@@ -19,3 +19,7 @@ def installation(request):
 def blocks(request):
     template_name = 'docs/blocks.html'
     return render(request, template_name)
+
+def accordion(request):
+    template_name = 'docs/components/accordion.html'
+    return render(request, template_name)

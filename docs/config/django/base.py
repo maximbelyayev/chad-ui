@@ -38,6 +38,7 @@ LOCAL_APPS = [
 THIRD_PARTY_APPS = [
     'django_vite',
     'django_cotton',
+    'heroicons',
 ]
 
 INSTALLED_APPS = [
@@ -77,7 +78,11 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'docs.context_processors.global_context',
             ],
+            'builtins': [
+                'heroicons.templatetags.heroicons',
+            ]
         },
     },
 ]

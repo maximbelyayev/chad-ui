@@ -1,7 +1,32 @@
-<div 
+{% with component='sidebar' %}
+
+<c-vars asChild />
+
+<div
+    x-data="{
+        asChild: {{ asChild|yesno:'true,false' }},
+        component: '{{ component }}',
+        findProvider() {
+            return $el.closest(`[x-data][data-slot='${this.component}-wrapper']`);
+        },
+        initChild() {
+            const r = this.findProvider();
+            if (this.asChild && r) {
+                const rData = Alpine.$data(r);
+                if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
+            }
+            return false;
+        },
+        init() {
+            if (this.initChild()) return;
+        },
+    }"
     data-slot="sidebar-group-label" 
     data-sidebar="group-label" 
-    class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&amp;&gt;svg]:size-4 [&amp;&gt;svg]:shrink-0 group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 font-medium text-muted-foreground"
+    class="flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 ring-sidebar-ring outline-hidden transition-[margin,opacity] duration-200 ease-linear group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
 >
     {{ slot }}
 </div>
+
+{% endwith %}

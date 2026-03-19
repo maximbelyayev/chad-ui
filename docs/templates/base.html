@@ -14,11 +14,13 @@
     </head>
     <body class="group/body overscroll-none antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)] theme-default">
         <c-layout mobileBreakpoint="lg" class="flex flex-col">
-            {% include 'header.html' %}
-            <main class="flex flex-col flex-1">
-                {% block content %}
-                {% endblock %}
-            </main>
+            <c-tooltip.provider>
+                {% include 'header.html' %}
+                <main class="flex flex-col flex-1">
+                    {% block content %}
+                    {% endblock %}
+                </main>
+            </c-tooltip.provider>
         </c-layout>
     </body>
 </html>

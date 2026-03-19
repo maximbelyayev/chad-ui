@@ -87,6 +87,25 @@ Django = ">=3.2"
 dev = ["black"]
 
 [[package]]
+name = "heroicons"
+version = "2.14.0"
+description = "Use heroicons in your Django and Jinja templates."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "heroicons-2.14.0-py3-none-any.whl", hash = "sha256:cdf7fa6de02b7bc5b4513d7f592a9a1faea150b050a3b4270a0dc445ebe930c9"},
+    {file = "heroicons-2.14.0.tar.gz", hash = "sha256:e55ecc0a839cf872f55977d2dd04a1855bfdf080bed1d13db5264b0060e65a96"},
+]
+
+[package.dependencies]
+django = {version = ">=2.2", optional = true, markers = "extra == \"django\""}
+
+[package.extras]
+django = ["django (>=2.2)"]
+jinja = ["jinja2 (>=2.8)"]
+
+[[package]]
 name = "sqlparse"
 version = "0.5.5"
 description = "A non-validating SQL parser."
@@ -133,4 +152,4 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "3d584ca399fbe41dfe29b306716075ac0d35e23ca03b8141a4975f88c83c61f9"
+content-hash = "e755600499ba71624ddbf27da5d54300343a47546054a2a94c8b34c9b1cc253b"

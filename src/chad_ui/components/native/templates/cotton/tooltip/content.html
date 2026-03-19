@@ -1,0 +1,105 @@
+{% with component='tooltip' %}
+
+<c-vars align="center" alignOffset="0" side="bottom" sideOffset="6" />
+
+<template x-teleport="body">
+    <div :id="`${id}-portal`">
+        <div x-data="{ 
+                align: '{{ align }}',
+                alignOffset: {{ alignOffset }},
+                side: '{{ side }}',
+                sideOffset: {{ sideOffset }},
+                anchor: null,
+                arrowOpen: false,
+                contentId: '{{ attrs.id }}',
+                initAnchor() {
+                    return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
+                        .find(n => { try { return Alpine.$data(n).id === id } catch { return false } });
+                },
+                initContent() {
+                    this.anchor = this.initAnchor();
+                    if (!this.contentId) this.contentId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
+                },
+                alignArrow() {
+                    const cRect = content.getBoundingClientRect();
+                    const aRect = this.anchor.getBoundingClientRect();
+                    const cAnchorSide = cRect.bottom - 8 < aRect.top ? 'top'
+                        : cRect.top + 8 > aRect.bottom ? 'bottom'
+                        : cRect.right - 8 < aRect.left ? 'left'
+                        : cRect.left + 8 > aRect.right ? 'right' : null;
+                    if (!cAnchorSide) return this.arrowOpen = false;
+                    const opposite = { bottom: 'top', top: 'bottom', left: 'right', right: 'left' };
+                    this.positionArrow(opposite[cAnchorSide]);
+                },
+                positionArrow(side) {
+                    const el = this.$refs.arrow,
+                        pos = { top: { top: '-4px', left: '50%' },
+                            bottom: { bottom: '-4px', left: '50%' },
+                            left: { left: '-4px', top: `calc(50% - ${el.offsetWidth / 2}px)` },
+                            right: { right: '-4px', top: `calc(50% - ${el.offsetWidth / 2}px)` }
+                        }[side];
+                    Object.assign(el.style, { top: '', bottom: '', left: '', right: '', transform: '', ...pos });
+                },
+                init() {   
+                    this.initContent()
+                    this.$watch('open', open => {
+                        if (open) {
+                            htmx.process($el);
+                            this.arrowOpen = true;
+                            this.$nextTick(() => this.alignArrow());
+                        }
+                    })
+                    this.$watch('settledState', () => {
+                        if (this.open) {
+                            this.alignArrow();
+                        }
+                    })
+                }   
+            }"
+            
+            x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
+            @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
+            class="fixed inset-0 z-50 pointer-events-none"
+        >
+            <div
+                x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
+                style="transform: translate({% if side == 'right' or side == 'left'%}0,{{ alignOffset }}px{% else %}{{ alignOffset }}px,0{% endif %});"
+                class="pointer-events-none"
+            >
+                <div
+                    class="z-50 inline-flex w-fit max-w-xs origin-(--transform-origin) items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs text-background has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-sm{% if class %} {{ class }}{% endif %}"
+                    {{ attrs }}
+                    x-show="open"
+                    :id="contentId"
+                    :data-open="open ? '' : null"
+                    :data-closed="open ? null : ''"
+                    :data-align="align"
+                    :data-side="side" 
+                    @click.away="open = false;"
+                    x-transition:enter="transition-all ease-out duration-100"
+                    x-transition:enter-start="opacity-0 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition-all ease-in duration-100"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    tabindex="-1"
+                    data-slot="{{ component }}-content"
+                >   
+                    {{ slot }}
+                    <div
+                        x-show="arrowOpen"
+                        x-ref="arrow"
+                        data-open="" 
+                        :data-side="side"
+                        data-align="center" 
+                        aria-hidden="true" 
+                        class="absolute z-50 rotate-45 bg-foreground size-2.5 rounded-[2px] fill-foreground"
+                    ></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+{% endwith %}
+
