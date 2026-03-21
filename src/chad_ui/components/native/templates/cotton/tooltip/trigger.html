@@ -24,14 +24,13 @@
                 .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
         },
         initTrigger() {
-            const r = this.findRoot();
-            if (this.asChild && r) {
-                const rData = Alpine.$data(r);
+            this.root = this.findRoot();
+            if (this.asChild && this.root) {
+                const rData = Alpine.$data(this.root);
                 if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
             }
-            this.root = r;
-            this.detached = (r !== this.$el.parentElement);
-            if (!this.rid) this.rid = `${r.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
+            this.detached = (this.root !== this.$el.parentElement); 
+            if (!this.rid) this.rid = `${this.root.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
             return false;
         },
         init() {
@@ -58,7 +57,6 @@
     :id="id"
     @mouseenter="
         if (!root || disabled || $el.attributes.disabled) return;
-        console.log('niggaz');
         const rootData = Alpine.$data(root);
         if (rootData.open && !rootData.openedOnHover) return;
         if (rootData.openedOnHover && rootData.trigger === $el) {
@@ -68,13 +66,13 @@
         rootData.createHoverOpenTimeout($el, $event, delay);
     "
     @mouseleave="
-        if (!root) return;
+        if (!root || disabled || $el.attributes.disabled) return;
         const rootData = Alpine.$data(root);
         rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
         if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, $event, delay);
     "
     type="button"
-    :data-popup-open="ariaExpanded ? '' : null"
+    :data-popup-open="open ? '' : null"
     :data-trigger-disabled="disabled ? '': null"
     {{ attrs }}
     class="w-fit"

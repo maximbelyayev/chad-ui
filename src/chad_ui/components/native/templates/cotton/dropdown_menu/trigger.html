@@ -1,7 +1,7 @@
 {% with component='dropdown-menu' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars handle openOnHover delay="100" closeDelay="0" asChild />
+<c-vars handle disabled openOnHover delay="100" closeDelay="0" asChild />
 
 <div data-slot="{{ component }}-trigger"
     x-data="{
@@ -50,6 +50,7 @@
     }"
     :id="id"
     @click="
+        if (!root || disabled || $el.attributs.disabled) return;
         const rootData = Alpine.$data(root);
         rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
         rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);

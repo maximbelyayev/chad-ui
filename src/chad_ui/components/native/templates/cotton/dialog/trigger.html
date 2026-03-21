@@ -1,7 +1,7 @@
 {% with component='dialog' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars handle asChild />
+<c-vars handle disabled asChild />
 
 <div data-slot="{{ component }}-trigger"
     x-data="{
