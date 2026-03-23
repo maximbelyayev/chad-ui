@@ -23,9 +23,7 @@
             if (!c) return false;
             if (c.hasAttribute('x-data')) {
                 if (c.getAttribute('x-data').includes('asChild: true')) {
-                    this.$nextTick(() => {
-                        this.initAsChild(c) && this.initAsChild(el);
-                    });
+                    this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
                     return true;
                 }
                 return false;
@@ -94,6 +92,7 @@
         init() {
             this._mobileBreakpoint = Number(this.mobileBreakpoint) || this.getTailwindBreakpoint(this.mobileBreakpoint) || this._mobileBreakpoint || 768;
             this.initStore();
+            this.setIsMobile(window.innerWidth);
             const cookie = this.getCookie();
             if (cookie) this.setOpen(cookie === 'true');
             this.state = this.open ? 'expanded' : 'collapsed';

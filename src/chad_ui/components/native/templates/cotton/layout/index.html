@@ -24,6 +24,7 @@
         init() {
             this._mobileBreakpoint = Number(this.mobileBreakpoint) || this.getTailwindBreakpoint(this.mobileBreakpoint) || 768;
             this.initStore();
+            this.setIsMobile(window.innerWidth);
         },
     }"
     x-resize.document="setIsMobile($width)"
