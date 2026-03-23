@@ -11,14 +11,26 @@
                 sideOffset: {{ sideOffset }},
                 anchor: null,
                 arrowOpen: false,
-                contentId: '{{ attrs.id }}',
-                initAnchor() {
+                cId: '{{ attrs.id }}',
+                findAnchor() {
                     return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
                         .find(n => { try { return Alpine.$data(n).id === id } catch { return false } });
                 },
                 initContent() {
-                    this.anchor = this.initAnchor();
-                    if (!this.contentId) this.contentId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
+                    this.anchor = this.findAnchor();
+                    if (!this.cId) this.cId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
+                },
+                init() {   
+                    this.initContent()
+                    this.$watch('open', open => {
+                        if (!open) return;
+                        htmx.process($el);
+                        this.arrowOpen = true;
+                        this.$nextTick(() => this.alignArrow());
+                    })
+                    this.$watch('settledState', () => {
+                        if (this.open) this.alignArrow();
+                    })
                 },
                 alignArrow() {
                     const cRect = content.getBoundingClientRect();
@@ -40,23 +52,7 @@
                         }[side];
                     Object.assign(el.style, { top: '', bottom: '', left: '', right: '', transform: '', ...pos });
                 },
-                init() {   
-                    this.initContent()
-                    this.$watch('open', open => {
-                        if (open) {
-                            htmx.process($el);
-                            this.arrowOpen = true;
-                            this.$nextTick(() => this.alignArrow());
-                        }
-                    })
-                    this.$watch('settledState', () => {
-                        if (this.open) {
-                            this.alignArrow();
-                        }
-                    })
-                }   
             }"
-            
             x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
             @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
             class="fixed inset-0 z-50 pointer-events-none"
@@ -67,15 +63,21 @@
                 class="pointer-events-none"
             >
                 <div
-                    class="z-50 inline-flex w-fit max-w-xs origin-(--transform-origin) items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs text-background has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-sm{% if class %} {{ class }}{% endif %}"
+                    class="pointer-events-auto z-50 inline-flex w-fit max-w-xs origin-(--transform-origin) items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs text-background has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 **:data-[slot=kbd]:rounded-sm{% if class %} {{ class }}{% endif %}"
                     {{ attrs }}
                     x-show="open"
-                    :id="contentId"
+                    :id="cId"
                     :data-open="open ? '' : null"
                     :data-closed="open ? null : ''"
                     :data-align="align"
                     :data-side="side" 
                     @click.away="open = false;"
+                    @mouseenter="hoverCloseTimeout = destroyTimeout(hoverCloseTimeout)"
+                    @mouseleave="if (openedOnHover && trigger) {
+                        tData = Alpine.$data(trigger)
+                        hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
+                        createHoverCloseTimeout($el, $event, tData.closeDelay);
+                    }"
                     x-transition:enter="transition-all ease-out duration-100"
                     x-transition:enter-start="opacity-0 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
                     x-transition:enter-end="opacity-100 scale-100"
@@ -89,9 +91,6 @@
                     <div
                         x-show="arrowOpen"
                         x-ref="arrow"
-                        data-open="" 
-                        :data-side="side"
-                        data-align="center" 
                         aria-hidden="true" 
                         class="absolute z-50 rotate-45 bg-foreground size-2.5 rounded-[2px] fill-foreground"
                     ></div>

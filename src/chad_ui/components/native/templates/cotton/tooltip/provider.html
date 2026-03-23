@@ -1,7 +1,12 @@
-<c-vars delay="0" closeDelay="" timeout="400" />
+<c-vars delay="0" closeDelay="0" timeout="400" />
 
 <div data-slot="tooltip-provider"
-    x-data="{ delay: '{{ delay }}' }"
+    x-data="{ 
+        delay: {{ delay }},
+        closeDelay: {{ closeDelay }},
+        timeout: {{ timeout }},
+        timestamp: null, 
+    }"
     style="display: contents;"
     {{ attrs }}
 >

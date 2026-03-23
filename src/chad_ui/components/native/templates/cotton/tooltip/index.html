@@ -29,9 +29,7 @@
             if (!c) return false;
             if (c.hasAttribute('x-data')) {
                 if (c.getAttribute('x-data').includes('asChild: true')) {
-                    this.$nextTick(() => {
-                        this.initAsChild(c) && this.initAsChild(el);
-                    });
+                    this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
                     return true;
                 }
                 return false;
@@ -58,20 +56,25 @@
             el.replaceWith(c);
             return true;
         },
-        initIndex() {
+        findProvider() {
+            return document.querySelector(`[x-data][data-slot='${this.component}-provider']`);
+        },
+        initState() {
             if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+            this.provider = this.findProvider();
             this.initStore();
             this.$nextTick(() => {
                 this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
             })
-        },
-        init() {
-            this.initIndex();
             if (this.open) this.showContent();
         },
+        init() {
+            this.initState();
+        },
+        
         toggleContent(event) {
-            if (this.open) { this.trap = false; this.hideContent(); }
-            else { this.trap = true; this.showContent(event); }
+            if (this.open) this.hideContent();
+            else this.showContent(event);
         },
         showContent(event) {
             this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
@@ -87,14 +90,17 @@
             return null;
         }, 
         createHoverOpenTimeout(triggerEl, event, delay) {
-            const triggerData = Alpine.$data(triggerEl);
+            const pData = Alpine.$data(this.provider);
+            const withinTimeout = pData.timestamp && (Date.now() - pData.timestamp) < pData.timeout;
+            const effectiveDelay = withinTimeout ? 50 : delay;
             this.hoverOpenTimeout = setTimeout(() => {
-                triggerData.handleTrigger(event)
+                Alpine.$data(triggerEl).handleTrigger(event);
                 this.openedOnHover = true;
                 this.hoverOpenTimeout = this.destroyTimeout(this.hoverOpenTimeout);
-            }, delay)
+            }, effectiveDelay);
         },
         createHoverCloseTimeout(el, event, delay) {
+            Alpine.$data(this.provider).timestamp = Date.now();
             if (el === this.trigger) return this.initHoverPathHandler(el, event);
             const triggerData = Alpine.$data(this.trigger);
             this.hoverCloseTimeout = setTimeout(() => {
@@ -146,12 +152,6 @@
     }"
     :id="id"
     @{{ handle }}.window="toggleContent($event)"
-    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideContent()"
-    @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
-        $event.preventDefault();
-        $event.stopImmediatePropagation();
-        hideContent();
-    }"
     {{ attrs }}
 >
     {{ slot }}
