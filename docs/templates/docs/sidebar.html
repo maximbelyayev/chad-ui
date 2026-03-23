@@ -8,7 +8,7 @@
             <c-sidebar.menu>
                 {% for key, value in sections.items %}
                 <c-sidebar.menu.item>
-                    <c-sidebar.menu.button tooltip="{{ value.name }}" asChild >
+                    <c-sidebar.menu.button tooltip="{{ value.name }}" :isActive="{{ value.url_is_active }}" asChild >
                         <a href="{{ value.url }}">
                             {% heroicon_outline 'plus' %}
                             <span>{{ value.name }}</span>
@@ -23,8 +23,8 @@
             <c-sidebar.menu>
                 {% for key, value in components.items %}
                 <c-sidebar.menu.item>
-                    <c-sidebar.menu.button tooltip="{{ value.name }}" asChild>
-                        <a href="{{ value.url }}" >
+                    <c-sidebar.menu.button tooltip="{{ value.name }}" :isActive="{{ value.url_is_active }}" asChild >
+                        <a href="{{ value.url }}">
                             {% heroicon_outline 'pencil' %}
                             <span>{{ value.name }}</span>
                         </a>

@@ -1,7 +1,7 @@
 {% with component='sheet' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars defaultOpen disablePointerDismissal disableDismissalDuringHtmx handle forceOverlay />
+<c-vars defaultOpen dynamicOpen="null" disablePointerDismissal disableDismissalDuringHtmx handle forceOverlay />
 
 <div data-slot="{{ component }}"
     x-data="{
@@ -83,6 +83,7 @@
             this.getStore(true).lastFocusedEl?.focus();
         },
     }"
+    x-effect="open = {{ dynamicOpen }}"
     @{{ handle }}.window="open ? hideDialog() : showDialog($event)"
     @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideDialog()"
     @keydown.escape.window="if (open && (nestedIndex === getStore().maxIndex)) {
