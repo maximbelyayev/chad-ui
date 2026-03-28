@@ -47,32 +47,35 @@
             else if (this.root) $dispatch(this.handle);
             else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
         }
+        handleMouseClick(event) {
+            if (!this.root || this.disabled || $el.attributes.disabled) return;
+            const rootData = Alpine.$data(this.root);
+            rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
+            rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
+            if (rootData.openedOnHover) rootData.openedOnHover = false;
+            this.handleTrigger(event);
+        },
+        handleMouseEnter(event) {
+            if (!this.root || !this.openOnHover || this.disabled || $el.attributes.disabled) return;
+            const rootData = Alpine.$data(this.root);
+            if (rootData.open && !rootData.openedOnHover) return;
+            if (rootData.openedOnHover && rootData.trigger === $el) {
+                rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
+                return;
+            }
+            rootData.createHoverOpenTimeout($el, event, delay);
+        },
+        handleMouseLeave(event) {
+            if (!this.root || this.disabled || $el.attributes.disabled) return;
+            const rootData = Alpine.$data(this.root);
+            rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
+            if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, event, delay);
+        }
     }"
     :id="id"
-    @click="
-        if (!root || disabled || $el.attributs.disabled) return;
-        const rootData = Alpine.$data(root);
-        rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
-        rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
-        if (rootData.openedOnHover) rootData.openedOnHover = false;
-        handleTrigger($event);
-    "
-    @mouseenter="
-        if (!openOnHover || !root) return;
-        const rootData = Alpine.$data(root);
-        if (rootData.open && !rootData.openedOnHover) return;
-        if (rootData.openedOnHover && rootData.trigger === $el) {
-            rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
-            return;
-        }
-        rootData.createHoverOpenTimeout($el, $event, delay);
-    "
-    @mouseleave="
-        if (!root) return;
-        const rootData = Alpine.$data(root);
-        rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
-        if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, $event, delay);
-    "
+    @click="handleMouseClick($event)"
+    @mouseenter="handleMouseEnter($event)"
+    @mouseleave="handleMouseLeave($event)"
     type="button"
     tabindex="0"
     aria-haspopup="menu"

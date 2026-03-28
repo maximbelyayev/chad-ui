@@ -1,6 +1,6 @@
 {% with component='popover' %}
 
-<c-vars align="center" alignOffset="0" side="bottom" sideOffset="5" />
+<c-vars align="center" alignOffset="0" side="bottom" sideOffset="4" />
 
 <template x-teleport="body">
     <div x-data="{ 
@@ -28,7 +28,7 @@
         :id="`${id}-portal`"
         x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
         @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
-        class="fixed inset-0 z-10 pointer-events-none overflow-clip"
+        class="fixed inset-0 z-50 pointer-events-none overflow-clip"
     >
         <div
             x-cloak
@@ -49,6 +49,8 @@
             class="pointer-events-none"
         >
             <div
+                class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
+                {{ attrs }}
                 x-show="open"
                 :id="contentId"
                 :data-open="open ? '' : null"
@@ -70,8 +72,6 @@
                 tabindex="-1"
                 role="menu"
                 data-slot="{{ component }}-content"
-                class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
-                {{ attrs }}
             >
                 {{ slot }}
             </div>

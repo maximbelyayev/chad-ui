@@ -2,13 +2,17 @@
 
 <div x-data="{
         asChild: {{ asChild|yesno:'true,false' }},
-        init () {
-            this.$nextTick(() => {
-                if (initAsChild($el)) return;
-            })
+        initMount() {
+            if (this.asChild) {
+                if (initAsChild(this.$el)) return true;
+            }
+            return false;
+        },
+        init() {
+            if (this.initMount()) return;
         },
     }"
-    @click.stop="hideDialog"
+    @click.stop="hideContent"
     {{ attrs }}
 >
     {{ slot }}

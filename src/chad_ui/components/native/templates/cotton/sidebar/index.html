@@ -10,35 +10,27 @@
 </div>
 {% else %}
 <template x-if="isMobile"
-    x-data="{
-        side: '{{ side }}',
-        variant: '{{ variant }}',
-        collapsible: '{{ collapsible }}',
-    }"
+    x-data="{ side: '{{ side }}', variant: '{{ variant }}', collapsible: '{{ collapsible }}' }"
 >
-    <c-sheet dynamicOpen="(openMobile && isMobile)">
+    <c-sheet open="openMobile && isMobile">
         <c-sheet.content
             data-sidebar="sidebar"
             data-slot="sidebar"
             data-mobile="true"
-            class="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            class="p-0 w-(--sidebar-width) bg-sidebar text-sidebar-foreground [&>[data-slot=sheet-close]>button]:hidden"
             :style="`--sidebar-width: ${widthMobile};"
-            side="side"
+            side="{{ side }}"
         >
             <c-sheet.header class="sr-only">
                 <c-sheet.title>Sidebar</c-sheet.title>
                 <c-sheet.description>Displays the mobile sidebar.</c-sheet.description>
             </c-sheet.header>
-            <div className="flex flex-col w-full h-full">{{ slot }}</div>
+            <div class="flex flex-col w-full h-full">{{ slot }}</div>
         </c-sheet.content>
     </c-sheet>
 </template>
 <template x-if="!isMobile"
-    x-data="{
-        side: '{{ side }}',
-        variant: '{{ variant }}',
-        collapsible: '{{ collapsible }}',
-    }"
+    x-data="{ side: '{{ side }}', variant: '{{ variant }}', collapsible: '{{ collapsible }}' }"
 >
     <div data-slot="sidebar"
         :data-state="state"
