@@ -48,25 +48,28 @@
             if (!this._detached) toggleContent(event);
             else if (this.root) $dispatch(this.handle);
             else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
+        },
+        handleMouseEnter(event) {
+            if (!this.root || this.disabled || $el.attributes.disabled) return;
+            const rData = Alpine.$data(this.root);
+            if (rData.open && !rData.openedOnHover) return;
+            if (rData.openedOnHover && rData.trigger === $el) {
+                rData.hoverCloseTimeout = rData.destroyTimeout(rData.hoverCloseTimeout);
+                return;
+            }
+            rData.createHoverOpenTimeout($el, event, delay);
+        },
+        handleMouseLeave(event) {
+            if (!this.root || this.disabled || $el.attributes.disabled) return;
+            const rData = Alpine.$data(this.root);
+            rData.hoverOpenTimeout = rData.destroyTimeout(rData.hoverOpenTimeout);
+            if (rData.openedOnHover) rData.createHoverCloseTimeout($el, event, closeDelay);
         }
     }"
     :id="id"
-    @mouseenter="
-        if (!root || disabled || $el.attributes.disabled) return;
-        const rData = Alpine.$data(root);
-        if (rData.open && !rData.openedOnHover) return;
-        if (rData.openedOnHover && rData.trigger === $el) {
-            rData.hoverCloseTimeout = rData.destroyTimeout(rData.hoverCloseTimeout);
-            return;
-        }
-        rData.createHoverOpenTimeout($el, $event, delay);
-    "
-    @mouseleave="
-        if (!root || disabled || $el.attributes.disabled) return;
-        const rData = Alpine.$data(root);
-        rData.hoverOpenTimeout = rData.destroyTimeout(rData.hoverOpenTimeout);
-        if (rData.openedOnHover) rData.createHoverCloseTimeout($el, $event, closeDelay);
-    "
+    @click.stop
+    @mouseenter="handleMouseEnter($event)"
+    @mouseleave="handleMouseLeave($event)"
     type="button"
     :data-popup-open="open ? '' : null"
     :data-trigger-disabled="disabled ? '': null"
