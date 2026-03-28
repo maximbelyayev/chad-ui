@@ -1,7 +1,7 @@
 <p 
-    :id="$id('chad-ui_sheet-description_r')"
+    :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-description`)"
     data-slot="sheet-description" 
-    class="text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3{% if class %} {{ class }}{% endif %}"
+    class="text-sm text-muted-foreground{% if class %} {{ class }}{% endif %}"
     {{ attrs }}
 >
     {{ slot }}

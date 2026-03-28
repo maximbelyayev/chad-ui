@@ -1,0 +1,54 @@
+{% with component='sheet' %}
+{% firstof handle 'handle-'|add:component as handle %}
+
+<c-vars handle disabled asChild />
+
+<div data-slot="{{ component }}-trigger"
+    x-data="{
+        handle: '{{ handle }}',
+        disabled: {{ disabled|yesno:'true,false' }},
+        asChild: {{ asChild|yesno:'true,false' }},
+        component: '{{ component }}',
+        root: null,
+        tId: '{{ attrs.id }}',
+        findRoot() {
+            const p = this.$el.parentElement;
+            if (p.getAttribute('data-slot') === this.component) return p;
+            return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
+                .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
+        },
+        initState() {
+            if (!this.tId) this.tId = `${this.root.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
+            this._detached = (this.root !== this.$el.parentElement); 
+        },
+        initMount() {
+            this.root = this.findRoot();
+            this.initState()
+            if (this.asChild && this.root) {
+                const rData = Alpine.$data(this.root);
+                if (rData.initAsChild(this.$el)) return true;
+            }
+            return false;
+        },
+        init() {
+            if (this.initMount()) return;
+        },
+        handleTrigger(event) {
+            if (this.disabled) return;
+            const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
+            trigger.blur();
+            const content = event.target.closest(`[data-slot=${this.component}-content]`);
+            if (content) { content.removeAttribute('aria-hidden'); }
+            if (!this._detached) showContent(event);
+            else if (this.root) $dispatch(this.handle)
+            else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
+        }
+    }"
+    @click.stop="handleTrigger($event);"
+    aria-haspopup="dialog"
+    {{ attrs }}    
+>
+    {{ slot }}
+</div>
+
+{% endwith %}
