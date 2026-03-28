@@ -1,6 +1,6 @@
-<c-vars variant="default" size="default" asChild htmx />
+<c-vars variant="default" size="default" nativeButton="true" asChild htmx />
 
-<button
+<{% if nativeButton|lower == 'false' %}div{% else %}button{% endif %}
     x-data="{
         asChild: {{ asChild|yesno:'true,false' }},
         htmx: {{ htmx|yesno:'true, false'}},
@@ -18,7 +18,6 @@
                 child = this.$el.firstElementChild;
             }
             if (!child) return;
-
             [...this.$el.attributes].forEach(attr => {
                 if (child.hasAttribute(attr.name) || attr.name === 'class') return;
                 if (attr.name === 'x-data') {
@@ -29,7 +28,6 @@
                 child.setAttribute(attr.name, attr.value);
             });
             child.classList.add(...this.$el.classList);
-            
             if (this.htmx && indicator && spinner) {
                 const element = child.cloneNode()
                 indicator = element.appendChild(indicator.cloneNode())
@@ -86,4 +84,4 @@
     {% else %}
     {{ slot }}
     {% endif %}
-</button>
+</{% if nativeButton|lower == 'false' %}div{% else %}button{% endif %}>
