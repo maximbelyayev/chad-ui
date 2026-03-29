@@ -1,4 +1,4 @@
-<li 
+<li
     x-data="{
         handleMouseOver(event) {
             if (event.target.getAttribute('data-sidebar') === 'menu-sub') return;
@@ -17,10 +17,10 @@
     }"
     @mouseover.stop="handleMouseOver($event)"
     @mouseleave="handleMouseLeave($event)"
-    class="relative group/menu-item"
+    data-slot="sidebar-menu-sub-item"
+    data-sidebar="menu-sub-item"
+    class="group/menu-sub-item relative{% if class %} {{ class }}{% endif %}"
     {{ attrs }}
-    data-slot="sidebar-menu-item" 
-    data-sidebar="menu-item" 
 >
     {{ slot }}
 </li>
