@@ -5,9 +5,9 @@
 
 <div data-slot="{{ component }}" 
     x-data="{
-        open: {{ defaultOpen|default:False|yesno:'true,false' }},
+        open: {{ defaultOpen|yesno:'true,false' }},
         handle: '{{ handle }}',
-        modal: {{ modal|default:False|yesno:'true,false' }},
+        modal: {{ modal|yesno:'true,false' }},
         openedOnHover: null,
         hoverOpenTimeout: null,
         hoverCloseTimeout: null,
