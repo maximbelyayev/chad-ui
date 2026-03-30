@@ -1,3 +1,5 @@
+{% with component='accordion' %}
+
 <c-vars type="single" defaultValue="" collapsible disabled dir="ltr" orientation="vertical"></c-vars>
 
 <div
@@ -10,9 +12,12 @@
         orientation: '{{ orientation|lower }}',
         values: [],
         open: {},
-        init () {
+        component: '{{ component }}',
+        id: '{{ attrs.id }}',
+        initState() {
+            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
             this.$nextTick(() => {
-                $el.querySelectorAll('[data-slot=accordion-item]').forEach(item => {
+                $el.querySelectorAll(`[data-slot=${this.component}-item]`).forEach(item => {
                     this.values.push(Alpine.$data(item).value)
                 })
                 if (this.defaultValue) {
@@ -20,6 +25,9 @@
                     defaultValues.forEach(value => this.toggle(value));
                 }
             })
+        },
+        init () {
+            this.initState();
         },
         getIndex(el) {
             return this.values.indexOf(Alpine.$data(el).value)
@@ -43,12 +51,15 @@
             return !!this.open[value];
         }
     }"
-    data-orientation="{{ orientation|lower }}"
+    :id="id"
     :dir="dir"
     role="region"
+    data-orientation="{{ orientation|lower }}"
     data-slot="accordion"
     :class="orientation === 'horizontal' ? 'flex w-full' : 'flex flex-col w-full'"
     {{ attrs }}
 >
     {{ slot }}
 </div>
+
+{% endwith %}

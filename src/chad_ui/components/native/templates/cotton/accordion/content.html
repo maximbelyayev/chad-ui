@@ -2,14 +2,14 @@
     <div
         x-cloak
         x-data="{
-            id: '{{ attrs.id }}',
+            cId: '{{ attrs.id }}',
             init() {
-                if (!this.id) this.id = $id(`chad-ui_r_accordion-content`);
+                if (!this.cId) this.cId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
             }
         }"
         x-show="isOpen(value)"
         x-collapse.duration.200ms
-        :id="id"
+        :id="cId"
         :data-orientation="orientation"
         :data-open="isOpen(value) ? '' : null"
         :data-closed="isOpen(value) ? null : ''"
