@@ -1,0 +1,25 @@
+<c-vars value disabled />
+
+<div
+    x-cloak
+    x-data="{
+        value: '{{ value }}',
+        id: '{{ attrs.id }}',
+        init() {
+            if (!this.id) this.id = $id(`chad-ui_r_tabs-content`);
+        }
+    }"
+    class="flex-1 text-sm outline-none{% if class %} {{ class }}{% endif %}"
+    x-show="isOpen(value)"
+    :id="id"
+    :tabindex="isOpen(value) ? 0 : -1"
+    :aria-disabled="disabled"
+    aria-labelledby=""
+    :data-orientation="orientation"
+    :data-active="isOpen(value) ? '' : null"
+    type="button"
+    role="tabpanel"
+    data-slot="tabs-content"
+>
+    {{ slot }}
+</div>

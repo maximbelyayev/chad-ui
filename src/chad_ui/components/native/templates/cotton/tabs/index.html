@@ -1,0 +1,50 @@
+{% with component='tabs' %}
+
+<c-vars defaultValue="" orientation="horizontal" disabled />
+
+<div 
+    x-data="{
+        defaultValue: '{{ defaultValue }}',
+        orientation: '{{ orientation|lower }}',
+        tabsOpen: {},
+        component: '{{ component }}',
+        id: '{{ attrs.id }}',
+        initState() {
+            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+            this.$nextTick(() => {
+                $el.querySelectorAll(`[data-slot=${this.component}-item]`).forEach(item => {
+                    this._values.push(Alpine.$data(item).value)
+                })
+                if (this.defaultValue) this.toggle(this.defaultValue);
+            })
+        },
+        init () {
+            this.initState();
+        },
+        getIndex(el) {
+            return this._values.indexOf(Alpine.$data(el).value)
+        },
+        setDisabled(el) {
+            if (el.matches('button, input, textarea, select, fieldset')) {
+                el.setAttribute('disabled', '');
+                el.setAttribute('aria-disabled', 'true');
+            }
+            el.setAttribute('data-disabled', '');
+        },
+        toggle(value) {
+            this.tabsOpen = value;
+        },
+        isOpen(value) {
+            return this.tabsOpen === value;
+        }
+    }"
+    data-orientation="{{ orientation|lower }}"
+    class="group/tabs flex gap-2 data-[orientation=horizontal]:flex-col{% if class %} {{ class }}{% endif %}"
+    {{ attrs }}
+    :id="id"
+    data-slot="{{ component }}"
+>
+    {{ slot }}
+</div>
+
+{% endwith %}
