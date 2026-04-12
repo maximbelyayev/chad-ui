@@ -1,0 +1,37 @@
+{% load i18n %}
+
+<c-vars copyButton />
+
+<div
+    x-data="{
+        copied: false,
+        async copy(text) {
+            if (!text) return;
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch (err) {
+                console.error('Unable to copy code to clipboard', err);
+            }
+        },
+        copyCode() {
+            this.copied = true;
+            this.copy($el.querySelector('code').innerText);
+            setTimeout(() => this.copied = false, 2000);
+        }
+    }"
+    class="**:data-[slot=copy-button]:right-4 {% if class %} {{ class }}{% endif %}"
+>
+    <div class="relative">
+        {{ slot }}
+        <c-button variant="ghost" size="icon"
+            @click="copyCode()"
+            data-copied="false"
+            data-slot="copy-button"
+            class="absolute top-3 right-2! z-10 size-7! bg-code hover:opacity-100 focus-visible:opacity-100"
+        >
+            {% heroicon_outline 'square-2-stack' stroke_width=2 x_show="!copied" %}
+            {% heroicon_outline 'check' stroke_width=2 x_show="copied" %}
+        </c-button>
+    </div>
+</div>
+

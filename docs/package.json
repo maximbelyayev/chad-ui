@@ -4,8 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "vite build"
   },
   "devDependencies": {
     "vite": "^7.3.1"
@@ -17,7 +16,16 @@
     "@alpinejs/resize": "^3.15.8",
     "@tailwindcss/vite": "^4.2.1",
     "alpinejs": "^3.15.8",
+    "gray-matter": "^4.0.3",
     "htmx.org": "^4.0.0-alpha7",
-    "tailwindcss": "^4.2.1"
+    "rehype-pretty-code": "^0.14.3",
+    "rehype-stringify": "^10.0.1",
+    "remark-directive": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "tailwindcss": "^4.2.1",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
   }
 }

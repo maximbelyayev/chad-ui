@@ -1,0 +1,11 @@
+<c-vars align="center" />
+
+<div data-slot="preview">
+    <div 
+        data-align="{{ align }}" 
+        data-chromeless="false" 
+        class="preview relative flex w-full justify-center data-[align=center]:items-center data-[align=end]:items-end data-[align=start]:items-start data-[chromeless=true]:h-auto data-[chromeless=true]:p-0{% if class %} {{ class }}{% endif %}"
+    >
+        {{ slot }}
+    </div>
+</div>

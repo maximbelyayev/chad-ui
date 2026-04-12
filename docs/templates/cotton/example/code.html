@@ -1,0 +1,39 @@
+{% load i18n %}
+
+<c-vars copyButton defaultOpen/>
+
+<div
+    x-data="{
+        open: {{ defaultOpen|yesno:'true,false' }},
+        copied: false,
+        async copy(text) {
+            if (!text) return;
+            try {
+                await navigator.clipboard.writeText(text);
+            } catch (err) {
+                console.error('Unable to copy code to clipboard', err);
+            }
+        },
+        copyCode() {
+            this.copied = true;
+            const activeContent = $el.querySelector('[data-slot=tabs-content][data-active] code');
+            const fallback = $el.querySelector('code');
+            this.copy((activeContent || fallback).innerText);
+            setTimeout(() => this.copied = false, 2000);
+        }
+    }"
+    :data-mobile-code-visible="open"
+    data-slot="code"
+    class="relative overflow-hidden **:data-[slot=copy-button]:right-4 **:data-[slot=copy-button]:hidden data-[mobile-code-visible=true]:**:data-[slot=copy-button]:flex {% if class %} {{ class }}{% endif %}"
+>
+    <div class="relative">
+        {{ slot }}
+        <div x-show="!open" class="flex absolute inset-0 z-20 justify-center items-center pb-4">
+            <div class="absolute inset-0" style="background:linear-gradient(to top, var(--color-code), color-mix(in oklab, var(--color-code) 60%, transparent), transparent)"></div>
+            <c-button variant="outline" size="sm" class="relative! z-10! rounded-lg! shadow-none! bg-background! text-foreground! dark:bg-background dark:text-foreground! dark:hover:bg-muted! hover:bg-muted!" @click="open=true;">
+                {% trans "View Code" %}
+            </c-button>
+        </div>
+    </div>
+</div>
+
