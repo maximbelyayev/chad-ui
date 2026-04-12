@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
 <div class="flex flex-col flex-1 px-2 container-wrapper">
@@ -6,15 +7,110 @@
         {% include 'docs/sidebar.html' %}
         <div class="w-full h-full">
             <div data-slot="docs" class="flex items-stretch pb-8 xl:w-full scroll-mt-24 text-[1.05rem] sm:text-[15px]">
-                <div class="flex flex-col flex-1 min-w-0">
+                <div class="flex flex-col flex-1 min-w-0"> 
                     <div class="h-(--top-spacing) shrink-0"></div>
                     <div class="flex flex-col flex-1 gap-6 py-6 px-4 mx-auto w-full min-w-0 md:px-0 lg:py-8 max-w-[40rem] text-neutral-800 dark:text-neutral-300">
-                        {% block content_docs %}
-                        {% endblock content_docs %}
+                        
+                        <div class="flex flex-col gap-2">
+                            <div class="flex justify-between items-center md:items-start">
+                                <h1 class="text-3xl font-semibold tracking-tight sm:text-3xl scroll-m-24">
+                                    {{ title }}
+                                </h1>
+                                <div class="flex gap-2 items-center docs-nav">
+                                    <div class="hidden sm:block">
+                                        <c-button-group>
+                                            <c-button variant="secondary" size="sm">
+                                                {% heroicon_outline 'square-2-stack' stroke_width=2 %}
+                                                {% translate "Copy Page" %}
+                                            </c-button>
+                                            <c-button-group.separator />
+                                            <c-dropdown-menu.trigger handle="docs-dropdown" asChild>
+                                                <c-button variant="secondary" size="icon-sm">
+                                                    {% heroicon_outline 'chevron-down' stroke_width=2 size=12 %}
+                                                </c-button>
+                                            </c-dropdown-menu.trigger>
+                                        </c-button-group>
+                                    </div>
+                                    <div class="flex gap-2 ml-auto">
+                                        <c-button variant="secondary" size="icon-sm" asChild>
+                                            <a href="{{ current.url.previous }}">
+                                                {% heroicon_outline 'arrow-left' stroke_width=2 class="size-3.5" %}
+                                            </a>
+                                        </c-button>
+                                        <c-button variant="secondary" size="icon-sm" asChild>
+                                            <a href="{{ current.url.next }}">
+                                                {% heroicon_outline 'arrow-right' stroke_width=2 class="size-3.5" %}
+                                            </a>
+                                        </c-button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-[1.05rem] text-muted-foreground sm:text-base sm:text-balance md:max-w-[80%]">
+                                {{ description }}
+                            </p>
+                        </div>
+
+                        <div class="w-full flex-1 pb-16 *:data-[slot=alert]:first:mt-0 sm:pb-0">
+                            {% block docs_content %}
+                            {% endblock %}
+                        </div>
+
+                        <div class="hidden gap-2 items-center px-4 w-full h-16 shadow-none sm:flex sm:px-0">
+                            <c-button variant="secondary" size="sm" asChild>
+                                <a href="{{ current.url.previous }}">
+                                    {% heroicon_outline 'arrow-left' stroke_width=2 class="size-3.5" %}
+                                    Components
+                                </a>
+                            </c-button>
+                            <c-button variant="secondary" size="sm" asChild class="ml-auto shadow-none">
+                                <a href="{{ current.url.next }}">
+                                    {% heroicon_outline 'arrow-right' stroke_width=2 class="size-3.5" %}
+                                    Alert
+                                </a>
+                            </c-button>
+                        </div>
+
                     </div>
                 </div>
+
+                <div class="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[90svh] w-(--sidebar-width) flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
+                    <div class="h-(--top-spacing) shrink-0"></div>
+                    <div class="flex overflow-y-auto flex-col gap-8 px-8 no-scrollbar">
+                        <div class="flex flex-col gap-2 p-4 pt-0 text-sm">
+                            <p class="sticky top-0 h-6 text-xs font-medium bg-background text-muted-foreground">
+                                On This Page
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </c-sidebar.provider>
 </div>
+
+<c-dropdown-menu handle="docs-dropdown">
+    <c-dropdown-menu.content align="end">
+        <c-dropdown-menu.group>
+            <c-dropdown-menu.item asChild>
+                <a href="{{ request.path|slice:':-1' }}.md" target="_blank" rel="noopener noreferrer">
+                    {% include 'svg/markdown.html' %}
+                    {% trans "View as Markdown" %}
+                </a>
+            </c-dropdown-menu.item>
+            <c-dropdown-menu.item asChild>
+                <a href="https://chatgpt.com/?prompt={{ llm_prompt|urlencode }}" target="_blank" rel="noopener noreferrer">
+                    {% include 'svg/chatgpt.html' %}
+                    {% trans "Open in ChatGPT" %}
+                </a>
+            </c-dropdown-menu.item>
+            <c-dropdown-menu.item asChild>
+                <a href="https://claude.ai/new?q={{ llm_prompt|urlencode }}" target="_blank" rel="noopener noreferrer">
+                    {% include 'svg/claude.html' %}
+                    {% trans "Open in Claude" %}
+                </a>
+            </c-dropdown-menu.item>
+        </c-dropdown-menu.group>
+    </c-dropdown-menu.content>
+</c-dropdown-menu>
 {% endblock%}
