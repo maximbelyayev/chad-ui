@@ -46,7 +46,7 @@
             if (!this.detached) toggleMenu(event);
             else if (this.root) $dispatch(this.handle);
             else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
-        }
+        },
         handleMouseClick(event) {
             if (!this.root || this.disabled || $el.attributes.disabled) return;
             const rootData = Alpine.$data(this.root);
@@ -77,7 +77,7 @@
     @mouseenter="handleMouseEnter($event)"
     @mouseleave="handleMouseLeave($event)"
     type="button"
-    tabindex="0"
+    tabindex="{% if asChild %}-1{% else %}0{% endif %}"
     aria-haspopup="menu"
     class="{% if class %}{{ class }}{% endif %}" 
     {{ attrs }}

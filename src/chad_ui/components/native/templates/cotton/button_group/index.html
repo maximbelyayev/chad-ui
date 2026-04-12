@@ -1,31 +1,20 @@
 <c-vars orientation="horizontal" />
 
 <div
-    x-data="{orientation: '{{ orientation|lower }}'}"
+    x-data="{ orientation: '{{ orientation|lower }}' }"
     role="group"
     data-slot="button-group"
-    class="
-        flex
-        w-fit
-        items-stretch
-        [&>*]:focus-visible:z-10
-        [&>*]:focus-visible:relative
-        [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit
-        [&>input]:flex-1
-        has-[>[data-slot=button-group]]:gap-2
+    class="has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1
         {% if orientation == 'vertical' %}
         flex-col
-        has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-b-md
-        [&>*:not(:first-child)]:rounded-t-none
-        [&>*:not(:first-child)]:border-t-0
-        [&>*:not(:last-child)]:rounded-b-none
+        [&>*:not(:first-child),&>*:not(:first-child)_button]:rounded-t-none
+        [&>*:not(:first-child),&>*:not(:first-child)_button]:border-t-0
+        [&>*:not(:last-child),&>*:not(:last-child)_button]:rounded-b-none
         {% else %}
-        has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md
-        [&>*:not(:first-child)]:rounded-l-none
-        [&>*:not(:first-child)]:border-l-0
-        [&>*:not(:last-child)]:rounded-r-none
-        {% endif %}
-        {% if class %}{{ class }}{% endif %}
+        [&>*:not(:first-child),&>*:not(:first-child)_button]:rounded-l-none
+        [&>*:not(:first-child),&>*:not(:first-child)_button]:border-l-0
+        [&>*:not(:last-child),&>*:not(:last-child)_button]:rounded-r-none
+        {% endif %}{% if class %} {{ class }}{% endif %}
     "
     {{ attrs }}
 >

@@ -1,7 +1,7 @@
 {% with component='sidebar' %}
 
 <c-vars size="md" variant="default" isActive asChild />
-<a
+<div
     x-data="{
         isActive: {{ isActive|yesno:'true,false' }},
         asChild: {{ asChild|yesno:'true,false' }},
@@ -29,6 +29,6 @@
     {{ attrs }}
 >   
     {{ slot }}
-</a>
+</div>
 
 {% endwith %}
