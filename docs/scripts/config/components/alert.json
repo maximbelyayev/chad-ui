@@ -1,0 +1,6 @@
+{
+  "default": {
+    "align": "center",
+    "class": "h-auto sm:h-72 p-6"
+  }
+}

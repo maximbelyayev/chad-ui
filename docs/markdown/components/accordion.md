@@ -32,11 +32,13 @@ description: A vertically stacked set of interactive headings that each reveal a
 :::
 
 ## Installation
+
 ```bash
 pipx run chad-ui add accordion
 ```
 
 ## Usage
+
 ```html
 <c-accordion defaultValue="item-1">
   <c-accordion.item value="item-1">
@@ -48,9 +50,24 @@ pipx run chad-ui add accordion
 </c-accordion>
 ```
 
-## Example
+## Composition 
+
+Use the following composition to build an accordion:
+
+```text
+c-accordion
+├── c-accordion.item
+│   ├── c-accordion.trigger
+│   └── c-accordion.content
+└── c-accordion.item
+    ├── c-accordion.trigger
+    └── c-accordion.content
+```
+
+## Examples
 
 ### Basic
+
 A basic accordion that shows one item at a time. The first item is open by default.
 
 :::example
@@ -79,11 +96,12 @@ A basic accordion that shows one item at a time. The first item is open by defau
 :::
 
 ### Multiple
-Use `type="multiple"` to allow multiple items to be open at the same time.
+
+Use the `multiple` prop to allow multiple items to be open at the same time.
 
 :::example
 ```html
-<c-accordion type="multiple" defaultValue="notifications" class="max-w-lg">
+<c-accordion multiple defaultValue="notifications" class="max-w-lg">
   {% for item in items %}
     <c-accordion.item key="{{ item.value }}" value="{{ item.value }}">
       <c-accordion.trigger>{{ item.trigger }}</c-accordion.trigger>
@@ -94,6 +112,7 @@ Use `type="multiple"` to allow multiple items to be open at the same time.
 ```
 ```python
 def multiple(request):
+  template_name = 'docs/components/accordion/multiple.html'
   context = {
     'items': [
       {
@@ -116,11 +135,12 @@ def multiple(request):
       },
     ]
   }
-return render(request, "multiple.html", context)
+  return render(request, template_name, context)
 ```
 :::
 
 ### Disabled
+
 Use the `disabled` prop on `c-accordion.item` to disable individual items.
 
 :::example
@@ -154,6 +174,7 @@ Use the `disabled` prop on `c-accordion.item` to disable individual items.
 :::
 
 ### Borders
+
 Add `border` to the `c-accordion` and `border-b last:border-b-0` to the `c-accordion.item` to add borders to the items.
 
 :::example
@@ -177,27 +198,36 @@ Add `border` to the `c-accordion` and `border-b last:border-b-0` to the `c-accor
 </c-accordion>
 ```
 ```python
-<Accordion
-  type="single"
-  collapsible
-  className="max-w-lg rounded-lg border"
-  defaultValue="billing"
->
-  {items.map((item) => (
-    <AccordionItem
-      key={item.value}
-      value={item.value}
-      className="border-b px-4 last:border-b-0"
-    >
-      <AccordionTrigger>{item.trigger}</AccordionTrigger>
-      <AccordionContent>{item.content}</AccordionContent>
-    </AccordionItem>
-  ))}
-</Accordion>
+def borders(request):
+  template_name = 'docs/components/accordion/borders.html'
+  context = {
+    'items': [
+      {
+        "value": "billing",
+        "trigger": "How does billing work?",
+        "content":
+          "We offer monthly and annual subscription plans. Billing is charged at the beginning of each cycle, and you can cancel anytime. All plans include automatic backups, 24/7 support, and unlimited team members."
+      },
+      {
+        "value": "security",
+        "trigger": "Is my data secure?",
+        "content":
+          "Yes. We use end-to-end encryption, SOC 2 Type II compliance, and regular third-party security audits. All data is encrypted at rest and in transit using industry-standard protocols."
+      },
+      {
+        "value": "integration",
+        "trigger": "What integrations do you support?",
+        "content":
+          "We integrate with 500+ popular tools including Slack, Zapier, Salesforce, HubSpot, and more. You can also build custom integrations using our REST API and webhooks."
+      }
+    ]
+  }
+  return render(request, template_name, context)
 ```
 :::
 
 ### Card
+
 Wrap the `c-accordion` in a `c-card` component.
 
 :::example
@@ -222,11 +252,49 @@ Wrap the `c-accordion` in a `c-card` component.
   </c-card.content>
 </c-card>
 ```
+```python
+def card(request):
+  template_name = 'docs/components/accordion/card.html'
+  context = {
+    "items": [
+      {
+        "value": "plans",
+        "trigger": "What subscription plans do you offer?",
+        "content":
+          "We offer three subscription tiers: Starter ($9/month), Professional ($29/month), and Enterprise ($99/month). Each plan includes increasing storage limits, API access, priority support, and team collaboration features.",
+      },
+      {
+        "value": "billing",
+        "trigger": "How does billing work?",
+        "content":
+          "Billing occurs automatically at the start of each billing cycle. We accept all major credit cards, PayPal, and ACH transfers for enterprise customers. You'll receive an invoice via email after each payment.",
+      },
+      {
+        "value": "cancel",
+        "trigger": "How do I cancel my subscription?",
+        "content":
+          "You can cancel your subscription anytime from your account settings. There are no cancellation fees or penalties. Your access will continue until the end of your current billing period.",
+      },
+    ]
+  }
+  return render(request, template_name, context)
+```
 :::
 
 ## API Reference
 
+### Root
+
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `orientation` | `string` | `vertical` | Layout direction |
-| `defaultValue` | `string` | — | Initially open item |
+| `defaultValue` | `string` | — | The uncontrolled value of the item(s) that should be initially expanded. |
+| `multiple` | `boolean`  | `false` | Whether multiple items can be open at the same time. |
+| `disabled` | `boolean`  | `false` | Whether the component should ignore user interaction. |
+| `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | The visual orientation of the accordion. |
+
+### Item
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `value` | `string` | — | A unique value that identifies this accordion item. If no value is provided, a unique ID will be generated automatically. Use when controlling the accordion programmatically, or to set an initial open state. |
+| `disabled` | `boolean`  | `false` | Whether the component should ignore user interaction. |

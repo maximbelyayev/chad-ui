@@ -4,21 +4,21 @@
     "class": "p-10 *:data-[slot=accordion]:max-w-sm h-fit-content"
   },
   "example": {
-    "class": "md:h-[300px]"
+    "class": "md:h-[320px]"
   },
   "basic": {
-    "class": "md:h-[300px]"
+    "class": "md:h-[320px]"
   },
   "multiple": {
-    "class": "md:h-[34rem]"
+    "class": "md:h-[512px]"
   },
   "disabled": {
-    "class": "md:h-[300px]"
+    "class": "md:h-[320px]"
   },
   "borders": {
-    "class": "h-96! md:h-80"
+    "class": "md:h-[342px]"
   },
   "card": {
-    "class": "h-[32rem]! md:h-[28rem]"
+    "class": "md:h-[500px]"
   }
 }
