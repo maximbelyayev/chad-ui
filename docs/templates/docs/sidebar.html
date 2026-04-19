@@ -1,17 +1,19 @@
-<c-sidebar collapsible="icon" class="sticky top-[calc(var(--header-height)+0.6rem)] z-30 hidden h-[calc(100svh-10rem)]! overscroll-none bg-transparent [--sidebar-menu-width:--spacing(56)] lg:flex">
+<c-sidebar collapsible="none" class="sticky top-[calc(var(--header-height)+0.6rem)] z-30 hidden h-[calc(100svh-10rem)]! overscroll-none bg-transparent [--sidebar-menu-width:--spacing(56)] lg:flex">
     <div class="h-9"></div>
     <div class="absolute top-8 z-10 h-8 w-(--sidebar-menu-width) shrink-0 bg-linear-to-b from-background via-background/80 to-background/50 blur-xs"></div>
     <div class="hidden absolute bottom-0 right-2 top-12 w-px h-full from-transparent to-transparent lg:flex bg-linear-to-b via-border"></div>
-    <c-sidebar.content>
+    <c-sidebar.content class="overflow-x-hidden px-2 mx-auto w-(--sidebar-menu-width)">
         <c-sidebar.group class="pt-6">
             <c-sidebar.group.label>Sections</c-sidebar.group.label>
             <c-sidebar.menu>
                 {% for key, value in sections.items %}
                 <c-sidebar.menu.item>
-                    <c-sidebar.menu.button tooltip="{{ value.name }}" :isActive="{{ value.url_is_active }}" asChild >
+                    <c-sidebar.menu.button :isActive="{{ value.url_is_active }}" asChild 
+                        class="relative h-[30px]! w-fit! overflow-visible! border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48"
+                    >
                         <a href="{{ value.url }}">
-                            {% heroicon_outline 'plus' %}
-                            <span>{{ value.name }}</span>
+                            <span class="flex absolute inset-0 bg-transparent w-(--sidebar-menu-width)"></span>
+                            {{ value.name }}
                         </a>
                     </c-sidebar.menu.button>
                 </c-sidebar.menu.item>
@@ -23,10 +25,12 @@
             <c-sidebar.menu>
                 {% for key, value in components.items %}
                 <c-sidebar.menu.item>
-                    <c-sidebar.menu.button tooltip="{{ value.name }}" :isActive="{{ value.url_is_active }}" asChild >
+                    <c-sidebar.menu.button :isActive="{{ value.url_is_active }}" asChild 
+                        class="relative h-[30px]! w-fit! overflow-visible! border border-transparent text-[0.8rem] font-medium after:absolute after:inset-x-0 after:-inset-y-1 after:z-0 after:rounded-md data-[active=true]:border-accent data-[active=true]:bg-accent 3xl:fixed:w-full 3xl:fixed:max-w-48"
+                    >
                         <a href="{{ value.url }}">
-                            {% heroicon_outline 'pencil' %}
-                            <span>{{ value.name }}</span>
+                            <span class="flex absolute inset-0 bg-transparent w-(--sidebar-menu-width)"></span>
+                            {{ value.name }}
                         </a>
                     </c-sidebar.menu.button>
                 </c-sidebar.menu.item>

@@ -11,8 +11,23 @@ def home(request):
     return render(request, template_name)
 
 def introduction(request):
-    template_name = 'docs/sections/introduction/index.html'
-    return render(request, template_name)
+    name = inspect.currentframe().f_code.co_name
+    template_name = f'docs/sections/{name}/index.html'
+    
+    file_path_md_data = os.path.join(settings.BASE_DIR, f'static/docs/sections/{name}.json')
+    try:
+        with open(file_path_md_data, 'r') as file:
+            md_data = json.load(file)
+    except FileNotFoundError:
+        raise Http404('Requested resource was not found.')
+    md_frontmatter = md_data.get('frontmatter', {})
+    md_context = md_data.get('context', {})
+    context = {
+        'title': md_frontmatter.get('title'),
+        'description': md_frontmatter.get('description'),
+        'headings': md_context.get('headings')
+    }
+    return render(request, template_name, context)
 
 def components(request):
     template_name = 'docs/sections/components/index.html'
@@ -20,8 +35,4 @@ def components(request):
 
 def installation(request):
     template_name = 'docs/sections/installation/index.html'
-    return render(request, template_name)
-
-def blocks(request):
-    template_name = 'docs/blocks.html'
     return render(request, template_name)

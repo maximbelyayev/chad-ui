@@ -21,7 +21,7 @@
                                         <c-button-group>
                                             <c-button variant="secondary" size="sm">
                                                 {% heroicon_outline 'square-2-stack' stroke_width=2 %}
-                                                {% translate "Copy Page" %}
+                                                {% trans "Copy Page" %}
                                             </c-button>
                                             <c-button-group.separator />
                                             <c-dropdown-menu.trigger handle="docs-dropdown" asChild>
@@ -33,12 +33,12 @@
                                     </div>
                                     <div class="flex gap-2 ml-auto">
                                         <c-button variant="secondary" size="icon-sm" asChild>
-                                            <a href="{{ current.url.previous }}">
+                                            <a href="{{ zip.previous.url }}">
                                                 {% heroicon_outline 'arrow-left' stroke_width=2 class="size-3.5" %}
                                             </a>
                                         </c-button>
                                         <c-button variant="secondary" size="icon-sm" asChild>
-                                            <a href="{{ current.url.next }}">
+                                            <a href="{{ zip.next.url }}">
                                                 {% heroicon_outline 'arrow-right' stroke_width=2 class="size-3.5" %}
                                             </a>
                                         </c-button>
@@ -57,15 +57,15 @@
 
                         <div class="hidden gap-2 items-center px-4 w-full h-16 shadow-none sm:flex sm:px-0">
                             <c-button variant="secondary" size="sm" asChild>
-                                <a href="{{ current.url.previous }}">
+                                <a href="{{ zip.previous.url }}">
                                     {% heroicon_outline 'arrow-left' stroke_width=2 class="size-3.5" %}
-                                    Components
+                                    {{ zip.previous.title }}
                                 </a>
                             </c-button>
                             <c-button variant="secondary" size="sm" asChild class="ml-auto shadow-none">
-                                <a href="{{ current.url.next }}">
+                                <a href="{{ zip.next.url }}">
+                                    {{ zip.next.title }}
                                     {% heroicon_outline 'arrow-right' stroke_width=2 class="size-3.5" %}
-                                    Alert
                                 </a>
                             </c-button>
                         </div>
@@ -76,11 +76,22 @@
                 <div class="sticky top-[calc(var(--header-height)+1px)] z-30 ml-auto hidden h-[90svh] w-(--sidebar-width) flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex">
                     <div class="h-(--top-spacing) shrink-0"></div>
                     <div class="flex overflow-y-auto flex-col gap-8 px-8 no-scrollbar">
-                        <div class="flex flex-col gap-2 p-4 pt-0 text-sm">
+
+                        <div x-data="{ active: null, setActive(value) { this.active = value; } }" class="flex flex-col gap-2 p-4 pt-0 text-sm">
                             <p class="sticky top-0 h-6 text-xs font-medium bg-background text-muted-foreground">
-                                On This Page
+                                {% trans "On This Page" %}
                             </p>
+                            {% for heading in headings %}
+                            <a x-data="{ value: '#{{ heading.headingName|slugify }}' }" :href="value" class="text-[0.8rem] text-muted-foreground no-underline transition-colors hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-foreground data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+                                :data-active="active === value ? 'true': 'false'" 
+                                data-depth="{{ heading.headingNum|length }}"
+                                @click.stop="setActive(value)"
+                            >
+                                {{ heading.headingName }}
+                            </a>
+                            {% endfor %}
                         </div>
+
                     </div>
                 </div>
 

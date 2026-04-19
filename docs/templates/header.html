@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 
 <header class="sticky top-0 z-50 w-full bg-background">
     <div class="px-6! container-wrapper 3xl:fixed:px-0">
@@ -11,20 +11,19 @@
                                 <span class="block absolute left-0 w-4 h-0.5 transition-all duration-100 bg-foreground" :class="open ? 'top-[0.4rem] -rotate-45' : 'top-1'"></span>
                                 <span class="block absolute left-0 w-4 h-0.5 transition-all duration-100 bg-foreground" :class="open ? 'top-[0.4rem] rotate-45' : 'top-2.5'"></span>
                             </div>
-                            <span class="sr-only">Toggle Menu</span>
+                            <span class="sr-only">{% trans "Toggle Menu" %}</span>
                         </div>
-                        <span class="flex items-center h-8 text-lg font-medium leading-none">Menu</span>
+                        <span class="flex items-center h-8 text-lg font-medium leading-none">{% trans "Menu" %}</span>
                     </c-button>
                 </c-popover.trigger>
                 <c-popover.content side="bottom" class="ring-0! min-h-dvh w-dvw bg-background/90! backdrop-blur! lg:hidden" alignOffset="-5">
                     <div class="flex overflow-auto flex-col gap-12 py-6 px-6" >
                         <div class="flex flex-col gap-4">
-                            <div class="text-sm font-medium text-muted-foreground">Menu</div>
+                            <div class="text-sm font-medium text-muted-foreground">{% trans "Menu" %}</div>
                             <div class="flex flex-col gap-3">
-                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'home' %}">Home</a>
-                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:installation' %}">Docs</a>
-                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:components' %}">Components</a>
-                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:blocks' %}">Blocks</a>
+                                {% for key, value in menu.items %}
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{{ value.url }}">{{ value.name }}</a>
+                                {% endfor %}
                             </div>
                         </div>
                         <div class="flex flex-col gap-4">
@@ -38,7 +37,9 @@
                         <div class="flex flex-col gap-4">
                             <div class="text-sm font-medium text-muted-foreground">Components</div>
                             <div class="flex flex-col gap-3">
-                                <a class="flex gap-2 items-center text-2xl font-medium" href="{% url 'docs:accordion' %}">Accordion</a>
+                                {% for key, value in components.items %}
+                                <a class="flex gap-2 items-center text-2xl font-medium" href="{{ value.url }}">{{ value.name }}</a>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -54,16 +55,13 @@
                 </a>
             </c-button>
             <nav class="hidden gap-0 items-center lg:flex">
-                <c-button variant="ghost" size="sm" asChild>
-                    <a href="{% url 'docs:installation' %}">Docs</a>
-                </c-button>
-                <c-button variant="ghost" size="sm" asChild>
-                    <a href="{% url 'docs:components' %}">Components</a>
-                </c-button>
-                <c-button variant="ghost" size="sm" asChild>
-                    <a href="{% url 'docs:blocks' %}">Blocks</a>
-                </c-button>
-                
+                {% for key, value in menu.items %}
+                    {% if not forloop.first %}
+                        <c-button variant="ghost" size="sm" asChild>
+                            <a href="{{ value.url }}">{{ value.name }}</a>
+                        </c-button>
+                    {% endif %}
+                {% endfor %}
             </nav>
             <div class="flex gap-2 items-center ml-auto md:flex-1 md:justify-end">
                 <c-button variant="ghost" size="icon" asChild>

@@ -22,19 +22,20 @@ const PRETTY_CODE_OPTIONS = {
 const COMPONENT_PREVIEW_CODE_HIDDEN_LINES = 3;
 const TAG_DEFAULT_CLASS_MAPPING = {
 	figure: '[&_pre]:max-h-96',
-	pre:  'no-scrollbar min-w-0 overflow-x-auto overflow-y-auto overscroll-x-contain overscroll-y-auto px-4 py-3.5 outline-none has-[[data-highlighted-line]]:px-0 has-[[data-line-numbers]]:px-0 has-[[data-slot=tabs]]:p-0 !bg-transparent',
+	pre:  	'no-scrollbar min-w-0 overflow-x-auto overflow-y-auto overscroll-x-contain overscroll-y-auto px-4 py-3.5 outline-none has-[[data-highlighted-line]]:px-0 has-[[data-line-numbers]]:px-0 has-[[data-slot=tabs]]:p-0 !bg-transparent',
 	code:   'relative rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] break-words outline-none',
-	h2:   '[&+]*:[code]:text-xl mt-10 scroll-m-28 font-heading text-xl font-medium tracking-tight first:mt-0 lg:mt-12 [&+.steps]:mt-0! [&+.steps>h3]:mt-4! [&+h3]:mt-6! [&+p]:mt-4!',
-	h3:   'mt-12 scroll-m-28 font-heading text-lg font-medium tracking-tight [&+p]:mt-4! *:[code]:text-xl',
-	p:    'leading-relaxed [&:not(:first-child)]:mt-6',
-	ul: 'my-6 ml-6 list-disc',
-	li: 'mt-2',
+	h2:   	'[&+]*:[code]:text-xl mt-10 scroll-m-28 font-heading text-xl font-medium tracking-tight first:mt-0 lg:mt-12 [&+.steps]:mt-0! [&+.steps>h3]:mt-4! [&+h3]:mt-6! [&+p]:mt-4!',
+	h3:   	'mt-12 scroll-m-28 font-heading text-lg font-medium tracking-tight [&+p]:mt-4! *:[code]:text-xl',
+	p:    	'leading-relaxed [&:not(:first-child)]:mt-6',
+	strong: 'font-medium',
+	ul: 	'my-6 ml-6 list-disc',
+	li: 	'mt-2',
 	table:  'relative w-full overflow-hidden border-none text-sm [&_tbody_tr:last-child]:border-b-0',
 	thead:  '',
 	tbody:  '',
-	tr:   'm-0 border-b',
-	th:   'px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right',
-	td:   'px-4 py-2 text-left whitespace-nowrap [&[align=center]]:text-center [&[align=right]]:text-right',
+	tr:   	'm-0 border-b',
+	th:   	'px-4 py-2 text-left font-bold [&[align=center]]:text-center [&[align=right]]:text-right',
+	td:   	'px-4 py-2 text-left whitespace-nowrap [&[align=center]]:text-center [&[align=right]]:text-right',
 };
 
 
@@ -50,6 +51,12 @@ function processElementLi(node, index, parent) {
 
 function processElementUl(node, index, parent) {
 	if (node.tagName !== 'ul') return;
+	processElementCodeInline(node);
+	node.properties.className = TAG_DEFAULT_CLASS_MAPPING[node.tagName];
+}
+
+function processElementStrong(node, index, parent) {
+	if (node.tagName !== 'strong') return;
 	processElementCodeInline(node);
 	node.properties.className = TAG_DEFAULT_CLASS_MAPPING[node.tagName];
 }
@@ -275,19 +282,20 @@ function processElementFigure(node, index, parent) {
 function rehypeDocsTree(options) {
 	const MAPPING_NODE_FUNC = {
 		figure: processElementFigure,
-		pre:  processElementPre,
+		pre:  	processElementPre,
 		code:   processElementCode,
-		h2:   processElementHeader,
-		h3:   processElementHeader,
-		p:    processElementParagraph,
+		h2:   	processElementHeader,
+		h3:   	processElementHeader,
+		p:    	processElementParagraph,
+		strong: processElementStrong,
 		ul:		processElementUl,
 		li:		processElementLi,
 		table:  processElementTable,
 		thead:  processElementTableHeadBody,
 		tbody:  processElementTableHeadBody,
-		tr:   processElementTr,
-		th:   processElementTh,
-		td:   processElementTd,
+		tr:   	processElementTr,
+		th:   	processElementTh,
+		td:   	processElementTd,
 	};
 	const executeTags = Object.keys(MAPPING_NODE_FUNC).filter(tag =>
 		(!options?.include || options.include.includes(tag)) &&

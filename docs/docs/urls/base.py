@@ -8,7 +8,6 @@ urlpatterns = [
     path('', views.introduction, name='introduction'),
     path('components/', views.components, name='components'),
     path('installation/', views.installation, name='installation'),
-    path('blocks/', views.blocks, name='blocks'),
     path('components/', include('docs.urls.components'), name='components')
 ]
 
