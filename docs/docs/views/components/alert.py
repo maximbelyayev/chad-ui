@@ -2,26 +2,10 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http import Http404, HttpRequest
 
-import os
-import json
-import inspect
+from ...context import get_docs_template_and_context
 
-def alert(request):
-    name = inspect.currentframe().f_code.co_name
-    template_name = f'docs/components/{name}/index.html'
-    
-    file_path_md_data = os.path.join(settings.BASE_DIR, f'static/docs/components/{name}.json')
-    try:
-        with open(file_path_md_data, 'r') as file:
-            md_data = json.load(file)
-    except FileNotFoundError:
-        raise Http404('Requested resource was not found.')
-    md_frontmatter = md_data.get('frontmatter', {})
-    md_context = md_data.get('context', {})
-    context = {
-        'title': md_frontmatter.get('title'),
-        'description': md_frontmatter.get('description'),
-        'headings': md_context.get('headings')
-    }
-    
-    return render(request, template_name, context)
+
+def index(request):
+  component = __name__.split('.')[-1]
+  template_name, context = get_docs_template_and_context(component)
+  return render(request, template_name, context)

@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+APP_NAME = 'chad/ui'
+
 LOCAL_APPS = [
     'docs',
 ]

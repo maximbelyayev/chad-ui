@@ -2,50 +2,34 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http import Http404, HttpRequest
 
-import os
-import json
-import inspect
+from ...context import get_docs_template_and_context
 
-def accordion(request):
-    name = inspect.currentframe().f_code.co_name
-    template_name = f'docs/components/{name}/index.html'
-    
-    file_path_md_data = os.path.join(settings.BASE_DIR, f'static/docs/components/{name}.json')
-    try:
-        with open(file_path_md_data, 'r') as file:
-            md_data = json.load(file)
-    except FileNotFoundError:
-        raise Http404('Requested resource was not found.')
-    md_frontmatter = md_data.get('frontmatter', {})
-    md_context = md_data.get('context', {})
-    context = {
-        'title': md_frontmatter.get('title'),
-        'description': md_frontmatter.get('description'),
-        'headings': md_context.get('headings')
-    }
-    
-    context.update({
-        'items': [
-        {
-            'value': "notifications",
-            'trigger': "Notification Settings",
-            'content':
-            "Manage how you receive notifications. You can enable email alerts for updates or push notifications for mobile devices.",
-        },
-        {
-            'value': "privacy",
-            'trigger': "Privacy & Security",
-            'content':
-            "Control your privacy settings and security preferences. Enable two-factor authentication, manage connected devices, review active sessions, and configure data sharing preferences. You can also download your data or delete your account.",
-        },
-        {
-            'value': "billing",
-            'trigger': "Billing & Subscription",
-            'content':
-            "View your current plan, payment history, and upcoming invoices. Update your payment method, change your subscription tier, or cancel your subscription.",
-        }]
-    })
-    return render(request, template_name, context)
+
+def index(request):
+  component = __name__.split('.')[-1]
+  template_name, context = get_docs_template_and_context(component)
+  context.update({
+    'items': [
+    {
+      'value': "notifications",
+      'trigger': "Notification Settings",
+      'content':
+      "Manage how you receive notifications. You can enable email alerts for updates or push notifications for mobile devices.",
+    },
+    {
+      'value': "privacy",
+      'trigger': "Privacy & Security",
+      'content':
+      "Control your privacy settings and security preferences. Enable two-factor authentication, manage connected devices, review active sessions, and configure data sharing preferences. You can also download your data or delete your account.",
+    },
+    {
+      'value': "billing",
+      'trigger': "Billing & Subscription",
+      'content':
+      "View your current plan, payment history, and upcoming invoices. Update your payment method, change your subscription tier, or cancel your subscription.",
+    }]
+  })
+  return render(request, template_name, context)
 
 def multiple(request):
   template_name = 'docs/components/accordion/multiple.html'

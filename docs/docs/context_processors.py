@@ -1,11 +1,12 @@
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse, reverse_lazy
+from django.conf import settings
 
 from docs.registry import MENU, SECTIONS, COMPONENTS
 
 
-def get_current_page_from_request(request: HttpRequest) -> str:
+def get_current_page_from_request(request: HttpRequest) -> str | None:
   rm = request.resolver_match
   if 'docs' and 'components' in rm.namespaces:
     page = rm.namespaces[-1]
@@ -28,7 +29,7 @@ def get_url_from_page(page: str):
     return reverse_lazy(f'docs:components:{page}:index')
 
 def get_zip_from_current_page(page: str) -> dict:
-  if page in MENU and page not in SECTIONS:
+  if page is None or page not in (*SECTIONS, *COMPONENTS):
     return None
   
   registry_flattened = [
@@ -59,8 +60,6 @@ def get_zip_from_current_page(page: str) -> dict:
 
 
 def global_context(request: HttpRequest) -> dict:
-  page = get_current_page_from_request(request)
-  zip = get_zip_from_current_page(page)
 
   ctx_menu = {
     item: {
@@ -85,11 +84,14 @@ def global_context(request: HttpRequest) -> dict:
     }
     for component in COMPONENTS 
   }
+  page = get_current_page_from_request(request)
+  zip = get_zip_from_current_page(page)
 
   return {
-    'zip': zip,
     'menu': ctx_menu,
     'sections': ctx_sections,
-    'components': ctx_components
+    'components': ctx_components,
+    'zip': zip,
+    'llm_prompt': _(f'I’m looking at this {settings.APP_NAME} documentation: {request.build_absolute_uri()}. Help me understand how to use it. Be ready to explain concepts, give examples, or help debug based on it.')
   }
 

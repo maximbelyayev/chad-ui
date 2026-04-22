@@ -77,6 +77,7 @@
                     <div class="h-(--top-spacing) shrink-0"></div>
                     <div class="flex overflow-y-auto flex-col gap-8 px-8 no-scrollbar">
 
+                        {% if headings %}
                         <div x-data="{ active: null, setActive(value) { this.active = value; } }" class="flex flex-col gap-2 p-4 pt-0 text-sm">
                             <p class="sticky top-0 h-6 text-xs font-medium bg-background text-muted-foreground">
                                 {% trans "On This Page" %}
@@ -91,6 +92,7 @@
                             </a>
                             {% endfor %}
                         </div>
+                        {% endif %}
 
                     </div>
                 </div>
