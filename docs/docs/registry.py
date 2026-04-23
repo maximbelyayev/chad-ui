@@ -16,4 +16,5 @@ COMPONENTS = [
     'accordion',
     'alert',
     'badge',
+    'button',
 ]

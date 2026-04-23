@@ -5,6 +5,13 @@ from django.conf import settings
 
 from docs.registry import MENU, SECTIONS, COMPONENTS
 
+import re
+
+def get_title_from_slug(slug: str):
+  substrings = []
+  for text in re.split('_|-', slug):
+    substrings.append(text.capitalize())
+  return ' '.join(substrings)
 
 def get_current_page_from_request(request: HttpRequest) -> str | None:
   rm = request.resolver_match
@@ -48,12 +55,12 @@ def get_zip_from_current_page(page: str) -> dict:
   return {
     'previous': {
       'slug': previous,
-      'title': _(previous.capitalize()),
+      'title': _(get_title_from_slug(previous)),
       'url': get_url_from_page(previous)
     },
     'next': {
       'slug': next,
-      'title': _(next.capitalize()),
+      'title': _(get_title_from_slug(next)),
       'url': get_url_from_page(next)
     }
   }
@@ -63,14 +70,14 @@ def global_context(request: HttpRequest) -> dict:
 
   ctx_menu = {
     item: {
-      'name': _(item.capitalize()),
+      'name': _(get_title_from_slug(item)),
       'url': get_url_from_page(item)
     }
     for item in MENU 
   }
   ctx_sections = {
     section: {
-      'name': _(section.capitalize()),
+      'name': _(get_title_from_slug(section)),
       'url': get_url_from_page(section),
       'url_is_active': request.path_info == get_url_from_page(section),
     }
@@ -78,7 +85,7 @@ def global_context(request: HttpRequest) -> dict:
   }
   ctx_components = {
     component: {
-      'name': _(component.capitalize()),
+      'name': _(get_title_from_slug(component)),
       'url': get_url_from_page(component),
       'url_is_active': request.path_info == get_url_from_page(component),
     }

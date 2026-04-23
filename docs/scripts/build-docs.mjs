@@ -27,6 +27,7 @@ const TAG_DEFAULT_CLASS_MAPPING = {
 	h2:   	'[&+]*:[code]:text-xl mt-10 scroll-m-28 font-heading text-xl font-medium tracking-tight first:mt-0 lg:mt-12 [&+.steps]:mt-0! [&+.steps>h3]:mt-4! [&+h3]:mt-6! [&+p]:mt-4!',
 	h3:   	'mt-12 scroll-m-28 font-heading text-lg font-medium tracking-tight [&+p]:mt-4! *:[code]:text-xl',
 	p:    	'leading-relaxed [&:not(:first-child)]:mt-6',
+	a:		'font-medium underline underline-offset-4',
 	strong: 'font-medium',
 	ul: 	'my-6 ml-6 list-disc',
 	li: 	'mt-2',
@@ -57,6 +58,12 @@ function processElementUl(node, index, parent) {
 
 function processElementStrong(node, index, parent) {
 	if (node.tagName !== 'strong') return;
+	processElementCodeInline(node);
+	node.properties.className = TAG_DEFAULT_CLASS_MAPPING[node.tagName];
+}
+
+function processElementAnchor(node, index, parent) {
+	if (node.tagName !== 'a') return;
 	processElementCodeInline(node);
 	node.properties.className = TAG_DEFAULT_CLASS_MAPPING[node.tagName];
 }
@@ -130,7 +137,7 @@ function processElementTableAsDetails(node) {
 		detailsContentDl: 'flex flex-col gap-2',
 		detailsContentDlChild: 'flex flex-col md:grid md:grid-cols-[5fr_11.5fr_2.5rem] w-full',
 		detailsContentDlDt: 'px-4 py-2 font-semibold',
-		detailsContentDlDd: 'px-4 py-2'
+		detailsContentDlDd: 'px-4 py-2 [&_code]:inline-block!'
 	};
     const tHead = node.children.find(c => c.type === 'element' && c.tagName === 'thead');
     const tHeadTr = tHead?.children.find(c => c.type === 'element' && c.tagName === 'tr');
@@ -172,6 +179,11 @@ function processElementTableAsDetails(node) {
     });
     const detailRows = tBodyTrs.map(tr => {
         const tds = tr.children.filter(c => c.type === 'element' && c.tagName === 'td');
+		tds.forEach(td => {
+			td.children.forEach(node => {
+				processElementCodeInline(node);
+			});
+		});
         const [nameTd, typeTd, defaultTd, descriptionTd] = tds;
         const summaryTds = tds.slice(0, -1);
         const contentDiv = {
@@ -287,6 +299,7 @@ function rehypeDocsTree(options) {
 		h2:   	processElementHeader,
 		h3:   	processElementHeader,
 		p:    	processElementParagraph,
+		a:		processElementAnchor,
 		strong: processElementStrong,
 		ul:		processElementUl,
 		li:		processElementLi,
@@ -483,7 +496,7 @@ async function processMarkdown(markdownContent, dir, name) {
 
 	await Promise.all(codeBlockMatches.map(async ({ lang, code}, i) => {
 		let content = `\`\`\`${lang}\n${code}\n\`\`\``;
-		if (['html', 'python'].includes(lang)) {
+		if (['html', 'python', 'css'].includes(lang)) {
 			content = `\`\`\`${lang} showLineNumbers\n${code}\n\`\`\``;
 		} 
 
@@ -546,7 +559,7 @@ async function processMarkdown(markdownContent, dir, name) {
 		const exampleClass = [exampleDefaultConfig?.class, exampleConfigs[headingName]?.class].filter(Boolean).join(' ');
 
 		const block = `
-			<c-example>
+			<c-example id="${headingName}">
 				<c-example.preview${exampleAlign ? ` align="${exampleAlign}"` : ''}${exampleClass ? ` class="${exampleClass}"` : ''}>
 					${firstCodeBlock}
 				</c-example.preview>
@@ -556,7 +569,7 @@ async function processMarkdown(markdownContent, dir, name) {
 						@click="copyCode()"
 						data-copied="false"
 						data-slot="copy-button"
-						class="absolute top-1.5! z-10 size-7! bg-code hover:opacity-100 focus-visible:opacity-100"
+						class="absolute ${exampleCodeIncludesPython ? `top-1.5!` : 'top-3!'} z-10 size-7! bg-code hover:opacity-100 focus-visible:opacity-100"
 					>
 						{% heroicon_outline 'square-2-stack' stroke_width=2 x_show="!copied" %}
 						{% heroicon_outline 'check' stroke_width=2 x_show="copied" %}
@@ -565,7 +578,7 @@ async function processMarkdown(markdownContent, dir, name) {
 			</c-example>
 		`;
 		if (exampleCodeIncludesPython) {
-			html = html.replace(`<div data-directive="${i}"></div>`, `<div hx-get="{% url 'docs:components:${name}:${headingName}' %}" hx-trigger="load"></div>` );
+			html = html.replace(`<div data-directive="${i}"></div>`, `<div id="${headingName}-partial" hx-get="{% url 'docs:components:${name}:${headingName}' %}" hx-trigger="load"></div>` );
 			partials.push({ heading: headingName, partial: block})
 		}
 		else {
