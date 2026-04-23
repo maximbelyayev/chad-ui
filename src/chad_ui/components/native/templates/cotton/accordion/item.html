@@ -1,9 +1,9 @@
-<c-vars disabled value></c-vars>
+<c-vars disabled value />
 
 <div
     x-data="{
-        disabled: disabled ? disabled : {{ disabled|yesno:'true,false' }},
         value: '{{ value }}',
+        disabled: disabled ? disabled : {{ disabled|yesno:'true,false' }},
         header: null,
         trigger: null,
         content: null,

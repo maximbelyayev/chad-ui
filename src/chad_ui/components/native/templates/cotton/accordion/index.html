@@ -1,12 +1,11 @@
 {% with component='accordion' %}
 
-<c-vars type="single" defaultValue="" collapsible disabled dir="ltr" orientation="vertical"></c-vars>
+<c-vars defaultValue multiple disabled orientation="vertical" dir="ltr" />
 
 <div
     x-data="{
-        type: '{{ type|lower }}',
         defaultValue: '{{ defaultValue }}',
-        collapsible: {{ collapsible|yesno:'true,false' }},
+        multiple: {{ multiple|yesno:'true,false' }},
         disabled: {{ disabled|yesno:'true,false' }},
         dir: '{{ dir|lower }}',
         orientation: '{{ orientation|lower }}',
@@ -40,12 +39,8 @@
             el.setAttribute('data-disabled', '');
         },
         toggle(value) {
-            if (this.type === 'single') {
-                if (this.open[value] && !this.collapsible) return;
-                this.open = { [value]: !this.open[value] }
-            } else {
-                this.open[value] = !this.open[value];
-            }
+            if (this.multiple) this.open[value] = !this.open[value];
+            else this.open = { [value]: !this.open[value] };
         },
         isOpen(value) {
             return !!this.open[value];
