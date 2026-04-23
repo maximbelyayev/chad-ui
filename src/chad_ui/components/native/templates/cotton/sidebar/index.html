@@ -2,6 +2,7 @@
 
 {% if collapsible == 'none' %}
 <div
+    x-data="{ side: '{{ side }}', variant: '{{ variant }}', collapsible: '{{ collapsible }}' }"
     data-slot="sidebar"
     class="flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground{% if class %} {{ class }}{% endif %}"
     {{ attrs }}

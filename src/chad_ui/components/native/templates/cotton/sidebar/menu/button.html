@@ -4,7 +4,7 @@
 
 {% if tooltip %}
 <c-tooltip>
-    <c-tooltip.trigger class="w-full" ::disabled="settledState !== 'collapsed' ? '' : null" asChild>
+    <c-tooltip.trigger class="w-full" ::disabled="collapsible === 'none' || settledState !== 'collapsed' ? '' : null" asChild>
         <button
             x-data="{
                 isActive: {{ isActive|yesno:'true,false' }},
