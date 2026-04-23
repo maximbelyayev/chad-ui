@@ -6,6 +6,10 @@
     x-data="{
         open: {{ defaultOpen|yesno:'true,false' }},
         copied: false,
+        init() {
+            const lines = $el.querySelectorAll('code span[data-line]')
+            if (lines.length && lines.length < 4) this.open = true;
+        },
         async copy(text) {
             if (!text) return;
             try {
