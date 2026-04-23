@@ -24,7 +24,7 @@
     :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-item`)"
     :data-variant="variant"
     :data-disabled="disabled ? '' : null"
-    @mouseenter="if (!this.disabled) handleFocus($el)"
+    @mouseenter="if (!disabled) handleFocus($el)"
     @mouseleave="removeFocus($el)"
     @click.stop="handleEvent($event)"
     @keydown.enter.self="handleEvent($event)"

@@ -73,14 +73,17 @@
         {% endif %}
     {% endif %}
     {{ attrs }}
+    data-slot="button"
+    {% if not asChild %}
     type="button"
     tabindex="0"
+    {% endif %}
 >
     {% if htmx %}
     <span class="htmx-indicator-hide">
         {{ slot }}
     </span>
-    <c-spinner class="absolute m-auto" />
+    <c-spinner htmx class="absolute m-auto" />
     {% else %}
     {{ slot }}
     {% endif %}

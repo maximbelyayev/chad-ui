@@ -5,11 +5,28 @@
         asChild: {{ asChild|yesno:'true,false' }},
         initAsChild(el) {
             const c = el.firstElementChild;
-            if (!c || c.hasAttribute('x-data')) return false;
+            if (!c) return false;
+            if (c.hasAttribute('x-data')) {
+                if (c.getAttribute('x-data').includes('asChild: true')) {
+                    this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
+                    return true;
+                }
+                return false;
+            }
             [...el.attributes].forEach(attr => {
                 if (c.hasAttribute(attr.name) || attr.name === 'class') return;
                 if (attr.name === 'x-data') {
                     c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                const key = attr.name.match(/^(?::|x-bind:)(.+)/)?.[1]
+                if (key) {
+                    let value;
+                    try { value = Alpine.evaluate(el, attr.value); } catch { }
+                    value === null || value === false
+                        ? c.removeAttribute(key)
+                        : c.setAttribute(key, value === true ? '' : value);
+                    c.removeAttribute(attr.name);
                     return;
                 }
                 c.setAttribute(attr.name, attr.value);

@@ -2,18 +2,30 @@
 
 <div
     x-data="{ orientation: '{{ orientation|lower }}' }"
+    :data-orientation="orientation"
     role="group"
     data-slot="button-group"
-    class="has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1
-        {% if orientation == 'vertical' %}
+    class="has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-within:z-10 [&>*]:focus-visible:relative [&>*]:focus-within:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1
+        {% if orientation == 'horizontal' %}
+        [&>[data-slot]]:rounded-r-none
+        [&>[data-slot]:not(:has(~[data-slot]))]:rounded-r-md!
+        [&>[data-slot]~[data-slot]]:rounded-l-none
+        [&>[data-slot]~[data-slot]]:border-l-0
+        [&>[data-slot]:not([data-slot=button-group])_[data-slot=button]]:rounded-r-none
+        [&>[data-slot]:not(:has(~[data-slot])):not([data-slot=button-group])_[data-slot=button]]:rounded-r-md!
+        [&>[data-slot]~[data-slot]:not([data-slot=button-group])_[data-slot=button]]:rounded-l-none
+        [&>[data-slot]~[data-slot]:not([data-slot=button-group])_[data-slot=button]]:border-l-0
+        {% elif orientation == 'vertical' %}
         flex-col
-        [&>*:not(:first-child),&>*:not(:first-child)_button]:rounded-t-none
-        [&>*:not(:first-child),&>*:not(:first-child)_button]:border-t-0
-        [&>*:not(:last-child),&>*:not(:last-child)_button]:rounded-b-none
-        {% else %}
-        [&>*:not(:first-child),&>*:not(:first-child)_button]:rounded-l-none
-        [&>*:not(:first-child),&>*:not(:first-child)_button]:border-l-0
-        [&>*:not(:last-child),&>*:not(:last-child)_button]:rounded-r-none
+        [&>:not([data-slot=button-group]):not([data-slot=button])_[data-slot=button]]:w-full
+        [&>[data-slot]]:rounded-b-none
+        [&>[data-slot]:not(:has(~[data-slot]))]:rounded-b-md!
+        [&>[data-slot]~[data-slot]]:rounded-t-none
+        [&>[data-slot]~[data-slot]]:border-t-0
+        [&>[data-slot]:not([data-slot=button-group])_[data-slot=button]]:rounded-b-none
+        [&>[data-slot]:not(:has(~[data-slot])):not([data-slot=button-group])_[data-slot=button]]:rounded-b-md!
+        [&>[data-slot]~[data-slot]:not([data-slot=button-group])_[data-slot=button]]:rounded-t-none
+        [&>[data-slot]~[data-slot]:not([data-slot=button-group])_[data-slot=button]]:border-t-0
         {% endif %}{% if class %} {{ class }}{% endif %}
     "
     {{ attrs }}
