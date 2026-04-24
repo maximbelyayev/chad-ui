@@ -3,127 +3,132 @@
 <c-vars side="bottom" sideOffset="4" align="center" alignOffset="0" />
 
 <template x-teleport="body">
-    <div x-data="{ 
-            side: '{{ side }}',
-            sideOffset: {{ sideOffset }},
-            align: '{{ align }}',
-            alignOffset: {{ alignOffset }},
-            width: null,
-            items: [],
-            highlightedIndex: -1,
-            anchor: null,
-            initAnchor() {
-                return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
-                    .find(n => { try { return Alpine.$data(n).id.includes(id) } catch { return false } });
-            },
-            init() {  
-                this.anchor = this.initAnchor() 
-                this.$nextTick(() => {
-                    this.items = this.indexItems();
-                });
-                this.$watch('open', open => {
-                    if (open) { 
-                        htmx.process($el);
-                        const lastValue = Object.keys(selected).findLast(value => selected[value]);
-                        if (!lastValue) return;
-                        this.highlightedIndex = values.indexOf(lastValue);
-                        this.handleFocus(this.items[this.highlightedIndex]);
-                    }
-                    else this.$nextTick(() => this.anchor?.focus());
-                })
-            },
-            indexItems: () => Array.from($el.querySelectorAll(`[data-slot=${component}-item]`)),
-            handleFocus(el) {
-                const index = this.items.indexOf(el);
-                if (index > -1) this.highlightedIndex = index;
-                this.items.filter(i => i !== el).forEach(i => this.removeFocus(i));
-                el.focus();
-                el.setAttribute('tabindex', 0);
-                el.setAttribute('data-highlighted', '')    
-                getStore(true).lastFocusedEl = el;  
-            },
-            removeFocus(el) {
-                el.blur();
-                el.setAttribute('tabindex', -1);
-                el.removeAttribute('data-highlighted')
-            },
-        }"
-        :id="`${id}-portal`"
-        x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
-        @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
-        class="fixed inset-0 z-10 pointer-events-none overflow-clip"
-    >
-        <div
-            x-cloak
-            x-show="open && modal"
-            aria-hidden="true"
-            class="fixed inset-0 duration-100 pointer-events-auto isolate"
-        ></div>
-        <div
-            x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
-            style="transform: translate(`${this.translation}`);"
-            class="pointer-events-none"
+    <div :id="`${id}-portal`">
+        <div x-data="{ 
+                side: '{{ side }}',
+                sideOffset: {{ sideOffset }},
+                align: '{{ align }}',
+                alignOffset: {{ alignOffset }},
+                width: null,
+                items: [],
+                highlightedIndex: -1,
+                anchor: null,
+                cId: '{{ attrs.id }}',
+                findAnchor() {
+                    return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
+                        .find(n => { try { return Alpine.$data(n).id === id } catch { return false } });
+                },
+                initContent() {
+                    this.anchor = this.findAnchor();
+                    if (!this.cId) this.cId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
+                },
+                init() {  
+                    this.initContent()
+                    this.$nextTick(() => {
+                        this.items = this.indexItems();
+                    });
+                    this.$watch('open', open => {
+                        if (open) { 
+                            htmx.process($el);
+                            const lastValue = Object.keys(selected).findLast(value => selected[value]);
+                            if (!lastValue) return;
+                            this.highlightedIndex = values.indexOf(lastValue);
+                            this.handleFocus(this.items[this.highlightedIndex]);
+                        }
+                        else this.$nextTick(() => this.anchor?.focus());
+                    })
+                },
+                indexItems: () => Array.from($el.querySelectorAll(`[data-slot=${component}-item]`)),
+                handleFocus(el) {
+                    const index = this.items.indexOf(el);
+                    if (index > -1) this.highlightedIndex = index;
+                    this.items.filter(i => i !== el).forEach(i => this.removeFocus(i));
+                    el.focus();
+                    el.setAttribute('tabindex', 0);
+                    el.setAttribute('data-highlighted', '')    
+                    getStore(true).lastFocusedEl = el;  
+                },
+                removeFocus(el) {
+                    el.blur();
+                    el.setAttribute('tabindex', -1);
+                    el.removeAttribute('data-highlighted')
+                },
+            }"
+            x-effect="if (open) $el.removeAttribute('aria-hidden');"
+            @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
+            class="fixed inset-0 z-10 pointer-events-none overflow-clip"
         >
             <div
-                x-data="{
-                    init() {
-                        this.$nextTick(() => this.handleAlignment(anchor.offsetWidth))
-                    },
-                    handleAlignment(width) {
-                        if (!Number(width) || Number(width) <= 0) return;
-                        let translation;
-                        if (['top', 'bottom'].includes(this.side)) {
-                            translation = `${this.alignOffset}px, 0`
-                            $el.style.transform = `translate(${translation.trim()})`
-                            $el.style.width = `${width}px`;
-                            
-                        }
-                        else {
-                            translation = `0, ${this.alignOffset}px`
-                            $el.style.transform = `translate(${translation.trim()})`
-                            $el.style.width = '100%'
-                        }
-                    }
-                }"
-                x-show="open"
-                x-effect="handleAlignment(width);"
-                @htmx:before:init.window="if ($event.target.contains(anchor)) handleAlignment(anchor.offsetWidth);"
-                :data-open="open ? '' : null"
-                :data-closed="open ? null : ''"
-                @click.away="hideContent()"
-                @keydown.down.prevent="if (items.length === 0) return;
-                    if (highlightedIndex === -1) highlightedIndex = 0;
-                    else if (highlightedIndex === items.length - 1) {
-                        return;
-                    } else highlightedIndex++;
-                    handleFocus(items[highlightedIndex]);
-                "
-                @keydown.up.prevent="if (items.length === 0) return;
-                    if (highlightedIndex === -1) highlightedIndex = items.length - 1;
-                    else if (highlightedIndex === 0) {
-                        return;
-                    } else highlightedIndex--;
-                    handleFocus(items[highlightedIndex]);
-                "
-                @keydown.escape.window="if (open) {
-                    $event.preventDefault();
-                    $event.stopImmediatePropagation();
-                    hideContent();
-                }"
-                x-trap="open"
-                x-transition:enter="transition-all ease-out duration-100"
-                x-transition:enter-start="opacity-0 scale-99 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition-all ease-in duration-100"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
-                tabindex="-1"
-                role="menu"
-                data-slot="{{ component }}-content"
-                class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
-                {{ attrs }}
+                x-cloak
+                x-show="open && modal"
+                aria-hidden="true"
+                class="fixed inset-0 duration-100 pointer-events-auto isolate"
+            ></div>
+            <div
+                x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
+                style="transform: translate(`${this.translation}`);"
+                class="pointer-events-none"
             >
-                {{ slot }}
+                <div
+                    x-data="{
+                        init() {
+                            this.$nextTick(() => this.handleAlignment(anchor.offsetWidth))
+                        },
+                        handleAlignment(width) {
+                            if (!Number(width) || Number(width) <= 0) return;
+                            let translation;
+                            if (['top', 'bottom'].includes(this.side)) {
+                                translation = `${this.alignOffset}px, 0`
+                                $el.style.transform = `translate(${translation.trim()})`
+                                $el.style.width = `${width}px`;
+                            }
+                            else {
+                                translation = `0, ${this.alignOffset}px`
+                                $el.style.transform = `translate(${translation.trim()})`
+                                $el.style.width = '100%'
+                            }
+                        }
+                    }"
+                    x-show="open"
+                    x-effect="handleAlignment(width);"
+                    @htmx:before:init.window="if ($event.target.contains(anchor)) handleAlignment(anchor.offsetWidth);"
+                    :data-open="open ? '' : null"
+                    :data-closed="open ? null : ''"
+                    @click.away="hideContent()"
+                    @keydown.down.prevent="if (items.length === 0) return;
+                        if (highlightedIndex === -1) highlightedIndex = 0;
+                        else if (highlightedIndex === items.length - 1) {
+                            return;
+                        } else highlightedIndex++;
+                        handleFocus(items[highlightedIndex]);
+                    "
+                    @keydown.up.prevent="if (items.length === 0) return;
+                        if (highlightedIndex === -1) highlightedIndex = items.length - 1;
+                        else if (highlightedIndex === 0) {
+                            return;
+                        } else highlightedIndex--;
+                        handleFocus(items[highlightedIndex]);
+                    "
+                    @keydown.escape.window="if (open) {
+                        $event.preventDefault();
+                        $event.stopImmediatePropagation();
+                        hideContent();
+                    }"
+                    x-trap="open"
+                    x-transition:enter="transition-all ease-out duration-100"
+                    x-transition:enter-start="opacity-0 scale-99 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition-all ease-in duration-100"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-95"
+                    tabindex="-1"
+                    role="menu"
+                    data-slot="{{ component }}-content"
+                    class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
+                    {{ attrs }}
+                >
+                    {{ slot }}
+                </div>
             </div>
         </div>
     </div>

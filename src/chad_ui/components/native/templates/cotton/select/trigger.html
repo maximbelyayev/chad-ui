@@ -9,7 +9,7 @@
         asChild: {{ asChild|yesno:'true,false' }},
         component: '{{ component }}',
         root: null,
-        id: '{{ attrs.id }}',
+        tId: '{{ attrs.id }}',
         findRoot() {
             const p = this.$el.parentElement;
             if (p.getAttribute('data-slot') === this.component) return p;
@@ -21,7 +21,7 @@
                 if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
             }
             this.root = r;
-            if (!this.id) this.id = $id(`${r.id}-trigger`) || $id(`chad-ui_r_${this.component}-trigger`);
+            if (!this.tId) this.tId = $id(`${r.id}-trigger`) || $id(`chad-ui_r_${this.component}-trigger`);
             return false;
         },
         init() {
@@ -40,7 +40,7 @@
         }
     }"
     x-resize="handleResize({ width: $width, height: $height});"
-    :id="id"
+    :id="tId"
     @click="handleTrigger()"
     type="button"
     tabindex="0"
