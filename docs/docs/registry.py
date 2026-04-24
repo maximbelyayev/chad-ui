@@ -17,4 +17,5 @@ COMPONENTS = [
     'alert',
     'badge',
     'button',
+    'button_group',
 ]

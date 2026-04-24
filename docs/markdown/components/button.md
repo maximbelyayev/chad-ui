@@ -274,7 +274,7 @@ You can use the `asChild` prop on `<c-button>` to make another component look li
 
 ### HTMX
 
-Use the `htmx` prop with [htmx attributes](https://htmx.org/reference/#attributes) on `c-button` to render a spinner in-place when an htmx request is in-flight.
+Use the `htmx` prop with [HTMX attributes](https://htmx.org/reference/#attributes) on `c-button` to render a spinner in-place when an htmx request is in-flight.
 
 :::example
 ```html
@@ -292,7 +292,7 @@ from django.shortcuts import render
 import random
 import time
 
-def htmx(request):
+def htmx(request: HttpRequest) -> HttpResponse:
   template_name = 'docs/components/button/htmx.html'
   variants = ["default", "outline", "ghost", "destructive", "secondary", "link"]
   variant = random.choice(variants)

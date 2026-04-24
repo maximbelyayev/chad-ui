@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
+{% block head_title %}{{ title }}{% endblock %}
+
 {% block content %}
 <div class="flex flex-col flex-1 px-2 container-wrapper">
     <c-sidebar.provider width="18rem" widthIcon="3rem" class="min-h-min! flex-1 items-start px-0 [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--top-spacing:calc(var(--spacing)*4)] 3xl:fixed:container 3xl:fixed:px-3" style="--sidebar-width:calc(var(--spacing) * 72); --sidebar-width-icon:3rem">

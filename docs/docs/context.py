@@ -1,5 +1,6 @@
 from django.http import Http404
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 from .registry import SECTIONS, COMPONENTS
 
@@ -25,8 +26,8 @@ def get_docs_template_and_context(name: str):
     md_frontmatter = md_data.get('frontmatter', {})
     md_context = md_data.get('context', {})
     context = {
-        'title': md_frontmatter.get('title'),
-        'description': md_frontmatter.get('description'),
+        'title': _(md_frontmatter.get('title')),
+        'description': _(md_frontmatter.get('description')),
         'headings': md_context.get('headings')
     }
 
