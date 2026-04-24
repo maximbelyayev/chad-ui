@@ -1,0 +1,10 @@
+{
+  "default": {
+    "align": "center",
+    "class": "p-10 h-72"
+  },
+  "example": {
+    "align": "center",
+    "class": "h-[800px] p-6 md:h-[850px]"
+  }
+}

@@ -8,4 +8,7 @@ urlpatterns = [
     path('badge/', include('docs.urls.components.badge')),
     path('button/', include('docs.urls.components.button')),
     path('button-group/', include('docs.urls.components.button_group')),
+    path('field/', include('docs.urls.components.field')),
+    path('input/', include('docs.urls.components.input')),
+    path('input-group/', include('docs.urls.components.input_group')),
 ]

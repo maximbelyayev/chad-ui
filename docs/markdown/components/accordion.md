@@ -111,7 +111,10 @@ Use the `multiple` prop to allow multiple items to be open at the same time.
 </c-accordion>
 ```
 ```python
-def multiple(request):
+from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
+
+def multiple(request: HttpRequest) -> HttpResponse:
   template_name = 'docs/components/accordion/multiple.html'
   context = {
     'items': [
@@ -198,7 +201,10 @@ Add `border` to the `c-accordion` and `border-b last:border-b-0` to the `c-accor
 </c-accordion>
 ```
 ```python
-def borders(request):
+from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
+
+def borders(request: HttpRequest) -> HttpResponse:
   template_name = 'docs/components/accordion/borders.html'
   context = {
     'items': [
@@ -253,7 +259,10 @@ Wrap the `c-accordion` in a `c-card` component.
 </c-card>
 ```
 ```python
-def card(request):
+from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
+
+def card(request: HttpRequest) -> HttpResponse:
   template_name = 'docs/components/accordion/card.html'
   context = {
     "items": [

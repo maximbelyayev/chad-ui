@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.conf import settings
-from django.http import Http404, HttpRequest
+from django.http import Http404, HttpRequest, HttpResponse
 
 from ...context import get_docs_template_and_context
 
 
-def index(request):
+def index(request: HttpRequest) -> HttpResponse:
   component = __name__.split('.')[-1]
   template_name, context = get_docs_template_and_context(component)
   context.update({

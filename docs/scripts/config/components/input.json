@@ -1,0 +1,9 @@
+{
+  "default": {
+    "align": "center",
+    "class": "p-10 h-72 *:max-w-xs"
+  },
+  "form": {
+    "class": "h-[36rem] *:max-w-md!"
+  }
+}
