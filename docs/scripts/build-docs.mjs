@@ -2,6 +2,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import remarkDirective from 'remark-directive'
+import rehypeRaw from 'rehype-raw';
 import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeStringify from 'rehype-stringify';
 import remarkGfm from 'remark-gfm';
@@ -291,6 +292,31 @@ function processElementFigure(node, index, parent) {
 	if (parent) node.properties.className = TAG_DEFAULT_CLASS_MAPPING[node.tagName];
 }
 
+function rehypeCotton() {
+  return (tree) => {
+    const cottonNodes = [];
+    visit(tree, 'element', (node) => {
+      if (!node.tagName?.startsWith('c-')) return;
+      cottonNodes.push({ node });
+    });
+    for (const { node } of cottonNodes) {
+      visit(node, 'text', (node, index, parent) => {
+        const processed = unified()
+          .use(remarkParse)
+          .use(remarkGfm)
+          .use(remarkRehype, { allowDangerousHtml: true })
+          .use(rehypeDocsTree)
+          .use(rehypeStringify)
+          .processSync(node.value);
+        parent.children[index] = {
+          type: 'raw',
+          value: String(processed)
+        };
+      });
+    }
+  };
+}
+
 function rehypeDocsTree(options) {
 	const MAPPING_NODE_FUNC = {
 		figure: processElementFigure,
@@ -486,6 +512,8 @@ async function processMarkdown(markdownContent, dir, name) {
 		.use(remarkParse)
 		.use(remarkGfm)
 		.use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeRaw)
+    .use(rehypeCotton)
 		.use(rehypeDocsTree, {
 			exclude: ['figure', 'pre']
 		})
