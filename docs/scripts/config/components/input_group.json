@@ -1,6 +1,6 @@
 {
   "default": {
     "align": "center",
-    "class": "p-10 h-72"
+    "class": "p-10 h-[26rem]"
   }
 }
