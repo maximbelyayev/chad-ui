@@ -1,10 +1,10 @@
 <c-vars variant="default" />
 
 <div 
-    data-slot="alert" 
-    role="alert" 
-    class="grid gap-0.5 rounded-lg border border-border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert bg-card max-w-md{% if variant|lower == 'destructive' %} text-destructive *:data-[slot=alert-description]:text-destructive/90{% else %} text-card-foreground{% endif %}{% if class %} {{ class }}{% endif %}"
-    {{ attrs }}
+  data-slot="alert" 
+  role="alert" 
+  class="grid gap-0.5 rounded-lg border border-border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert bg-card max-w-md{% if variant|lower == 'destructive' %} text-destructive *:data-[slot=alert-description]:text-destructive/90{% else %} text-card-foreground{% endif %}{% if class %} {{ class }}{% endif %}"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </div>

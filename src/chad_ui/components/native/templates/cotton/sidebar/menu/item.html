@@ -1,26 +1,26 @@
 <li 
-    x-data="{
-        handleMouseOver(event) {
-            if (event.target.getAttribute('data-sidebar') === 'menu-sub') return;
-            const menuActions = document.querySelectorAll('[data-sidebar=menu-action]')
-            menuActions.forEach(a => Alpine.$data(a).hide());
-            const menuAction = $el.querySelector(':scope > [data-sidebar=menu-action]')
-            if (menuAction) Alpine.$data(menuAction).show();
-        },
-        handleMouseLeave(event) {
-            const menuActions = $el.querySelectorAll('[data-sidebar=menu-action]')
-            menuActions.forEach(a => {
-                const aData = Alpine.$data(a);
-                aData.hide();
-            })
-        }
-    }"
-    @mouseover.stop="handleMouseOver($event)"
-    @mouseleave="handleMouseLeave($event)"
-    class="relative group/menu-item"
-    {{ attrs }}
-    data-slot="sidebar-menu-item" 
-    data-sidebar="menu-item" 
+  x-data="{
+    handleMouseOver(event) {
+      if (event.target.getAttribute('data-sidebar') === 'menu-sub') return;
+      const menuActions = document.querySelectorAll('[data-sidebar=menu-action]')
+      menuActions.forEach(a => Alpine.$data(a).hide());
+      const menuAction = $el.querySelector(':scope > [data-sidebar=menu-action]')
+      if (menuAction) Alpine.$data(menuAction).show();
+    },
+    handleMouseLeave(event) {
+      const menuActions = $el.querySelectorAll('[data-sidebar=menu-action]')
+      menuActions.forEach(a => {
+        const aData = Alpine.$data(a);
+        aData.hide();
+      })
+    }
+  }"
+  @mouseover.stop="handleMouseOver($event)"
+  @mouseleave="handleMouseLeave($event)"
+  class="relative group/menu-item"
+  {{ attrs }}
+  data-slot="sidebar-menu-item" 
+  data-sidebar="menu-item" 
 >
-    {{ slot }}
+  {{ slot }}
 </li>

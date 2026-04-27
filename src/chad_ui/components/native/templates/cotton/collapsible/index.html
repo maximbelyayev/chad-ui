@@ -3,76 +3,76 @@
 <c-vars defaultOpen modal />
 
 <div data-slot="{{ component }}" 
-    x-data="{
-        open: {{ defaultOpen|yesno:'true,false' }},
-        component: '{{ component }}',
-        id: '{{ attrs.id }}',
-        initStore() {
-            Alpine.store('chad-ui', { ...$store['chad-ui'] })
-            this.$store['chad-ui'][this.component] ??= {};
-            this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
-        },
-        getStore(global = false) {
-            if (global) return this.$store['chad-ui']
-            return this.$store['chad-ui'][this.component];
-        },
-        initAsChild(el) {
-            const c = el.firstElementChild;
-            if (!c) return false;
-            if (c.hasAttribute('x-data')) {
-                if (c.getAttribute('x-data').includes('asChild: true')) {
-                    this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
-                    return true;
-                }
-                return false;
-            }
-            [...el.attributes].forEach(attr => {
-                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
-                if (attr.name === 'x-data') {
-                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
-                    return;
-                }
-                const key = attr.name.match(/^(?::|x-bind:)(.+)/)?.[1]
-                if (key) {
-                    let value;
-                    try { value = Alpine.evaluate(el, attr.value); } catch { }
-                    value === null || value === false
-                        ? c.removeAttribute(key)
-                        : c.setAttribute(key, value === true ? '' : value);
-                    c.removeAttribute(attr.name);
-                    return;
-                }
-                c.setAttribute(attr.name, attr.value);
-            });
-            c.classList.add(...el.classList);
-            el.replaceWith(c);
-            return true;
-        },
-        initIndex() {
-            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
-            this.initStore();
-        },
-        init() {
-            this.initIndex();
-            if (this.open) this.showContent();
-        },
-        toggleContent(event) {
-            if (this.open) this.hideContent();
-            else this.showContent(event);
-        },
-        showContent(event) {
-            this.open = true;
-        },
-        hideContent() {
-            this.open = false;
+  x-data="{
+    open: {{ defaultOpen|yesno:'true,false' }},
+    component: '{{ component }}',
+    id: '{{ attrs.id }}',
+    initStore() {
+      Alpine.store('chad-ui', { ...$store['chad-ui'] })
+      this.$store['chad-ui'][this.component] ??= {};
+      this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
+    },
+    getStore(global = false) {
+      if (global) return this.$store['chad-ui']
+      return this.$store['chad-ui'][this.component];
+    },
+    initAsChild(el) {
+      const c = el.firstElementChild;
+      if (!c) return false;
+      if (c.hasAttribute('x-data')) {
+        if (c.getAttribute('x-data').includes('asChild: true')) {
+          this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
+          return true;
         }
-    }"
-    :id="id"
-    :data-open="open ? '' : null"
-    :data-closed="open ? null : ''"
-    {{ attrs }}
+        return false;
+      }
+      [...el.attributes].forEach(attr => {
+        if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+        if (attr.name === 'x-data') {
+          c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+          return;
+        }
+        const key = attr.name.match(/^(?::|x-bind:)(.+)/)?.[1]
+        if (key) {
+          let value;
+          try { value = Alpine.evaluate(el, attr.value); } catch { }
+          value === null || value === false
+            ? c.removeAttribute(key)
+            : c.setAttribute(key, value === true ? '' : value);
+          c.removeAttribute(attr.name);
+          return;
+        }
+        c.setAttribute(attr.name, attr.value);
+      });
+      c.classList.add(...el.classList);
+      el.replaceWith(c);
+      return true;
+    },
+    initIndex() {
+      if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+      this.initStore();
+    },
+    init() {
+      this.initIndex();
+      if (this.open) this.showContent();
+    },
+    toggleContent(event) {
+      if (this.open) this.hideContent();
+      else this.showContent(event);
+    },
+    showContent(event) {
+      this.open = true;
+    },
+    hideContent() {
+      this.open = false;
+    }
+  }"
+  :id="id"
+  :data-open="open ? '' : null"
+  :data-closed="open ? null : ''"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </div>
 
 {% endwith %}

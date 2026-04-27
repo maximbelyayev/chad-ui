@@ -3,60 +3,60 @@
 <c-vars disabled nativeButton="true" asChild />
 
 <{% if nativeButton|lower == 'false' %}div{% else %}button{% endif %}
-    data-slot="{{ component }}-trigger"
-    x-data="{
-        disabled: {{ disabled|yesno:'true,false' }},
-        asChild: {{ asChild|yesno:'true,false' }},
-        ariaExpanded: null,
-        component: '{{ component }}',
-        root: null,
-        tId: '{{ attrs.id }}',
-        findRoot() {
-            return $el.closest(`[data-slot=${this.component}]`)
-        },
-        initTrigger() {
-            const r = this.findRoot();
-            if (this.asChild && r) {
-                const rData = Alpine.$data(r);
-                if (rData.initAsChild(this.$el)) return true;
-            }
-            this.root = r;
-            if (!this.tId) this.tId = $id(`${r.id}-trigger`) || $id(`chad-ui_r_${this.component}-trigger`);
-            return false;
-        },
-        init() {
-            this.$nextTick(() => {
-                if (this.initTrigger()) return;
-                this.updateARIA();
-            });
-        },
-        updateARIA() {
-            this.ariaExpanded = Alpine.$data(this.root).open;
-        },
-        handleTrigger(event) {
-            if (this.disabled) return;
-            const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
-            trigger.blur();
-            const content = event.target.closest(`[data-slot=${this.component}-content]`);
-            if (content) { content.removeAttribute('aria-hidden'); }
-            if (!this.detached) toggleContent(event);
-            else if (this.root) $dispatch(this.handle);
-            else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
-        },
-        handleMouseClick(event) {
-            if (!this.root || this.disabled || $el.attributes.disabled) return;
-            this.handleTrigger(event);
-        },
-    }"
-    :id="id"
-    @click="handleMouseClick($event)"
-    type="button"
-    tabindex="{% if nativeButton == 'true' and asChild %}0{% else %}-1{% endif %}"
-    :aria-expanded="open"
-    :data-panel-open="open ? '' : null"
-    {{ attrs }}
+  data-slot="{{ component }}-trigger"
+  x-data="{
+    disabled: {{ disabled|yesno:'true,false' }},
+    asChild: {{ asChild|yesno:'true,false' }},
+    ariaExpanded: null,
+    component: '{{ component }}',
+    root: null,
+    tId: '{{ attrs.id }}',
+    findRoot() {
+      return $el.closest(`[data-slot=${this.component}]`)
+    },
+    initTrigger() {
+      const r = this.findRoot();
+      if (this.asChild && r) {
+        const rData = Alpine.$data(r);
+        if (rData.initAsChild(this.$el)) return true;
+      }
+      this.root = r;
+      if (!this.tId) this.tId = $id(`${r.id}-trigger`) || $id(`chad-ui_r_${this.component}-trigger`);
+      return false;
+    },
+    init() {
+      this.$nextTick(() => {
+        if (this.initTrigger()) return;
+        this.updateARIA();
+      });
+    },
+    updateARIA() {
+      this.ariaExpanded = Alpine.$data(this.root).open;
+    },
+    handleTrigger(event) {
+      if (this.disabled) return;
+      const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
+      trigger.blur();
+      const content = event.target.closest(`[data-slot=${this.component}-content]`);
+      if (content) { content.removeAttribute('aria-hidden'); }
+      if (!this.detached) toggleContent(event);
+      else if (this.root) $dispatch(this.handle);
+      else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
+    },
+    handleMouseClick(event) {
+      if (!this.root || this.disabled || $el.attributes.disabled) return;
+      this.handleTrigger(event);
+    },
+  }"
+  :id="id"
+  @click="handleMouseClick($event)"
+  type="button"
+  tabindex="{% if nativeButton == 'true' and asChild %}0{% else %}-1{% endif %}"
+  :aria-expanded="open"
+  :data-panel-open="open ? '' : null"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </{% if nativeButton|lower == 'false' %}div{% else %}button{% endif %}>
 
 {% endwith %}

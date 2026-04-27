@@ -3,83 +3,83 @@
 <c-vars side="right" showCloseButton="true" />
 
 <template x-teleport="body">
-    <div :id="`${id}-portal`">
-        <div 
-            x-data="{ 
-                side: '{{ side }}',
-                showCloseButton: {{ showCloseButton|lower }}, 
-                closeButton: null, 
-                ariaLabelledBy: null,
-                ariaDescribedBy: null,
-                updateARIA() {
-                    this.ariaLabelledBy = this.$el.querySelector(`[data-slot=${this.component}-title]`)?.id;
-                    this.ariaDescribedBy = this.$el.querySelector(`[data-slot=${this.component}-description]`)?.id;
-                },
-                init() { 
-                    this.$nextTick(() => this.updateARIA());
-                }      
-            }"
-            x-effect="if (open) $el.removeAttribute('aria-hidden');" 
-            @click.stop
-        >
-            <div 
-                x-show="open"
-                :data-open="open ? '' : null"
-                :data-closed="!open ? '' : null"
-                @click.stop="hideContent()"
-                x-transition:enter="transition-opacity ease-out"
-                x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100"
-                x-transition:leave="transition-opacity ease-in"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                role="presentation"
-                data-slot="{{ component }}-overlay"
-                class="fixed inset-0 z-50 duration-100 isolate bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
-                style="user-select: none;"
+  <div :id="`${id}-portal`">
+    <div 
+      x-data="{ 
+        side: '{{ side }}',
+        showCloseButton: {{ showCloseButton|lower }}, 
+        closeButton: null, 
+        ariaLabelledBy: null,
+        ariaDescribedBy: null,
+        updateARIA() {
+          this.ariaLabelledBy = this.$el.querySelector(`[data-slot=${this.component}-title]`)?.id;
+          this.ariaDescribedBy = this.$el.querySelector(`[data-slot=${this.component}-description]`)?.id;
+        },
+        init() { 
+          this.$nextTick(() => this.updateARIA());
+        }    
+      }"
+      x-effect="if (open) $el.removeAttribute('aria-hidden');" 
+      @click.stop
+    >
+      <div 
+        x-show="open"
+        :data-open="open ? '' : null"
+        :data-closed="!open ? '' : null"
+        @click.stop="hideContent()"
+        x-transition:enter="transition-opacity ease-out"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-in"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        role="presentation"
+        data-slot="{{ component }}-overlay"
+        class="fixed inset-0 z-50 duration-100 isolate bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+        style="user-select: none;"
+      >
+        <c-spinner class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"/>
+      </div>
+      <div
+        x-show="open"
+        :aria-labelledby="ariaLabelledBy"
+        :aria-describedby="ariaDescribedBy"
+        :data-side="side"
+        :data-open="open ? '' : null"
+        :data-closed="open ? null : ''"
+        x-trap.inert.noscroll="open"
+        x-transition:enter="transition-all ease-out"
+        x-transition:enter-start="opacity-0 {% if side == 'right' %}translate-x-10{% elif side == 'left' %}-translate-x-10{% elif side == 'top' %}-translate-y-10{% elif side == 'bottom' %}translate-y-10{% endif %}"
+        x-transition:enter-end="opacity-100 translate-x-0"
+        x-transition:leave="transition-all ease-in"
+        x-transition:leave-start="opacity-100 translate-x-0"
+        x-transition:leave-end="opacity-0 {% if side == 'right' %}translate-x-10{% elif side == 'left' %}-translate-x-10{% elif side == 'top' %}-translate-y-10{% elif side == 'bottom' %}translate-y-10{% endif %}"
+        role="dialog"
+        data-slot="{{ component }}-content"
+        class="fixed z-50 flex flex-col gap-4 bg-background bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-3/4 data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-3/4 data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b data-[side=left]:sm:max-w-sm data-[side=right]:sm:max-w-sm{% if class %} {{ class }}{% endif %}"
+        {{ attrs }}
+      >
+        {{ slot }}
+        <template x-if="showCloseButton">
+          <c-sheet.close data-slot="sheet-close" asChild>
+            <c-button
+              variant="ghost"
+              class="absolute top-3 right-3"
+              size="icon-sm"
             >
-                <c-spinner class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"/>
-            </div>
-            <div
-                x-show="open"
-                :aria-labelledby="ariaLabelledBy"
-                :aria-describedby="ariaDescribedBy"
-                :data-side="side"
-                :data-open="open ? '' : null"
-                :data-closed="open ? null : ''"
-                x-trap.inert.noscroll="open"
-                x-transition:enter="transition-all ease-out"
-                x-transition:enter-start="opacity-0 {% if side == 'right' %}translate-x-10{% elif side == 'left' %}-translate-x-10{% elif side == 'top' %}-translate-y-10{% elif side == 'bottom' %}translate-y-10{% endif %}"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition-all ease-in"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 {% if side == 'right' %}translate-x-10{% elif side == 'left' %}-translate-x-10{% elif side == 'top' %}-translate-y-10{% elif side == 'bottom' %}translate-y-10{% endif %}"
-                role="dialog"
-                data-slot="{{ component }}-content"
-                class="fixed z-50 flex flex-col gap-4 bg-background bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-3/4 data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-3/4 data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b data-[side=left]:sm:max-w-sm data-[side=right]:sm:max-w-sm{% if class %} {{ class }}{% endif %}"
-                {{ attrs }}
-            >
-                {{ slot }}
-                <template x-if="showCloseButton">
-                    <c-sheet.close data-slot="sheet-close" asChild>
-                        <c-button
-                            variant="ghost"
-                            class="absolute top-3 right-3"
-                            size="icon-sm"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            >
-                                <path d="M18 6 6 18"></path>
-                                <path d="m6 6 12 12"></path>
-                            </svg>
-                            <span class="sr-only">Close</span>
-                        </c-button>
-                    </c-sheet.close>
-                </template>
-            </div>
-        </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              >
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+              <span class="sr-only">Close</span>
+            </c-button>
+          </c-sheet.close>
+        </template>
+      </div>
     </div>
+  </div>
 </template>
 
 {% endwith %}

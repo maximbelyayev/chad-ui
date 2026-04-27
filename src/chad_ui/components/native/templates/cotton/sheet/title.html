@@ -1,8 +1,8 @@
 <h2 
-    :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-title`)"
-    data-slot="sheet-title" 
-    class="font-medium text-foreground{% if class %} {{ class }}{% endif %}"
-    {{ attrs }}
+  :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-title`)"
+  data-slot="sheet-title" 
+  class="font-medium text-foreground{% if class %} {{ class }}{% endif %}"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </h2>

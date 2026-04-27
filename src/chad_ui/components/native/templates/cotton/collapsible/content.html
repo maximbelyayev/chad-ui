@@ -3,25 +3,25 @@
 <c-vars />
 
 <div x-data="{ 
-        contentId: '{{ attrs.id }}',
-        initContent() {
-            if (!this.contentId) this.contentId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
-        },
-        init() {   
-            this.initContent()
-            this.$watch('open', open => {
-                if (open) htmx.process($el);
-            })
-        }   
-    }"
-    x-show="open"
-    :id="contentId"
-    :data-open="open ? '' : null"
-    :data-closed="open ? null : ''"
-    data-slot="{{ component }}-content"
-    {{ attrs}}
+    contentId: '{{ attrs.id }}',
+    initContent() {
+      if (!this.contentId) this.contentId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
+    },
+    init() {   
+      this.initContent()
+      this.$watch('open', open => {
+        if (open) htmx.process($el);
+      })
+    }   
+  }"
+  x-show="open"
+  :id="contentId"
+  :data-open="open ? '' : null"
+  :data-closed="open ? null : ''"
+  data-slot="{{ component }}-content"
+  {{ attrs}}
 >
-    {{ slot }}
+  {{ slot }}
 </div>
 
 {% endwith %}

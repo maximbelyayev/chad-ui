@@ -1,8 +1,8 @@
 <p 
-    :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-description`)"
-    data-slot="sheet-description" 
-    class="text-sm text-muted-foreground{% if class %} {{ class }}{% endif %}"
-    {{ attrs }}
+  :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-description`)"
+  data-slot="sheet-description" 
+  class="text-sm text-muted-foreground{% if class %} {{ class }}{% endif %}"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </p>

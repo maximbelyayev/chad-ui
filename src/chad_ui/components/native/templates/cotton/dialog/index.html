@@ -4,111 +4,111 @@
 <c-vars defaultOpen disablePointerDismissal disableDismissalDuringHtmx handle forceOverlay />
 
 <div data-slot="{{ component }}"
-    x-data="{
-        open: {{ defaultOpen|yesno:'true,false' }},
-        disablePointerDismissal: {{ disablePointerDismissal|yesno:'true,false' }},
-        disableDismissalDuringHtmx: {{ disableDismissalDuringHtmx|yesno:'true,false' }},
-        handle: '{{ handle }}',
-        forceOverlay: {{ forceOverlay|yesno:'true,false' }},
-        nestedIndex: null,
-        htmxAwaitingResponse: false,
-        trigger: null,
-        content: null,
-        component: '{{ component }}',
-        id: '{{ attrs.id }}',
-        initStore() {
-            this.$store['chad-ui'] ??= {};
-            this.$store['chad-ui'][this.component] ??= {};
-            this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
-        },
-        getStore(global = false) {
-            if (global) return this.$store['chad-ui']
-            return this.$store['chad-ui'][this.component];
-        },
-        initAsChild(el) {
-            const c = el.firstElementChild;
-            if (!c) return false;
-            if (c.hasAttribute('x-data')) {
-                if (c.getAttribute('x-data').includes('asChild: true')) {
-                    this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
-                    return true;
-                }
-                return false;
-            }
-            [...el.attributes].forEach(attr => {
-                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
-                if (attr.name === 'x-data') {
-                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
-                    return;
-                }
-                const key = attr.name.match(/^(?::|x-bind:)(.+)/)?.[1]
-                if (key) {
-                    let value;
-                    try { value = Alpine.evaluate(el, attr.value); } catch { }
-                    value === null || value === false
-                        ? c.removeAttribute(key)
-                        : c.setAttribute(key, value === true ? '' : value);
-                    c.removeAttribute(attr.name);
-                    return;
-                }
-                c.setAttribute(attr.name, attr.value);
-            });
-            c.classList.add(...el.classList);
-            el.replaceWith(c);
-            return true;
-        },
-        initIndex() {
-            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
-            this.initStore();
-            this.$nextTick(() => {
-                this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
-            })
-        },
-        init() {
-            this.initIndex();
-            if (this.open) this.showDialog();
-        },
-        showDialog(event) {
-            this.nestedIndex = this.getStore().maxIndex = this.getOpenDialogCount();
-            this.trigger = event.target
-            this.open = true;
-        },
-        hideDialog() {
-            if (this.htmxAwaitingResponse && this.disableDismissalDuringHtmx) return;
-            if (this.hasHtmx(this.trigger) && this.content) {
-                setTimeout(() => {
-                    this.content.querySelectorAll(`:scope > :not([data-slot=${this.component}-close])`).forEach(el => el.remove());
-                }, 100);
-            }
-            this.open = false;
-            this.trigger = null;
-            setTimeout(() => {
-                this.nestedIndex = null;
-                this.getStore().maxIndex = this.getOpenDialogCount() - 1;
-                this.returnFocus();
-            }, 100);
-        },
-        getOpenDialogCount() {
-            return document.querySelectorAll(`[data-slot=${this.component}-content][data-open]`).length;
-        },
-        hasHtmx(el) {
-            if (!el) return false;
-            const htmxAttrs = ['hx-get', 'hx-post', 'hx-put', 'hx-patch', 'hx-delete'];
-            return htmxAttrs.some(attr => el.hasAttribute(attr) || el.querySelector(`[${attr}]`));
-        },
-        returnFocus() {
-            this.getStore(true).lastFocusedEl?.focus();
-        },
-    }"
-    @{{ handle }}.window="open ? hideDialog() : showDialog($event)"
-    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideDialog()"
-    @keydown.escape.window="if (open && (nestedIndex === getStore().maxIndex)) {
-        $event.preventDefault();
-        $event.stopImmediatePropagation();
-        hideDialog();
-    }"
+  x-data="{
+    open: {{ defaultOpen|yesno:'true,false' }},
+    disablePointerDismissal: {{ disablePointerDismissal|yesno:'true,false' }},
+    disableDismissalDuringHtmx: {{ disableDismissalDuringHtmx|yesno:'true,false' }},
+    handle: '{{ handle }}',
+    forceOverlay: {{ forceOverlay|yesno:'true,false' }},
+    nestedIndex: null,
+    htmxAwaitingResponse: false,
+    trigger: null,
+    content: null,
+    component: '{{ component }}',
+    id: '{{ attrs.id }}',
+    initStore() {
+      this.$store['chad-ui'] ??= {};
+      this.$store['chad-ui'][this.component] ??= {};
+      this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
+    },
+    getStore(global = false) {
+      if (global) return this.$store['chad-ui']
+      return this.$store['chad-ui'][this.component];
+    },
+    initAsChild(el) {
+      const c = el.firstElementChild;
+      if (!c) return false;
+      if (c.hasAttribute('x-data')) {
+        if (c.getAttribute('x-data').includes('asChild: true')) {
+          this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
+          return true;
+        }
+        return false;
+      }
+      [...el.attributes].forEach(attr => {
+        if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+        if (attr.name === 'x-data') {
+          c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+          return;
+        }
+        const key = attr.name.match(/^(?::|x-bind:)(.+)/)?.[1]
+        if (key) {
+          let value;
+          try { value = Alpine.evaluate(el, attr.value); } catch { }
+          value === null || value === false
+            ? c.removeAttribute(key)
+            : c.setAttribute(key, value === true ? '' : value);
+          c.removeAttribute(attr.name);
+          return;
+        }
+        c.setAttribute(attr.name, attr.value);
+      });
+      c.classList.add(...el.classList);
+      el.replaceWith(c);
+      return true;
+    },
+    initIndex() {
+      if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+      this.initStore();
+      this.$nextTick(() => {
+        this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
+      })
+    },
+    init() {
+      this.initIndex();
+      if (this.open) this.showDialog();
+    },
+    showDialog(event) {
+      this.nestedIndex = this.getStore().maxIndex = this.getOpenDialogCount();
+      this.trigger = event.target
+      this.open = true;
+    },
+    hideDialog() {
+      if (this.htmxAwaitingResponse && this.disableDismissalDuringHtmx) return;
+      if (this.hasHtmx(this.trigger) && this.content) {
+        setTimeout(() => {
+          this.content.querySelectorAll(`:scope > :not([data-slot=${this.component}-close])`).forEach(el => el.remove());
+        }, 100);
+      }
+      this.open = false;
+      this.trigger = null;
+      setTimeout(() => {
+        this.nestedIndex = null;
+        this.getStore().maxIndex = this.getOpenDialogCount() - 1;
+        this.returnFocus();
+      }, 100);
+    },
+    getOpenDialogCount() {
+      return document.querySelectorAll(`[data-slot=${this.component}-content][data-open]`).length;
+    },
+    hasHtmx(el) {
+      if (!el) return false;
+      const htmxAttrs = ['hx-get', 'hx-post', 'hx-put', 'hx-patch', 'hx-delete'];
+      return htmxAttrs.some(attr => el.hasAttribute(attr) || el.querySelector(`[${attr}]`));
+    },
+    returnFocus() {
+      this.getStore(true).lastFocusedEl?.focus();
+    },
+  }"
+  @{{ handle }}.window="open ? hideDialog() : showDialog($event)"
+  @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideDialog()"
+  @keydown.escape.window="if (open && (nestedIndex === getStore().maxIndex)) {
+    $event.preventDefault();
+    $event.stopImmediatePropagation();
+    hideDialog();
+  }"
 >   
-    {{ slot }}
+  {{ slot }}
 </div>
 
 {% endwith %}

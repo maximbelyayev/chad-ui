@@ -3,58 +3,58 @@
 <c-vars defaultValue multiple disabled orientation="vertical" dir="ltr" />
 
 <div
-    x-data="{
-        defaultValue: '{{ defaultValue }}',
-        multiple: {{ multiple|yesno:'true,false' }},
-        disabled: {{ disabled|yesno:'true,false' }},
-        dir: '{{ dir|lower }}',
-        orientation: '{{ orientation|lower }}',
-        values: [],
-        open: {},
-        component: '{{ component }}',
-        id: '{{ attrs.id }}',
-        initState() {
-            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
-            this.$nextTick(() => {
-                $el.querySelectorAll(`[data-slot=${this.component}-item]`).forEach(item => {
-                    this.values.push(Alpine.$data(item).value)
-                })
-                if (this.defaultValue) {
-                    const defaultValues = this.defaultValue.split(',').map((value) => value.trim())
-                    defaultValues.forEach(value => this.toggle(value));
-                }
-            })
-        },
-        init () {
-            this.initState();
-        },
-        getIndex(el) {
-            return this.values.indexOf(Alpine.$data(el).value)
-        },
-        setDisabled(el) {
-            if (el.matches('button, input, textarea, select, fieldset')) {
-                el.setAttribute('disabled', '');
-                el.setAttribute('aria-disabled', 'true');
-            }
-            el.setAttribute('data-disabled', '');
-        },
-        toggle(value) {
-            if (this.multiple) this.open[value] = !this.open[value];
-            else this.open = { [value]: !this.open[value] };
-        },
-        isOpen(value) {
-            return !!this.open[value];
+  x-data="{
+    defaultValue: '{{ defaultValue }}',
+    multiple: {{ multiple|yesno:'true,false' }},
+    disabled: {{ disabled|yesno:'true,false' }},
+    dir: '{{ dir|lower }}',
+    orientation: '{{ orientation|lower }}',
+    values: [],
+    open: {},
+    component: '{{ component }}',
+    id: '{{ attrs.id }}',
+    initState() {
+      if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+      this.$nextTick(() => {
+        $el.querySelectorAll(`[data-slot=${this.component}-item]`).forEach(item => {
+          this.values.push(Alpine.$data(item).value)
+        })
+        if (this.defaultValue) {
+          const defaultValues = this.defaultValue.split(',').map((value) => value.trim())
+          defaultValues.forEach(value => this.toggle(value));
         }
-    }"
-    :id="id"
-    :dir="dir"
-    role="region"
-    data-orientation="{{ orientation|lower }}"
-    data-slot="accordion"
-    :class="orientation === 'horizontal' ? 'flex w-full' : 'flex flex-col w-full'"
-    {{ attrs }}
+      })
+    },
+    init () {
+      this.initState();
+    },
+    getIndex(el) {
+      return this.values.indexOf(Alpine.$data(el).value)
+    },
+    setDisabled(el) {
+      if (el.matches('button, input, textarea, select, fieldset')) {
+        el.setAttribute('disabled', '');
+        el.setAttribute('aria-disabled', 'true');
+      }
+      el.setAttribute('data-disabled', '');
+    },
+    toggle(value) {
+      if (this.multiple) this.open[value] = !this.open[value];
+      else this.open = { [value]: !this.open[value] };
+    },
+    isOpen(value) {
+      return !!this.open[value];
+    }
+  }"
+  :id="id"
+  :dir="dir"
+  role="region"
+  data-orientation="{{ orientation|lower }}"
+  data-slot="accordion"
+  :class="orientation === 'horizontal' ? 'flex w-full' : 'flex flex-col w-full'"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </div>
 
 {% endwith %}

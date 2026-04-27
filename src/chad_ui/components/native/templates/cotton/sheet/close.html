@@ -1,19 +1,19 @@
 <c-vars asChild />
 
 <div x-data="{
-        asChild: {{ asChild|yesno:'true,false' }},
-        initMount() {
-            if (this.asChild) {
-                if (initAsChild(this.$el)) return true;
-            }
-            return false;
-        },
-        init() {
-            if (this.initMount()) return;
-        },
-    }"
-    @click.stop="hideContent"
-    {{ attrs }}
+    asChild: {{ asChild|yesno:'true,false' }},
+    initMount() {
+      if (this.asChild) {
+        if (initAsChild(this.$el)) return true;
+      }
+      return false;
+    },
+    init() {
+      if (this.initMount()) return;
+    },
+  }"
+  @click.stop="hideContent"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </div>

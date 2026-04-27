@@ -1,48 +1,48 @@
 <h3 :data-orientation="orientation" :data-open="isOpen(value) ? '' : null" :data-closed="isOpen(value) ? null : ''"
-    :class="
-        orientation === 'horizontal' 
-        ? isOpen(value)
-            ? 'h-full w-16 shrink-0 duration-300 ease-in-out transition-[width]' 
-            : 'h-full w-full duration-300 ease-in-out transition-[width]' 
-        : 'flex'
-    "
+  :class="
+    orientation === 'horizontal' 
+    ? isOpen(value)
+      ? 'h-full w-16 shrink-0 duration-300 ease-in-out transition-[width]' 
+      : 'h-full w-full duration-300 ease-in-out transition-[width]' 
+    : 'flex'
+  "
 >
-    <button
-        x-init="if (disabled) setDisabled($el);"
-        @click="toggle(value)"
-        :data-value="value"
-        :data-orientation="orientation"
-        :data-panel-open="isOpen(value) ? '' : null"
-        :aria-disabled="disabled"
-        :aria-controls="content"
-        :aria-expanded="isOpen(value)"
-        {{ attrs }} 
-        tabindex="0"
-        type="button"
-        data-slot="accordion-trigger"
-        :class="
-            orientation === 'horizontal'
-            ? 'w-full h-full flex flex-col items-center justify-between p-4'
-            : 'w-full flex items-start justify-between py-4 **:data-[slot=accordion-trigger-icon]:ml-auto'
-        "
-        class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring *:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium hover:underline focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50{% if class %} {{ class }}{% endif %}"
+  <button
+    x-init="if (disabled) setDisabled($el);"
+    @click="toggle(value)"
+    :data-value="value"
+    :data-orientation="orientation"
+    :data-panel-open="isOpen(value) ? '' : null"
+    :aria-disabled="disabled"
+    :aria-controls="content"
+    :aria-expanded="isOpen(value)"
+    {{ attrs }} 
+    tabindex="0"
+    type="button"
+    data-slot="accordion-trigger"
+    :class="
+      orientation === 'horizontal'
+      ? 'w-full h-full flex flex-col items-center justify-between p-4'
+      : 'w-full flex items-start justify-between py-4 **:data-[slot=accordion-trigger-icon]:ml-auto'
+    "
+    class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring *:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium hover:underline focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50{% if class %} {{ class }}{% endif %}"
+  >
+    <span class="text-sm" :class="orientation === 'horizontal' ? '[writing-mode:vertical-rl] order-last rotate-180' : ''">
+      {{ slot }}
+    </span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      data-slot="accordion-trigger-icon"
+      :class="orientation === 'horizontal' ? dir === 'rtl' ? 'rotate-90' : '-rotate-90' : ''"
+      class="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
     >
-        <span class="text-sm" :class="orientation === 'horizontal' ? '[writing-mode:vertical-rl] order-last rotate-180' : ''">
-            {{ slot }}
-        </span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-            data-slot="accordion-trigger-icon"
-            :class="orientation === 'horizontal' ? dir === 'rtl' ? 'rotate-90' : '-rotate-90' : ''"
-            class="pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
-        >
-            <path d="m6 9 6 6 6-6"></path>
-        </svg>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-            data-slot="accordion-trigger-icon"
-            :class="orientation === 'horizontal' ? dir === 'rtl' ? 'rotate-90' : '-rotate-90' : ''"
-            class="hidden pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:inline"
-        >
-            <path d="m18 15-6-6-6 6"></path>
-        </svg>
-    </button>
+      <path d="m6 9 6 6 6-6"></path>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      data-slot="accordion-trigger-icon"
+      :class="orientation === 'horizontal' ? dir === 'rtl' ? 'rotate-90' : '-rotate-90' : ''"
+      class="hidden pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:inline"
+    >
+      <path d="m18 15-6-6-6 6"></path>
+    </svg>
+  </button>
 </h3>

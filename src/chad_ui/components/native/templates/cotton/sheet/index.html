@@ -4,87 +4,87 @@
 <c-vars defaultOpen open="null" handle forceOverlay />
 
 <div data-slot="{{ component }}"
-    x-data="{
-        open: {{ defaultOpen|yesno:'true,false' }},
-        handle: '{{ handle }}',
-        forceOverlay: {{ forceOverlay|yesno:'true,false' }},
-        nestedIndex: null,
-        htmxAwaitingResponse: false,
-        trigger: null,
-        content: null,
-        component: '{{ component }}',
-        id: '{{ attrs.id }}',
-        initStore() {
-            this.$store['chad-ui'] ??= {};
-            this.$store['chad-ui'][this.component] ??= {};
-            this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
-        },
-        getStore(global = false) {
-            if (global) return this.$store['chad-ui']
-            return this.$store['chad-ui'][this.component];
-        },
-        initAsChild(el) {
-            const c = el.firstElementChild;
-            if (!c) return false;
-            if (c.hasAttribute('x-data')) {
-                if (c.getAttribute('x-data').includes('asChild: true')) {
-                    this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
-                    return true;
-                }
-                return false;
-            }
-            [...el.attributes].forEach(attr => {
-                if (c.hasAttribute(attr.name) || attr.name === 'class') return;
-                if (attr.name === 'x-data') {
-                    c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
-                    return;
-                }
-                const key = attr.name.match(/^(?::|x-bind:)(.+)/)?.[1]
-                if (key) {
-                    let value;
-                    try { value = Alpine.evaluate(el, attr.value); } catch { }
-                    value === null || value === false
-                        ? c.removeAttribute(key)
-                        : c.setAttribute(key, value === true ? '' : value);
-                    c.removeAttribute(attr.name);
-                    return;
-                }
-                c.setAttribute(attr.name, attr.value);
-            });
-            c.classList.add(...el.classList);
-            el.replaceWith(c);
-            return true;
-        },
-        initIndex() {
-            if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
-            this.initStore();
-            this.$nextTick(() => {
-                this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
-            })
-        },
-        init() {
-            this.initIndex();
-            if (this.open) this.showContent();
-        },
-        showContent(event) {
-            this.trigger = event.target
-            this.open = true;
-        },
-        hideContent() {
-            this.open = false;
-            this.trigger = null;
-        },
-    }"
-    x-effect="open = {{ open }}"
-    @{{ handle }}.window="open ? hideContent() : showContent($event)"
-    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideContent()"
-    @keydown.escape.window="if (open && (nestedIndex === getStore().maxIndex)) {
-        $event.preventDefault();
-        $event.stopImmediatePropagation();
-        hideContent();
-    }"
+  x-data="{
+    open: {{ defaultOpen|yesno:'true,false' }},
+    handle: '{{ handle }}',
+    forceOverlay: {{ forceOverlay|yesno:'true,false' }},
+    nestedIndex: null,
+    htmxAwaitingResponse: false,
+    trigger: null,
+    content: null,
+    component: '{{ component }}',
+    id: '{{ attrs.id }}',
+    initStore() {
+      this.$store['chad-ui'] ??= {};
+      this.$store['chad-ui'][this.component] ??= {};
+      this.$store['chad-ui'][this.component][`${this.id}`] ??= {};
+    },
+    getStore(global = false) {
+      if (global) return this.$store['chad-ui']
+      return this.$store['chad-ui'][this.component];
+    },
+    initAsChild(el) {
+      const c = el.firstElementChild;
+      if (!c) return false;
+      if (c.hasAttribute('x-data')) {
+        if (c.getAttribute('x-data').includes('asChild: true')) {
+          this.$nextTick(() => this.initAsChild(c) && this.initAsChild(el));
+          return true;
+        }
+        return false;
+      }
+      [...el.attributes].forEach(attr => {
+        if (c.hasAttribute(attr.name) || attr.name === 'class') return;
+        if (attr.name === 'x-data') {
+          c.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+          return;
+        }
+        const key = attr.name.match(/^(?::|x-bind:)(.+)/)?.[1]
+        if (key) {
+          let value;
+          try { value = Alpine.evaluate(el, attr.value); } catch { }
+          value === null || value === false
+            ? c.removeAttribute(key)
+            : c.setAttribute(key, value === true ? '' : value);
+          c.removeAttribute(attr.name);
+          return;
+        }
+        c.setAttribute(attr.name, attr.value);
+      });
+      c.classList.add(...el.classList);
+      el.replaceWith(c);
+      return true;
+    },
+    initIndex() {
+      if (!this.id) this.id = $id(`chad-ui_r_${this.component}`);
+      this.initStore();
+      this.$nextTick(() => {
+        this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
+      })
+    },
+    init() {
+      this.initIndex();
+      if (this.open) this.showContent();
+    },
+    showContent(event) {
+      this.trigger = event.target
+      this.open = true;
+    },
+    hideContent() {
+      this.open = false;
+      this.trigger = null;
+    },
+  }"
+  x-effect="open = {{ open }}"
+  @{{ handle }}.window="open ? hideContent() : showContent($event)"
+  @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideContent()"
+  @keydown.escape.window="if (open && (nestedIndex === getStore().maxIndex)) {
+    $event.preventDefault();
+    $event.stopImmediatePropagation();
+    hideContent();
+  }"
 >   
-    {{ slot }}
+  {{ slot }}
 </div>
 
 {% endwith %}
