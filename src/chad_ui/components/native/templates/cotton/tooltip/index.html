@@ -71,10 +71,6 @@
     init() {
       this.initState();
     },
-    toggleContent(event) {
-      if (this.open) this.hideContent();
-      else this.showContent(event);
-    },
     showContent(event) {
       this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
       this.open = true;
@@ -82,6 +78,10 @@
     hideContent() {
       this.trigger = null;
       this.open = false;
+    },
+    toggleContent(event) {
+      if (this.open) this.hideContent();
+      else this.showContent(event);
     },
     destroyTimeout(timeout) {
       this.destroyHoverPathHandler();

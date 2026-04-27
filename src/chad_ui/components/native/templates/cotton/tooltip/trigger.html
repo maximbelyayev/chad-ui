@@ -29,7 +29,7 @@
     },
     initMount() {
       this.root = this.findRoot();
-      this.initState()
+      this.initState();
       if (this.asChild && this.root) {
         const rData = Alpine.$data(this.root);
         if (rData.initAsChild(this.$el)) return true;

@@ -4,102 +4,110 @@
 <c-vars field defaultValue defaultOpen items modal multiple />
 
 <div data-slot="{{ component }}" 
-    x-data="{
-        defaultValue: '{% if defaultValue %}{{ defaultValue }}{% elif field.value %}{{ field.value }}{% endif %}',
-        open: {{ defaultOpen|yesno:'true,false' }},
-        items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}}{% elif items %}{{ items }}{% else %}null{% endif %},
-        modal: {{ modal|yesno:'true,false' }},
-        multiple: {{ multiple|yesno:'true,false' }},
-        content: null,
-        values: [],
-        selected: {},
-        selectedText: [],
-        component: '{{ component }}',
-        id: '{{ attrs.id }}',
-        init() {
-            this._field = this.$el.closest('[x-data][data-slot=field]');
-            this._control = $el.querySelector('select');
-            this.trigger = $el.querySelector(`[data-slot=${this.component}-trigger]`);
-            const fData = Alpine.$data(this._field);
-            if (!this.id) this.id = fData.getStore()[`${this._field.id}`]?.controlId || $id(`chad-ui_r_${this.component}`);
-            this.$nextTick(() => {
-                this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
-                this.values = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
-                    .map(item => Alpine.$data(item).value);
-                this.selected = this.values.reduce((selected, value) => ({ ...selected, [value]: false}), {})
-                if (this.defaultValue && Object.keys(this.selected).includes(this.defaultValue)) {
-                    const defaultValues = this.defaultValue.split(',').map((value) => value.trim());
-                    defaultValues.forEach(value => this.toggle(value));
-                }
-            });
-        },
-        setErrorStyle() {
-            if (this.trigger) this.trigger.setAttribute('aria-invalid', 'true');
-        },
-        unsetErrorStyle() {
-            if (this.trigger) this.trigger.removeAttribute('aria-invalid');
-        },
-        showContent() {
-            this.open = true;
-        },
-        hideContent() {
-            if (validationMode === 'blur' && Object.values(this.selected).some(Boolean)) htmx.trigger(this._control, 'change');   
-            this.open = false;
-        },
-        toggleContent() {
-            if (this.open) this.hideContent();
-            else this.showContent();
-        },
-        toggle(value) {
-            if (!this.multiple) this.selected = { [value]: !this.selected[value] };
-            else this.selected[value] = !this.selected[value];
-            const selectedItems = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
-                .filter(item => this.selected[Alpine.$data(item).value]);
-            this.selectedText = selectedItems.map(item => item.firstElementChild?.textContent?.trim()).filter(Boolean);
-        },
-    }"
-    :id="id"
-    @{{ handle }}.window="toggleContent()"
-    @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"
-    x-id="[`${this.id}-label`, `${this.id}-item`]"
-    class="*:w-full"
+  x-data="{
+    defaultValue: '{% if defaultValue %}{{ defaultValue }}{% elif field.value %}{{ field.value }}{% endif %}',
+    open: {{ defaultOpen|yesno:'true,false' }},
+    items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}}{% elif items %}{{ items }}{% else %}null{% endif %},
+    modal: {{ modal|yesno:'true,false' }},
+    multiple: {{ multiple|yesno:'true,false' }},
+    content: null,
+    values: [],
+    selected: {},
+    selectedText: [],
+    component: '{{ component }}',
+    id: '{{ attrs.id }}',
+    init() {
+      this._field = this.$el.closest('[x-data][data-slot=field]');
+      this._control = $el.querySelector('select');
+      this.trigger = $el.querySelector(`[data-slot=${this.component}-trigger]`);
+      if (this._field) {
+        const fData = Alpine.$data(this._field);
+        this.id ||= fData.getStore()[`${this._field.id}`]?.controlId
+      }
+      this.id ||= $id(`chad-ui_r_${this.component}`);
+      this.$nextTick(() => {
+        this.content = document.getElementById(`${this.id}-portal`).querySelector(`[data-slot=${this.component}-content]`);
+        this.values = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
+          .map(item => Alpine.$data(item).value);
+        this.selected = this.values.reduce((selected, value) => ({ ...selected, [value]: false}), {})
+        if (this.defaultValue && Object.keys(this.selected).includes(this.defaultValue)) {
+          const defaultValues = this.defaultValue.split(',').map((value) => value.trim());
+          defaultValues.forEach(value => this.toggle(value));
+        }
+      });
+    },
+    setErrorStyle() {
+      if (this.trigger) this.trigger.setAttribute('aria-invalid', 'true');
+    },
+    unsetErrorStyle() {
+      if (this.trigger) this.trigger.removeAttribute('aria-invalid');
+    },
+    showContent() {
+      this._lastFocused = $focus.within($el).focused();
+      this.open = true;
+    },
+    hideContent() {
+      this.open = false;
+      this.$nextTick(() => $focus.focus(this._lastFocused));
+      if (this._field && validationMode === 'blur' && Object.values(this.selected).some(Boolean)) htmx.trigger(this._control, 'change');
+    },
+    toggleContent() {
+      if (this.open) this.hideContent();
+      else this.showContent();
+    },
+    toggle(value) {
+      if (!this.multiple) this.selected = { [value]: !this.selected[value] };
+      else this.selected[value] = !this.selected[value];
+      const selectedItems = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
+        .filter(item => this.selected[Alpine.$data(item).value]);
+      this.selectedText = selectedItems.map(item => item.firstElementChild?.textContent?.trim()).filter(Boolean);
+    },
+  }"
+  :id="id"
+  @{{ handle }}.window="toggleContent()"
+  @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"
+  x-id="[`${this.id}-label`, `${this.id}-item`]"
+  class="*:w-full"
 >
-    {{ slot }}
-    {% if field %}
-        <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" 
-            x-data="{
-                init() {
-                    const fData = Alpine.$data(this._field);
-                    $watch('selected', (selected) => {
-                        if (fData.getStore()[`${this._field.id}`].formSubmit) {
-                            fData.renderErrors();
-                            fData.getStore()[`${this._field.id}`].formSubmit = false;
-                            return;
-                        }; 
-                        if (Object.values(selected).filter(Boolean).length > 0) {
-                            if (validationMode !== 'change') clearErrors();
-                            if (validationMode === 'change') htmx.trigger(this._control, 'change');
-                            trigger.focus();
-                        }
-                        else fData.clearErrors();
-                    });
-                }
-            }"
-            :multiple="multiple ? '' : null" 
-            @focus.self="$nextTick(() => document.activeElement == $el && toggleContent())"
-            id="{{ field.id_for_label}}"
-            hx-swap="outerMorph"
-            required
-            {{ attrs|cut:"disabled"|cut:"hx-trigger" }}
-        >
-            <template x-for="val in values">
-                <option 
-                    :value="val"
-                    :selected="selected && selected[val] === true"
-                ></option>
-            </template>
-        </select>
-    {% endif %}
+  {{ slot }}
+    <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" 
+      x-data="{
+        init() {
+          if (!this._field) return;
+          const fData = Alpine.$data(this._field);
+          $watch('selected', (selected) => {
+            if (fData.getStore()[`${this._field.id}`].formSubmit) {
+              fData.renderErrors();
+              fData.getStore()[`${this._field.id}`].formSubmit = false;
+              return;
+            }; 
+            if (Object.values(selected).filter(Boolean).length > 0) {
+              console.log('gothere');
+              if (validationMode !== 'change') clearErrors();
+              if (validationMode === 'change') htmx.trigger(this._control, 'change');
+              trigger.focus();
+            }
+            else {
+              fData.clearErrors();
+            }
+          });
+        }
+      }"
+      :multiple="multiple ? '' : null" 
+      @focus.self="$nextTick(() => document.activeElement == $el && toggleContent())"
+      id="{{ field.id_for_label}}"
+      hx-swap="outerMorph"
+      tabindex="-1"
+      required
+      {{ attrs|cut:"disabled"|cut:"hx-trigger" }}
+    >
+      <template x-for="val in values">
+        <option 
+          :value="val"
+          :selected="selected && selected[val] === true"
+        ></option>
+      </template>
+    </select>
 </div>
 
 {% endwith %}

@@ -23,7 +23,10 @@
         this.$nextTick(() => this.$nextTick(() => this.items = this.indexItems()));
         this.$watch('open', open => {
           if (open) { htmx.process($el); this.highlightedIndex = -1; }
-          else this.items.forEach(i => this.removeFocus(i))
+          else {
+            this.items.forEach(i => this.removeFocus(i));
+            this.$nextTick(() => $focus.lastFocused()?.focus());
+          }
         })
       },
       indexItems() {
@@ -71,7 +74,7 @@
         x-show="open"
         :data-open="open ? '' : null"
         :data-closed="open ? null : ''"
-        @click.away="open = false;"
+        @click.away="hideContent()"
         @keydown.down.prevent="if (items.length === 0) return;
           if (highlightedIndex === -1) highlightedIndex = 0;
           else if (highlightedIndex === items.length - 1) {
@@ -94,7 +97,7 @@
           hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
           createHoverCloseTimeout($el, $event, triggerData.closeDelay);
         }"
-        x-trap="open && trap"
+        x-trap="open"
         x-transition:enter="transition-all ease-out duration-200"
         x-transition:enter-start="opacity-0 scale-95 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
         x-transition:enter-end="opacity-100 scale-100"

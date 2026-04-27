@@ -51,20 +51,22 @@
     },
     init() {
       this.initIndex();
-      if (this.open) this.showMenu();
+      if (this.open) this.showContent();
     },
-    toggleMenu(event) {
-      if (this.open) { this.trap = false; this.hideMenu(); }
-      else { this.trap = true; this.showMenu(event); }
-    },
-    showMenu(event) {
+    showContent(event) {
       this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
+      this._lastFocused = $focus.within($el).focused();
       this.open = true;
     },
-    hideMenu() {
+    hideContent() {
       this.trigger = null;
       this.open = false;
-    },   
+      this.$nextTick(() => $focus.focus(this._lastFocused));
+    },
+    toggleContent(event) {
+      if (this.open) this.hideContent();
+      else this.showContent(event);
+    },
     destroyTimeout(timeout) {
       this.destroyHoverPathHandler();
       if (timeout) clearTimeout(timeout);
@@ -129,12 +131,12 @@
     },
   }"
   :id="id"
-  @{{ handle }}.window="toggleMenu($event)"
-  @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideMenu()"
+  @{{ handle }}.window="toggleContent($event)"
+  @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideContent()"
   @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
     $event.preventDefault();
     $event.stopImmediatePropagation();
-    hideMenu();
+    hideContent();
   }"
   x-id="[`${this.id}-label`, `${this.id}-item`]"
   {{ attrs }}

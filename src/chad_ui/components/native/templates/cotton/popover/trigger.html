@@ -4,95 +4,100 @@
 <c-vars handle disabled openOnHover delay="100" closeDelay="0" asChild />
 
 <div data-slot="{{ component }}-trigger"
-    x-data="{
-        handle:'{{ handle }}',
-        disabled: {{ disabled|yesno:'true,false' }},
-        openOnHover: {{ openOnHover|yesno:'true,false' }},
-        delay: {{ delay }},
-        closeDelay: {{ closeDelay }},
-        asChild: {{ asChild|yesno:'true,false' }},
-        ariaExpanded: null,
-        ariaControls: null,
-        component: '{{ component }}',
-        root: null,
-        detached: null,
-        id: '{{ attrs.id }}',
-        findRoot() {
-            const p = this.$el.parentElement;
-            if (p.getAttribute('data-slot') === this.component) return p;
-            return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
-                .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
-        },
-        initTrigger() {
-            const r = this.findRoot();
-            if (this.asChild && r) {
-                const rData = Alpine.$data(r);
-                if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
-            }
-            this.root = r;
-            this.detached = (r !== this.$el.parentElement);
-            if (!this.id) this.id = $id(`${r.id}-trigger`) || $id(`chad-ui_r_${this.component}-trigger`);
-            return false;
-        },
-        init() {
-            this.$nextTick(() => {
-                if (this.initTrigger()) return;
-                this.updateARIA();
-            });
-        },
-        updateARIA() {
-            this.ariaExpanded = Alpine.$data(this.root).open;
-            this.ariaControls = Alpine.$data(this.root).content?.id;
-        },
-        handleTrigger(event) {
-            if (this.disabled) return;
-            const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
-            trigger.blur();
-            const content = event.target.closest(`[data-slot=${this.component}-content]`);
-            if (content) { content.removeAttribute('aria-hidden'); }
-            if (!this.detached) toggleMenu(event);
-            else if (this.root) $dispatch(this.handle);
-            else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
-        },
-        handleMouseClick(event) {
-            if (!this.root || this.disabled || $el.attributes.disabled) return;
-            const rootData = Alpine.$data(this.root);
-            rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
-            rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
-            if (rootData.openedOnHover) rootData.openedOnHover = false;
-            this.handleTrigger(event);
-        },
-        handleMouseEnter(event) {
-            if (!this.root || !this.openOnHover || this.disabled || $el.attributes.disabled) return;
-            const rootData = Alpine.$data(this.root);
-            if (rootData.open && !rootData.openedOnHover) return;
-            if (rootData.openedOnHover && rootData.trigger === $el) {
-                rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
-                return;
-            }
-            rootData.createHoverOpenTimeout($el, event, delay);
-        },
-        handleMouseLeave(event) {
-            if (!this.root || this.disabled || $el.attributes.disabled) return;
-            const rootData = Alpine.$data(this.root);
-            rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
-            if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, event, delay);
-        }
-    }"
-    :id="id"
-    @click="handleMouseClick($event)"
-    @mouseenter="handleMouseEnter($event)"
-    @mouseleave="handleMouseLeave($event)"
-    type="button"
-    tabindex="0"
-    aria-haspopup="dialog"
-    :aria-expanded="ariaExpanded"
-    :data-popup-open="ariaExpanded ? '' : null"
-    :data-pressed="ariaExpanded ? '' : null"
-    :aria-controls="open ? ariaControls : null"
-    {{ attrs }}
+  x-data="{
+    handle:'{{ handle }}',
+    disabled: {{ disabled|yesno:'true,false' }},
+    openOnHover: {{ openOnHover|yesno:'true,false' }},
+    delay: {{ delay }},
+    closeDelay: {{ closeDelay }},
+    asChild: {{ asChild|yesno:'true,false' }},
+    ariaExpanded: null,
+    ariaControls: null,
+    component: '{{ component }}',
+    root: null,
+    tId: '{{ attrs.id }}',
+    findRoot() {
+      const p = this.$el.parentElement;
+      if (p.getAttribute('data-slot') === this.component) return p;
+      return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
+        .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
+    },
+    initState() {
+      if (!this.tId) this.tId = `${this.root.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
+      this._detached = (this.root !== this.$el.parentElement);
+    },
+    initMount() {
+      this.root = this.findRoot();
+      this.initState()
+      if (this.asChild && this.root) {
+        const rData = Alpine.$data(this.root);
+        if (rData.initAsChild(this.$el)) return true;
+      }
+      return false;
+    },
+    init() {
+      if (this.initMount()) return;
+    },
+    updateARIA() {
+      this.ariaExpanded = Alpine.$data(this.root).open;
+      this.ariaControls = Alpine.$data(this.root).content?.id;
+    },
+    handleTrigger() {
+      if (this.disabled) return;
+      if (content) { content.removeAttribute('aria-hidden'); }
+      toggleContent();
+      const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
+      trigger.blur();
+    },
+    handleTrigger(event) {
+      if (this.disabled) return;
+      const content = event.target.closest(`[data-slot=${this.component}-content]`);
+      if (content) content.removeAttribute('aria-hidden');
+      if (!this._detached) toggleContent(event);
+      else if (this.root) $dispatch(this.handle);
+      else console.warn(`[chad-ui] ${this.component}: detached trigger has invalid or missing handle.`);
+      const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
+      trigger.blur();
+    },
+    handleMouseClick(event) {
+      if (!this.root || this.disabled || $el.attributes.disabled) return;
+      const rootData = Alpine.$data(this.root);
+      rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
+      rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
+      if (rootData.openedOnHover) rootData.openedOnHover = false;
+      this.handleTrigger(event);
+    },
+    handleMouseEnter(event) {
+      if (!this.root || !this.openOnHover || this.disabled || $el.attributes.disabled) return;
+      const rootData = Alpine.$data(this.root);
+      if (rootData.open && !rootData.openedOnHover) return;
+      if (rootData.openedOnHover && rootData.trigger === $el) {
+        rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
+        return;
+      }
+      rootData.createHoverOpenTimeout($el, event, delay);
+    },
+    handleMouseLeave(event) {
+      if (!this.root || this.disabled || $el.attributes.disabled) return;
+      const rootData = Alpine.$data(this.root);
+      rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
+      if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, event, delay);
+    }
+  }"
+  :id="tId"
+  @click="handleMouseClick($event)"
+  @mouseenter="handleMouseEnter($event)"
+  @mouseleave="handleMouseLeave($event)"
+  type="button"
+  :tabindex="asChild || $el.querySelector('button') ? -1 : 0"
+  aria-haspopup="dialog"
+  :aria-expanded="ariaExpanded"
+  :data-popup-open="ariaExpanded ? '' : null"
+  :data-pressed="ariaExpanded ? '' : null"
+  :aria-controls="open ? ariaControls : null"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </div>
 
 {% endwith %}

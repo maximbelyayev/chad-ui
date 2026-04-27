@@ -1,45 +1,42 @@
 <c-vars value disabled />
 
 <div x-data="{ 
-        value: '{{ value|escapejs }}',
-        disabled: {{ disabled|yesno:'true,false' }},
-        handleEvent(event) {
-            if (this.disabled) return;
-            if (this._handling) return;
-            this._handling = true;
-            this.$nextTick(() => {
-                toggle(this.value);
-                if (!multiple) hideContent();
-                this._handling = false;
-            });
-        },
-    }"
-    :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-item`)"
-    :data-selected="selected[value] ? '' : null"
-    :data-disabled="disabled ? '' : null"
-    @mouseenter="if (!disabled) handleFocus($el)"
-    @mouseleave="removeFocus($el)"
-    @click.stop="handleEvent($event)"
-    @keydown.enter.self="handleEvent($event)"
-    role="option"
-    tabindex="-1"
-    data-slot="select-item"
-    class="focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 relative flex w-full cursor-default items-center outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0{% if class %} {{ class }}{% endif %}"
-    {{ attrs }}
+    value: '{{ value|escapejs }}',
+    disabled: {{ disabled|yesno:'true,false' }},
+    handleEvent(event) {
+      if (this.disabled || this._handling) return;
+      this._handling = true;
+      toggle(this.value);
+      if (!multiple) hideContent();
+      this._handling = false;
+    },
+  }"
+  :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-item`)"
+  :data-selected="selected[value] ? '' : null"
+  :data-disabled="disabled ? '' : null"
+  @mouseenter="if (!disabled) handleFocus($el)"
+  @mouseleave="removeFocus($el)"
+  @click.stop="handleEvent($event)"
+  @keydown.enter.self="handleEvent($event)"
+  role="option"
+  tabindex="-1"
+  data-slot="select-item"
+  class="focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 relative flex w-full cursor-default items-center outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0{% if class %} {{ class }}{% endif %}"
+  {{ attrs }}
 >
-    <div class="flex flex-1 gap-2 whitespace-nowrap shrink-0">
-        {{ slot }}
-    </div>
-    <span 
-        x-show="selected[value]"
-        class="flex absolute right-2 justify-center items-center pointer-events-none size-4" 
-        :data-selected="selected[value] ? '' : null"
+  <div class="flex flex-1 gap-2 whitespace-nowrap shrink-0">
+    {{ slot }}
+  </div>
+  <span 
+    x-show="selected[value]"
+    class="flex absolute right-2 justify-center items-center pointer-events-none size-4" 
+    :data-selected="selected[value] ? '' : null"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      class="pointer-events-none" aria-hidden="true"
     >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-            class="pointer-events-none" aria-hidden="true"
-        >
-            <path d="M20 6 9 17l-5-5"></path>
-        </svg>
-    </span>
+      <path d="M20 6 9 17l-5-5"></path>
+    </svg>
+  </span>
 </div>

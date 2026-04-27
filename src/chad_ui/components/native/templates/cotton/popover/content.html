@@ -3,80 +3,82 @@
 <c-vars align="center" alignOffset="0" side="bottom" sideOffset="4" />
 
 <template x-teleport="body">
+  <div :id="`${id}-portal`">
     <div x-data="{ 
-            align: '{{ align }}',
-            alignOffset: {{ alignOffset }},
-            side: '{{ side }}',
-            sideOffset: {{ sideOffset }},
-            anchor: null,
-            cId: '{{ attrs.id }}',
-            initAnchor() {
-                return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
-                    .find(n => { try { return Alpine.$data(n).id === id || Alpine.$data(n).handle === handle } catch { return false } });
-            },
-            initContent() {
-                this.anchor = this.initAnchor();
-                if (!this.cId) this.cId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
-            },
-            init() {   
-                this.initContent()
-                this.$watch('open', open => {
-                    if (open) htmx.process($el);
-                })
-            }   
-        }"
-        :id="`${id}-portal`"
-        x-effect="if (trigger) anchor = trigger; if (open) $el.removeAttribute('aria-hidden');"
-        @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
-        class="fixed inset-0 z-50 pointer-events-none overflow-clip"
+        align: '{{ align }}',
+        alignOffset: {{ alignOffset }},
+        side: '{{ side }}',
+        sideOffset: {{ sideOffset }},
+        anchor: null,
+        cId: '{{ attrs.id }}',
+        findAnchor() {
+          return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
+            .find(n => { try { return Alpine.$data(n).id === id } catch { return false } });
+        },
+        initContent() {
+          this.anchor = this.findAnchor();
+          if (!this.cId) this.cId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
+        },
+        init() {  
+          this.initContent();
+          this.$watch('open', open => {
+            if (open) htmx.process($el);
+            else this.$nextTick(() => $focus.lastFocused()?.focus());
+          })
+        },
+      }"
+      x-effect="if (open) $el.removeAttribute('aria-hidden');"
+      @htmx:before:init.window="if ($event.target.contains(anchor)) this.anchor = anchor;"
+      class="fixed inset-0 z-50 pointer-events-none overflow-clip"
     >
+      <div
+        x-cloak
+        x-show="modal && open"
+        x-transition:enter="transition-opacity ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        aria-hidden="true"
+        class="fixed inset-0 duration-100 isolate bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+        :class="openedOnHover ? 'pointer-events-none' : 'pointer-events-auto'"
+      ></div>
+      <div
+        x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
+        style="transform: translate({% if side == 'right' or side == 'left'%}0,{{ alignOffset }}px{% else %}{{ alignOffset }}px,0{% endif %});"
+        class="pointer-events-none"
+      >
         <div
-            x-cloak
-            x-show="modal && open"
-            x-transition:enter="transition-opacity ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition-opacity ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            aria-hidden="true"
-            class="fixed inset-0 duration-100 isolate bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
-            :class="openedOnHover ? 'pointer-events-none' : 'pointer-events-auto'"
-        ></div>
-        <div
-            x-anchor.{{ side }}{% if align != 'center' %}-{{ align }}{% endif %}.offset.{{ sideOffset }}="anchor"
-            style="transform: translate({% if side == 'right' or side == 'left'%}0,{{ alignOffset }}px{% else %}{{ alignOffset }}px,0{% endif %});"
-            class="pointer-events-none"
+          class="bg-popover text-popover-foreground ring-foreground/10 flex flex-col gap-4 rounded-md p-4 text-sm shadow-md ring-1 duration-100 w-72 origin-(--transform-origin) outline-hidden pointer-events-auto overflow-x-hidden overflow-y-auto data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
+          {{ attrs }}
+          x-show="open"
+          :id="cId"
+          :data-open="open ? '' : null"
+          :data-closed="open ? null : ''"
+          @click.away="hideContent()"
+          @mouseenter="hoverCloseTimeout = destroyTimeout(hoverCloseTimeout)"
+          @mouseleave="if (openedOnHover && trigger) {d
+            triggerData = Alpine.$data(trigger)
+            hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
+            createHoverCloseTimeout($el, $event, triggerData.closeDelay);
+          }"
+          x-trap="open"
+          x-transition:enter="transition-all ease-out duration-200"
+          x-transition:enter-start="opacity-0 scale-95 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
+          x-transition:enter-end="opacity-100 scale-100"
+          x-transition:leave="transition-all ease-in duration-150"
+          x-transition:leave-start="opacity-100 scale-100"
+          x-transition:leave-end="opacity-0 scale-95"
+          tabindex="-1"
+          role="menu"
+          data-slot="{{ component }}-content"
         >
-            <div
-                class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
-                {{ attrs }}
-                x-show="open"
-                :id="cId"
-                :data-open="open ? '' : null"
-                :data-closed="open ? null : ''"
-                @click.away="open = false;"
-                @mouseenter="hoverCloseTimeout = destroyTimeout(hoverCloseTimeout)"
-                @mouseleave="if (openedOnHover && trigger) {
-                    triggerData = Alpine.$data(trigger)
-                    hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
-                    createHoverCloseTimeout($el, $event, triggerData.closeDelay);
-                }"
-                x-trap="open && trap"
-                x-transition:enter="transition-all ease-out duration-200"
-                x-transition:enter-start="opacity-0 scale-95 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition-all ease-in duration-150"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
-                tabindex="-1"
-                role="menu"
-                data-slot="{{ component }}-content"
-            >
-                {{ slot }}
-            </div>
+          {{ slot }}
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
 {% endwith %}
