@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<div 
+  data-slot="alert" 
+  role="alert" 
+  class="relative grid grid-cols-[0_1fr] items-start gap-y-0.5 border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current mt-6 w-auto rounded-xl border-surface bg-surface text-surface-foreground md:-mx-1 **:[code]:border"
+>
+  {% if attrs.icon %}
+  {% heroicon_outline attrs.icon %}
+  {% endif %}
+  {% if attrs.title %}
+  <div 
+    data-slot="alert-title" 
+    role="alert" 
+    class="col-start-2 font-medium tracking-tight line-clamp-1 min-h-4" 
+  >
+    {{ attrs.title }}
+  </div>
+  {% endif %}
+  <div 
+    data-slot="alert-description" 
+    class="col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed text-card-foreground/80" 
+  >
+    {% blocktranslate %}{{ slot }}{% endblocktranslate %}
+  </div>
+</div>
