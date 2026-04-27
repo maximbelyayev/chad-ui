@@ -10,6 +10,7 @@ SECTIONS = [
     'introduction',
     'components',
     'installation',
+    'usage_patterns'
 ]
 
 COMPONENTS = [

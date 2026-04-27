@@ -26,6 +26,10 @@ def installation(request):
     template_name, context = get_docs_template_and_context("installation")
     return render(request, template_name, context)
 
+def usage_patterns(request):
+    template_name, context = get_docs_template_and_context("usage_patterns")
+    return render(request, template_name, context)
+
 def markdown(request: HttpRequest):
     related_path = request.path_info.replace('.md', '/')
     match = resolve(related_path)
