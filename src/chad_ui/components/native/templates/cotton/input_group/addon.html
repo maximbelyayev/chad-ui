@@ -6,10 +6,11 @@
   data-align="{{ align|lower }}"
   class="
     text-muted-foreground h-auto gap-2 py-1.5 text-sm font-medium group-data-[disabled=true]/input-group:opacity-50 [&>kbd]:rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-4 flex cursor-text items-center justify-center select-none
-    {% if align == 'inline-start' %}pl-2 has-[>button]:ml-[-0.25rem] has-[>kbd]:ml-[-0.15rem] order-first
-    {% elif align == 'inline-end' %}pr-2 has-[>button]:mr-[-0.25rem] has-[>kbd]:mr-[-0.15rem] order-last
-    {% elif align == 'block-start' %}px-2.5 pt-2 group-has-[>input]/input-group:pt-2 [.border-b]:pb-2 order-first w-full justify-start
-    {% elif align == 'block-end' %}px-2.5 pb-2 group-has-[>input]/input-group:pb-2 [.border-t]:pt-2 order-last w-full justify-start
+    {% if class %} {{ class }}{% endif %}
+    {% if align == 'inline-start' %}pl-2 has-[_button]:ml-[-0.25rem] has-[_kbd]:ml-[-0.15rem]
+    {% elif align == 'inline-end' %}pr-2 has-[_button]:mr-[-0.25rem] has-[_kbd]:mr-[-0.15rem]
+    {% elif align == 'block-start' %}px-2.5 pt-2 group-has-[>input]/input-group:pt-2 [.border-b]:pb-2 w-full justify-start
+    {% elif align == 'block-end' %}px-2.5 pb-2 group-has-[>input]/input-group:pb-2 [.border-t]:pt-2 w-full justify-start
     {% endif %}
   "
   @click="

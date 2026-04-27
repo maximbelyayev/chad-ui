@@ -303,12 +303,12 @@ def htmx(request: HttpRequest) -> HttpResponse:
 
 ## API Reference
 
-### Button
+### c-button
 
-The `Button` component is a wrapper around the `button` element that adds a variety of styles and functionality.
+The `c-button` component is a wrapper around `<button>` that adds a variety of styles and functionality.
 
-| Prop      | Type                                                                                 | Default     | Description |
-| --------- | ------------------------------------------------------------------------------------ | ----------- | --- |
-| `variant` | `"default" \| "outline" \| "ghost" \| "destructive" \| "secondary" \| "link"`        | `"default"` | The type of styling applied to the component |
-| `size`    | `"default" \| "xs" \| "sm" \| "lg" \| "icon" \| "icon-xs" \| "icon-sm" \| "icon-lg"` | `"default"` | The size of the component |
-| `htmx`    | `boolean`                                                                            | `false`     | Adds a `<c-spinner>` indicator during an htmx request |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `"default" \| "xs" \| "sm" \| "lg" \| "icon" \| "icon-xs" \| "icon-sm" \| "icon-lg"` | `"default"` | The size of the button |
+| `variant` | `"default" \| "outline" \| "ghost" \| "destructive" \| "secondary" \| "link"` | `"ghost"` | The styling variant applied to the button |
+| `htmx` | `boolean` | `false` | Adds a visual indicator (default: `<c-spinner>`) and disables the button during an HTMX request |

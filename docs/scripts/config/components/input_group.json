@@ -1,6 +1,30 @@
 {
   "default": {
     "align": "center",
-    "class": "p-10 h-[26rem]"
+    "class": "p-10"
+  },
+  "example": {
+    "class": "h-[26rem]"
+  },
+  "inline-start": {
+    "class": "h-48"
+  },
+  "inline-end": {
+    "class": "h-48"
+  },
+  "block-start": {
+    "class": "h-96"
+  },
+  "block-end": {
+    "class": "h-[26rem]"
+  },
+  "icon": {
+    "class": "h-80"
+  },
+  "text": {
+    "class": "h-80"
+  },
+  "button": {
+    "class": "h-72"
   }
 }
