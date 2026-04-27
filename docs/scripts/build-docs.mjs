@@ -24,10 +24,12 @@ const COMPONENT_PREVIEW_CODE_HIDDEN_LINES = 3;
 const TAG_DEFAULT_CLASS_MAPPING = {
 	figure: '[&_pre]:max-h-96',
 	pre:  	'no-scrollbar min-w-0 overflow-x-auto overflow-y-auto overscroll-x-contain overscroll-y-auto px-4 py-3.5 outline-none has-[[data-highlighted-line]]:px-0 has-[[data-line-numbers]]:px-0 has-[[data-slot=tabs]]:p-0 !bg-transparent',
-	code:   'relative rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] break-words outline-none',
+	code:   'relative rounded-md bg-muted px-[0.3rem] py-[0.2rem] font-mono text-[0.8rem] break-words outline-none whitespace-nowrap',
 	h2:   	'[&+]*:[code]:text-xl mt-10 scroll-m-28 font-heading text-xl font-medium tracking-tight first:mt-0 lg:mt-12 [&+.steps]:mt-0! [&+.steps>h3]:mt-4! [&+h3]:mt-6! [&+p]:mt-4!',
 	h3:   	'mt-12 scroll-m-28 font-heading text-lg font-medium tracking-tight [&+p]:mt-4! *:[code]:text-xl',
-	p:    	'leading-relaxed [&:not(:first-child)]:mt-6',
+  h4:   	'mt-14 scroll-m-28 font-heading text-[16px] font-medium tracking-tight [&+p]:mt-4! *:[code]:text-xl',
+  h5:   	'mt-14 scroll-m-28 font-heading text-md font-medium tracking-tight [&+p]:mt-4! *:[code]:text-xl',
+	p:  	'leading-relaxed [&:not(:first-child)]:mt-6',
 	a:		'font-medium underline underline-offset-4',
 	strong: 'font-medium',
 	ul: 	'my-6 ml-6 list-disc',
@@ -76,7 +78,7 @@ function processElementParagraph(node, index, parent) {
 }
 
 function processElementHeader(node, index, parent) {
-	if (!['h2', 'h3'].includes(node.tagName)) return;
+	if (!['h2', 'h3', 'h4', 'h5'].includes(node.tagName)) return;
 	node.properties.id = slugify(node.children.find((c) => c.type === 'text')?.value)
 	node.properties.className = TAG_DEFAULT_CLASS_MAPPING[node.tagName];
 }
@@ -114,14 +116,14 @@ function processElementTable(node, index, parent) {
 
 function tryProcessPropTable(node) {
 	const propTableThTexts = ['Prop', 'Type', 'Default', 'Description']
-    const tHead = node.children.find(c => c.type === 'element' && c.tagName === 'thead');
-    const tHeadTr = tHead?.children.find(c => c.type === 'element' && c.tagName === 'tr');
-    const ths = tHeadTr?.children.filter(c => c.type === 'element' && c.tagName === 'th') ?? [];
+  const tHead = node.children.find(c => c.type === 'element' && c.tagName === 'thead');
+  const tHeadTr = tHead?.children.find(c => c.type === 'element' && c.tagName === 'tr');
+  const ths = tHeadTr?.children.filter(c => c.type === 'element' && c.tagName === 'th') ?? [];
 	const thTexts = ths.map((th) => th.children.find(c => c.type === 'text')?.value);
-    if (thTexts.length !== propTableThTexts.length ||
+  if (thTexts.length !== propTableThTexts.length ||
 		!thTexts.every((text, i) => propTableThTexts[i] === text)
 	) return null
-    return processElementTableAsDetails(node);
+  return processElementTableAsDetails(node);
 }
 
 function processElementTableAsDetails(node) {
@@ -138,18 +140,49 @@ function processElementTableAsDetails(node) {
 		detailsContentDl: 'flex flex-col gap-2',
 		detailsContentDlChild: 'flex flex-col md:grid md:grid-cols-[5fr_11.5fr_2.5rem] w-full',
 		detailsContentDlDt: 'px-4 py-2 font-semibold',
-		detailsContentDlDd: 'px-4 py-2 [&_code]:inline-block!'
+		detailsContentDlDd: 'px-4 py-2 [&_code]:inline-block! [&_code]:whitespace-normal'
 	};
-    const tHead = node.children.find(c => c.type === 'element' && c.tagName === 'thead');
-    const tHeadTr = tHead?.children.find(c => c.type === 'element' && c.tagName === 'tr');
-    const ths = tHeadTr?.children.filter(c => c.type === 'element' && c.tagName === 'th') ?? [];
-    const tBody = node.children.find(c => c.type === 'element' && c.tagName === 'tbody');
-    const tBodyTrs = tBody?.children.filter(c => c.type === 'element' && c.tagName === 'tr') ?? [];
-    const headerDiv = {
-        type: 'element',
-        tagName: 'div',
-        properties: { className: PROP_TABLE_CLASS_MAPPING.headerDiv },
-        children: ths.map((th, i) => {
+  const tHead = node.children.find(c => c.type === 'element' && c.tagName === 'thead');
+  const tHeadTr = tHead?.children.find(c => c.type === 'element' && c.tagName === 'tr');
+  const ths = tHeadTr?.children.filter(c => c.type === 'element' && c.tagName === 'th') ?? [];
+  const tBody = node.children.find(c => c.type === 'element' && c.tagName === 'tbody');
+  const tBodyTrs = tBody?.children.filter(c => c.type === 'element' && c.tagName === 'tr') ?? [];
+
+  const makeTextNode = (value) => ({ type: 'text', value });
+  const makeTd = (children) => ({
+    type: 'element',
+    tagName: 'td',
+    properties: {},
+    children,
+  });
+  const additionalAttrsRow = {
+    type: 'element',
+    tagName: 'tr',
+    properties: {},
+    children: [
+      makeTd([makeTextNode('-')]),
+      makeTd([makeTextNode('-')]),
+      makeTd([makeTextNode('-')]),
+      makeTd([
+        makeTextNode('Any additional HTML attribute, '),
+        { type: 'element', tagName: 'a', properties: { href: 'https://four.htmx.org/reference' }, children: [makeTextNode('HTMX')] },
+        makeTextNode(' attribute, '),
+        { type: 'element', tagName: 'a', properties: { href: 'https://alpinejs.dev/directives/data' }, children: [makeTextNode('AlpineJS')] },
+        makeTextNode(' directive, or '),
+        { type: 'element', tagName: 'a', properties: { href: 'https://django-cotton.com/docs/components#dynamic-attributes' }, children: [makeTextNode('django-cotton')] },
+        makeTextNode(' dynamic attribute. For more details, please see the section on '),
+        { type: 'element', tagName: 'a', properties: { href: '/docs/usage-patterns' }, children: [makeTextNode('Usage Patterns')] },
+        makeTextNode('.'),
+      ]),
+    ],
+  };
+  tBodyTrs.push(additionalAttrsRow);
+
+  const headerDiv = {
+    type: 'element',
+    tagName: 'div',
+    properties: { className: PROP_TABLE_CLASS_MAPPING.headerDiv },
+    children: ths.map((th, i) => {
 			if (i === (ths.length - 1)) th.children[0].value = '';
 			return {
 				type: 'element',
@@ -157,41 +190,41 @@ function processElementTableAsDetails(node) {
 				properties: { className: PROP_TABLE_CLASS_MAPPING.headerDivChild },
 				children: th.children,
 			}
-        }),
-    };
-    const makeDlChild = (label, children) => ({
+    }),
+  };
+  const makeDlChild = (label, children) => ({
+    type: 'element',
+    tagName: 'div',
+    properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContentDlChild },
+    children: [
+      {
         type: 'element',
-        tagName: 'div',
-        properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContentDlChild },
-        children: [
-            {
-                type: 'element',
-                tagName: 'dt',
-                properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContentDlDt },
-                children: [{ type: 'text', value: label }],
-            },
-            {
-                type: 'element',
-                tagName: 'dd',
-                properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContentDlDd },
-                children,
-            },
-        ],
-    });
-    const detailRows = tBodyTrs.map(tr => {
-        const tds = tr.children.filter(c => c.type === 'element' && c.tagName === 'td');
+        tagName: 'dt',
+        properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContentDlDt },
+        children: [{ type: 'text', value: label }],
+      },
+      {
+        type: 'element',
+        tagName: 'dd',
+        properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContentDlDd },
+        children,
+      },
+    ],
+  });
+  const detailRows = tBodyTrs.map(tr => {
+    const tds = tr.children.filter(c => c.type === 'element' && c.tagName === 'td');
 		tds.forEach(td => {
 			td.children.forEach(node => {
 				processElementCodeInline(node);
 			});
 		});
-        const [nameTd, typeTd, defaultTd, descriptionTd] = tds;
-        const summaryTds = tds.slice(0, -1);
-        const contentDiv = {
-            type: 'element',
-            tagName: 'div',
-            properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContent },
-            children: [{
+    const [nameTd, typeTd, defaultTd, descriptionTd] = tds;
+    const summaryTds = tds.slice(0, -1);
+    const contentDiv = {
+      type: 'element',
+      tagName: 'div',
+      properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContent },
+      children: [{
 				type: 'element',
 				tagName: 'dl',
 				properties: { className: PROP_TABLE_CLASS_MAPPING.detailsContentDl, 'aria-label': 'Info' },
@@ -201,19 +234,19 @@ function processElementTableAsDetails(node) {
 					makeDlChild('Type', typeTd?.children ?? []),
 					makeDlChild('Default', defaultTd?.children ?? []),
 				],
-            }],
-        };
-        return {
-            type: 'element',
-            tagName: 'details',
-            properties: { className: PROP_TABLE_CLASS_MAPPING.details },
-            children: [
-                {
-                    type: 'element',
-                    tagName: 'summary',
-                    properties: { className: PROP_TABLE_CLASS_MAPPING.detailsSummary },
-                    children: [
-                        ...summaryTds.map(td => {
+      }],
+    };
+    return {
+      type: 'element',
+      tagName: 'details',
+      properties: { className: PROP_TABLE_CLASS_MAPPING.details },
+      children: [
+        {
+          type: 'element',
+          tagName: 'summary',
+          properties: { className: PROP_TABLE_CLASS_MAPPING.detailsSummary },
+          children: [
+            ...summaryTds.map(td => {
 							td.children.forEach(node => processElementCodeInline(node))
 							return {
 								type: 'element',
@@ -222,54 +255,71 @@ function processElementTableAsDetails(node) {
 								children: td.children,
 							}
 						}),
-                        {
-                            type: 'element',
-                            tagName: 'div',
-                            properties: { className: PROP_TABLE_CLASS_MAPPING.detailsSummaryChevronChild },
-                            children: [{
-                                type: 'element',
-                                tagName: 'svg',
-                                properties: {
-                                    width: '10',
-                                    height: '10',
-                                    viewBox: '0 0 10 10',
-                                    fill: 'none',
-                                    xmlns: 'http://www.w3.org/2000/svg',
-                                },
-                                children: [{
-                                    type: 'element',
-                                    tagName: 'path',
-                                    properties: {
-                                        d: 'M1 3.5L5 7.5L9 3.5',
-                                        stroke: 'currentColor',
-                                    },
-                                    children: [],
-                                }],
-                            }],
-                        },
-                    ],
+            {
+              type: 'element',
+              tagName: 'div',
+              properties: { className: PROP_TABLE_CLASS_MAPPING.detailsSummaryChevronChild },
+              children: [{
+                type: 'element',
+                tagName: 'svg',
+                properties: {
+                  width: '10',
+                  height: '10',
+                  viewBox: '0 0 10 10',
+                  fill: 'none',
+                  xmlns: 'http://www.w3.org/2000/svg',
                 },
-                contentDiv,
-            ],
-        };
-    });
-    return {
-        type: 'element',
-        tagName: 'div',
-        properties: { className: PROP_TABLE_CLASS_MAPPING.containerDiv },
-        children: [{
+                children: [{
+                  type: 'element',
+                  tagName: 'path',
+                  properties: {
+                    d: 'M1 3.5L5 7.5L9 3.5',
+                    stroke: 'currentColor',
+                  },
+                  children: [],
+                }],
+              }],
+            },
+          ],
+        },
+        contentDiv,
+      ],
+    };
+  });
+  return {
+    type: 'element',
+    tagName: 'div',
+    properties: { className: PROP_TABLE_CLASS_MAPPING.containerDiv },
+    children: [{
 			type: 'element',
 			tagName: 'div',
 			properties: { className: PROP_TABLE_CLASS_MAPPING.tableDiv },
 			children: [headerDiv, ...detailRows],
 		},],
-    };
+  };
 }
 
 function processElementCodeInline(node) {
   if (!node || node.type !== 'element') return;
   node.properties = node.properties || {};
   node.properties.className = TAG_DEFAULT_CLASS_MAPPING[node.tagName];
+  if (!node.children) return;
+  const reJinja = /({{.*?}}|{%.+?%})/;
+  node.children = node.children.map(child => {
+    if (child.type !== 'text') return child;
+    const value = child.value;
+    if (!reJinja.test(value)) return child;
+    if (
+      value.includes('{% verbatim %}') ||
+      value.includes('{% endverbatim %}')
+    ) {
+      return child;
+    }
+    return {
+      type: 'text',
+      value: `{% verbatim %}${value}{% endverbatim %}`,
+    };
+  });
 }
 
 function processElementCodeBlock(node, index, parent) {
@@ -294,26 +344,26 @@ function processElementFigure(node, index, parent) {
 
 function rehypeCotton() {
   return (tree) => {
-    const cottonNodes = [];
-    visit(tree, 'element', (node) => {
-      if (!node.tagName?.startsWith('c-')) return;
-      cottonNodes.push({ node });
-    });
-    for (const { node } of cottonNodes) {
-      visit(node, 'text', (node, index, parent) => {
-        const processed = unified()
-          .use(remarkParse)
-          .use(remarkGfm)
-          .use(remarkRehype, { allowDangerousHtml: true })
-          .use(rehypeDocsTree)
-          .use(rehypeStringify)
-          .processSync(node.value);
-        parent.children[index] = {
-          type: 'raw',
-          value: String(processed)
-        };
+  const cottonNodes = [];
+  visit(tree, 'element', (node) => {
+    if (!node.tagName?.startsWith('c-')) return;
+    cottonNodes.push({ node });
+  });
+  for (const { node } of cottonNodes) {
+    visit(node, 'text', (node, index, parent) => {
+      const processed = unified()
+        .use(remarkParse)
+        .use(remarkGfm)
+        .use(remarkRehype, { allowDangerousHtml: true })
+        .use(rehypeDocsTree)
+        .use(rehypeStringify)
+        .processSync(node.value);
+      parent.children[index] = {
+        type: 'raw',
+        value: String(processed)
+      };
       });
-    }
+  }
   };
 }
 
@@ -324,7 +374,9 @@ function rehypeDocsTree(options) {
 		code:   processElementCode,
 		h2:   	processElementHeader,
 		h3:   	processElementHeader,
-		p:    	processElementParagraph,
+    h4:   	processElementHeader,
+    h5:   	processElementHeader,
+		p:  	processElementParagraph,
 		a:		processElementAnchor,
 		strong: processElementStrong,
 		ul:		processElementUl,
@@ -482,7 +534,7 @@ function processExampleDirective() {
 }
 
 async function processMarkdown(markdownContent, dir, name) {
-	const headingRe = /^(#{2,3})\s(.+)$/gm;
+	const headingRe = /^(#{2,5})\s(.+)$/gm;
 	const directiveRe = /:::(\w+)\s*\n([\s\S]*?):::/g;
 	const combinedRe = new RegExp(`${headingRe.source}|${directiveRe.source}`, 'gm');
 	const codeBlockRe = /```(\w+)\s*\n([\s\S]*?)```/g;
@@ -509,7 +561,7 @@ async function processMarkdown(markdownContent, dir, name) {
 	})
 	
 	const fileSansDirectivesAndBlocks = await unified()
-		.use(remarkParse)
+	  .use(remarkParse)
 		.use(remarkGfm)
 		.use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
