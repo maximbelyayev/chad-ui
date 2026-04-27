@@ -292,7 +292,9 @@ def card(request: HttpRequest) -> HttpResponse:
 
 ## API Reference
 
-### Root
+### c-accordion
+
+Groups all parts of the accordion.
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
@@ -301,9 +303,25 @@ def card(request: HttpRequest) -> HttpResponse:
 | `disabled` | `boolean`  | `false` | Whether the component should ignore user interaction. |
 | `orientation` | `"horizontal" \| "vertical"` | `"vertical"` | The visual orientation of the accordion. |
 
-### Item
+### c-accordion.item
+
+Groups an accordion header with the corresponding panel.
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `value` | `string` | — | A unique value that identifies this accordion item. If no value is provided, a unique ID will be generated automatically. Use when controlling the accordion programmatically, or to set an initial open state. |
 | `disabled` | `boolean`  | `false` | Whether the component should ignore user interaction. |
+
+### c-accordion.trigger
+
+A button that opens and closes the corresponding panel.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+
+### c-accordion.content
+
+A collapsible panel with the accordion item contents.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|

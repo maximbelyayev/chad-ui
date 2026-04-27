@@ -134,8 +134,31 @@ You can customize the alert colors by adding custom classes such as `bg-amber-50
 
 ## API Reference
 
-### Root
+### c-alert
+
+Displays a callout for user attention.
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `variant` | `"default" \| "destructive"` | `"default"` | The type of styling applied to the component. |
+| `variant` | `"default" \| "destructive"` | `"default"` | The styling variant applied to the component. |
+
+### c-alert.title
+
+Displays the title of the alert.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+
+### c-alert.description
+
+Displays the description or content of the alert.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+
+### c-alert.action
+
+Displays an action element (like a button) positioned absolutely in the top-right corner of the alert.
+
+| Prop | Type | Default | Description |
+|---|---|---|---|

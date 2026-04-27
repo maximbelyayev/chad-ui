@@ -124,10 +124,10 @@ You can customize the colors of a badge by adding custom classes such as `bg-gre
 
 ## API Reference
 
-### Badge
+### c-badge
 
-The `Badge` component displays a badge or a component that looks like a badge.
+Displays a badge or a component that looks like a badge.
 
-| Prop        | Type                                                                          | Default     | Description                                   |
-| ----------- | ----------------------------------------------------------------------------- | ----------- | --------------------------------------------- |
-| `variant`   | `"default" \| "secondary" \| "destructive" \| "outline" \| "ghost" \| "link"` | `"default"` | The type of styling applied to the component. |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `"default" \| "secondary" \| "destructive" \| "outline" \| "ghost" \| "link"` | `"default"` | The styling variant applied to the component. |
