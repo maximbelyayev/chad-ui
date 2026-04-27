@@ -78,12 +78,12 @@
               if (['top', 'bottom'].includes(this.side)) {
                 translation = `${this.alignOffset}px, 0`
                 $el.style.transform = `translate(${translation.trim()})`
-                $el.style.min-width = `${width}px`;
+                $el.style.minWidth = `${width}px`;
               }
               else {
                 translation = `0, ${this.alignOffset}px`
                 $el.style.transform = `translate(${translation.trim()})`
-                $el.style.width = '100%'
+                $el.style.minWidth = '100%'
               }
             }
           }"
