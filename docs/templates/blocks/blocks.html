@@ -5,48 +5,48 @@
 
 {% block content %}
 <section class="border-grid">
-    <div class="container-wrapper">
-        <div class="container flex flex-col gap-2 items-center py-8 px-6 text-center md:py-16 lg:py-20 xl:gap-4">
-            <c-badge variant="secondary">
-                {% blocktrans %}
-                Coming Soon!
-                {% endblocktrans %}
-            </c-badge>
-            <h1 class="text-3xl font-semibold tracking-tight lg:font-semibold xl:text-5xl xl:tracking-tighter leading-tighter text-balance text-primary lg:leading-[1.1]">
-                {% blocktrans %}
-                Building Blocks for the Web
-                {% endblocktrans %}
-            </h1>
-            <p class="max-w-4xl text-base sm:text-lg text-balance text-foreground">
-                {% blocktrans %}
-                Clean, modern building blocks. Copy and paste into your apps. Works with the Django web framework. Open Source. Free forever.
-                {% endblocktrans %}
-            </p>
-            <div class="flex w-full items-center justify-center gap-2 pt-2 **:data-[slot=button]:shadow-none">
-                <c-button size="sm" class="h-[31px]" asChild>
-                    <a href="{% url 'blocks:blocks' %}">
-                        {% blocktrans %}
-                        Browse Blocks
-                        {% endblocktrans %}
-                    </a>
-                </c-button>
-                <c-button variant="ghost" size="sm" asChild>
-                    <a href="{% url 'docs:components' %}">
-                        {% blocktrans %}
-                        View Components
-                        {% endblocktrans %}
-                    </a>
-                </c-button>
-            </div>
-        </div>
+  <div class="container-wrapper">
+    <div class="container flex flex-col gap-2 items-center py-8 px-6 text-center md:py-16 lg:py-20 xl:gap-4">
+      <c-badge variant="secondary">
+        {% blocktrans %}
+        Coming Soon!
+        {% endblocktrans %}
+      </c-badge>
+      <h1 class="text-3xl font-semibold tracking-tight lg:font-semibold xl:text-5xl xl:tracking-tighter leading-tighter text-balance text-primary lg:leading-[1.1]">
+        {% blocktrans %}
+        Building Blocks for the Web
+        {% endblocktrans %}
+      </h1>
+      <p class="max-w-4xl text-base sm:text-lg text-balance text-foreground">
+        {% blocktrans %}
+        Clean, modern building blocks. Copy and paste into your apps. Works with the Django web framework. Open Source. Free forever.
+        {% endblocktrans %}
+      </p>
+      <div class="flex w-full items-center justify-center gap-2 pt-2 **:data-[slot=button]:shadow-none">
+        <c-button size="sm" class="h-[31px]" asChild>
+          <a href="{% url 'blocks:blocks' %}">
+            {% blocktrans %}
+            Browse Blocks
+            {% endblocktrans %}
+          </a>
+        </c-button>
+        <c-button variant="ghost" size="sm" asChild>
+          <a href="{% url 'docs:components' %}">
+            {% blocktrans %}
+            View Components
+            {% endblocktrans %}
+          </a>
+        </c-button>
+      </div>
     </div>
+  </div>
 </section>
 {% endblock %}
 
 {% block footer %}
 <div class="px-1 w-full text-xs leading-loose text-center sm:text-sm text-muted-foreground">
-    {% blocktrans %}
-    Built by <a href="https://github.com/maximbelyayev" target="_blank" rel="noreferrer" class="font-medium underline underline-offset-4">Maxim Belyayev</a>. The source code is available on <a href="https://github.com/maximbelyayev/chad-ui" target="_blank" rel="noreferrer" class="font-medium underline underline-offset-4">GitHub</a>.
-    {% endblocktrans%}
+  {% blocktrans %}
+  Ported by <a href="https://github.com/maximbelyayev" target="_blank" rel="noreferrer" class="font-medium underline underline-offset-4">Maxim Belyayev</a>. The source code is available on <a href="https://github.com/maximbelyayev/chad-ui" target="_blank" rel="noreferrer" class="font-medium underline underline-offset-4">GitHub</a>.
+  {% endblocktrans%}
 </div>
 {% endblock %}

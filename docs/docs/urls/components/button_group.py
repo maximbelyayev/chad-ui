@@ -6,4 +6,5 @@ app_name="button_group"
 
 urlpatterns = [
     path('', button_group.index, name='index'),
+    path('select/', button_group.select, name='select')
 ]
