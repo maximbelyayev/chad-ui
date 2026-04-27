@@ -1,6 +1,11 @@
 <label
-    x-text="{{ slot|yesno:'true,false' }} ? '{{ slot }}' : fieldLabel "
-    :for="fieldId"
+    {% if not slot %}
+    x-text="fieldLabel"
+    {% endif %}
+    {% if not attrs.for %}
+    :for="fieldId ? fieldId : null"
+    {% endif %}
     data-slot="field-label"
+    {{ attrs }}
     class="text-sm font-medium group-data-[disabled=true]:opacity-50 peer-disabled:opacity-50 items-center select-none group-data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed has-data-checked:bg-primary/5 has-data-checked:border-primary/30 dark:has-data-checked:border-primary/20 dark:has-data-checked:bg-primary/10 gap-2 group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border *:data-[slot=field]:p-3 group/field-label peer/field-label flex w-fit leading-snug{% if class %} {{ class }}{% endif %}"
 >{{ slot }}</label>

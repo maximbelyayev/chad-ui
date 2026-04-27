@@ -12,6 +12,7 @@
         fieldId: '{{ field.id_for_label}}',
         fieldLabel: '{{ field.label }}',
         fieldErrors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        fieldDescription: '{{ field.help_text|escapejs }}',
         initStore() {
             this.$store['chad-ui'] ??= {};
             this.$store['chad-ui'][this.component] ??= {};
@@ -77,15 +78,19 @@
         init() {
             this.initStore();
             this._renderHandler = () => {
-                this.resetHtmxForValidation(this.validationMode);
-                this.renderErrors();
+                if (this.fieldId) {
+                    this.resetHtmxForValidation(this.validationMode);
+                    this.renderErrors();
+                }
             }
             $el.addEventListener('htmx:after:swap', this._renderHandler);
             this.$nextTick(() => {
-                this.findControl();
-                this.findErrorElt();
-                this.resetHtmxForValidation(this.validationMode);
-                this.renderErrors();
+                if (this.fieldId) {
+                    this.findControl();
+                    this.findErrorElt();
+                    this.resetHtmxForValidation(this.validationMode);
+                    this.renderErrors();
+                }
             });
         },
         destroy() {
@@ -96,6 +101,9 @@
     id="{% if attrs.id %}{{ attrs.id }}{% else %}{{ field.id_for_label}}-field{% endif %}"
     role="group"
     data-orientation="{{ orientation|lower }}"
+    {% if disabled %}
+    data-disabled="true"
+    {% endif %}
     class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full{% if orientation == 'vertical' %} flex-col *:w-full [&>.sr-only]:w-auto{% elif orientation == 'horizontal' %} flex-row items-center *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% elif orientation == 'responsive' %} flex-col *:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:*:data-[slot=field-label]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% endif %}{% if class %} {{ class }}{% endif %}"
     {{ attrs }}
 >
