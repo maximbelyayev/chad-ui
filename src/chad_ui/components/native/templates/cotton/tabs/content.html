@@ -1,4 +1,4 @@
-<c-vars value disabled />
+<c-vars value />
 
 <div
     x-cloak
@@ -13,7 +13,6 @@
     x-show="isOpen(value)"
     :id="id"
     :tabindex="isOpen(value) ? 0 : -1"
-    :aria-disabled="disabled"
     aria-labelledby=""
     :data-orientation="orientation"
     :data-active="isOpen(value) ? '' : null"
