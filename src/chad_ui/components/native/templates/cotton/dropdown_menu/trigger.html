@@ -39,8 +39,6 @@
     },
     handleTrigger(event) {
       if (this.disabled) return;
-      const trigger = (document.activeElement && $el.contains(document.activeElement)) ? document.activeElement : $el;
-      trigger.blur();
       const content = event.target.closest(`[data-slot=${this.component}-content]`);
       if (content) { content.removeAttribute('aria-hidden'); }
       if (!this.detached) toggleContent(event);
@@ -50,10 +48,15 @@
     handleMouseClick(event) {
       if (!this.root || this.disabled || $el.attributes.disabled) return;
       const rootData = Alpine.$data(this.root);
+      if (rootData._hiding) return;
       rootData.hoverOpenTimeout = rootData.destroyTimeout(rootData.hoverOpenTimeout);
       rootData.hoverCloseTimeout = rootData.destroyTimeout(rootData.hoverCloseTimeout);
       if (rootData.openedOnHover) rootData.openedOnHover = false;
       this.handleTrigger(event);
+    },
+    handleKeydown(event) {
+      event.preventDefault();
+      this.handleMouseClick(event);
     },
     handleMouseEnter(event) {
       if (!this.root || !this.openOnHover || this.disabled || $el.attributes.disabled) return;
@@ -74,10 +77,11 @@
   }"
   :id="id"
   @click="handleMouseClick($event)"
+  @keydown.enter="handleKeydown($event)"
   @mouseenter="handleMouseEnter($event)"
   @mouseleave="handleMouseLeave($event)"
   type="button"
-  :tabindex="asChild || $el.querySelector('button') ? -1 : 0"
+  :tabindex="disabled ? -1 : (asChild || $el.querySelector('button, [role=button]') ? -1 : 0)"
   aria-haspopup="menu"
   {{ attrs }}
 >

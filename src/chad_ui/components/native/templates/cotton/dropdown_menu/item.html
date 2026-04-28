@@ -12,12 +12,13 @@
     },
     handleEvent(event) {
       if (this.disabled) return;
-      trap = false;
       this.$nextTick(() => {
         document.activeElement?.blur();
-        if (event.target === $el) $el.firstElementChild?.click();
+        if (event.target === $el) {
+          $el.querySelector('[data-slot]')?.click();
+        }
         else event.target.blur();
-        if (this.closeOnClick) hideMenu();
+        if (this.closeOnClick) hideContent();
       });
     },
   }"

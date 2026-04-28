@@ -22,11 +22,10 @@
         this.initContent()
         this.$nextTick(() => this.$nextTick(() => this.items = this.indexItems()));
         this.$watch('open', open => {
-          if (open) { htmx.process($el); this.highlightedIndex = -1; }
-          else {
-            this.items.forEach(i => this.removeFocus(i));
-            this.$nextTick(() => $focus.lastFocused()?.focus());
-          }
+          if (open) {
+            htmx.process($el);
+            this.highlightedIndex = -1;
+          } else this.items.forEach(i => this.removeFocus(i));
         })
       },
       indexItems() {
@@ -74,7 +73,7 @@
         x-show="open"
         :data-open="open ? '' : null"
         :data-closed="open ? null : ''"
-        @click.away="hideContent()"
+        @click.away="if (!_hiding) hideContent()"
         @keydown.down.prevent="if (items.length === 0) return;
           if (highlightedIndex === -1) highlightedIndex = 0;
           else if (highlightedIndex === items.length - 1) {
