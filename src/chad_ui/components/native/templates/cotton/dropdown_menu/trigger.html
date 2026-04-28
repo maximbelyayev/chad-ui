@@ -14,28 +14,30 @@
     component: '{{ component }}',
     root: null,
     detached: null,
-    id: '{{ attrs.id }}',
+    tId: '{{ attrs.id }}',
     findRoot() {
       const p = this.$el.parentElement;
       if (p.getAttribute('data-slot') === this.component) return p;
       return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
         .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
     },
-    initTrigger() {
-      const r = this.findRoot();
-      if (this.asChild && r) {
-        const rData = Alpine.$data(r);
-        if (typeof rData.initAsChild === 'function' && rData.initAsChild(this.$el)) return true;
+    initState() {
+      if (!this.tId) this.tId = `${this.root.id}-trigger` || $id(`chad-ui_r_${this.component}-trigger`);
+      this.detached = (this.root !== this.$el.parentElement); 
+    },
+    initMount() {
+      this.root = this.findRoot();
+      this.initState();
+      if (this.asChild && this.root) {
+        const rData = Alpine.$data(this.root);
+        if (rData.initAsChild(this.$el)) return true;
       }
-      this.root = r;
-      this.detached = (r !== this.$el.parentElement);
-      if (!this.id) this.id = $id(`${r.id}-trigger`) || $id(`chad-ui_r_${this.component}-trigger`);
       return false;
     },
     init() {
       this.$nextTick(() => {
-        if (this.initTrigger()) return;
-      });
+        if (this.initMount()) return;
+      })
     },
     handleTrigger(event) {
       if (this.disabled) return;
@@ -75,7 +77,7 @@
       if (rootData.openedOnHover) rootData.createHoverCloseTimeout($el, event, delay);
     }
   }"
-  :id="id"
+  :id="tId"
   @click="handleMouseClick($event)"
   @keydown.enter="handleKeydown($event)"
   @mouseenter="handleMouseEnter($event)"

@@ -11,15 +11,17 @@
       side: '{{ side }}',
       sideOffset: {{ sideOffset }},
       anchor: null,
-      initAnchor() {
+      cId: '{{ attrs.id }}',
+      findAnchor() {
         return Array.from(document.querySelectorAll(`[x-data][data-slot='${component}-trigger']`))
-          .find(n => { try { return Alpine.$data(n).id === id || Alpine.$data(n).handle === handle } catch { return false } });
+          .find(n => { try { return Alpine.$data(n).id === id } catch { return false } });
       },
       initContent() {
-        this.anchor = this.initAnchor()
+        this.anchor = this.findAnchor();
+        if (!this.cId) this.cId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
       },
       init() {   
-        this.initContent()
+        this.initContent();
         this.$nextTick(() => this.$nextTick(() => this.items = this.indexItems()));
         this.$watch('open', open => {
           if (open) {
@@ -73,7 +75,7 @@
         x-show="open"
         :data-open="open ? '' : null"
         :data-closed="open ? null : ''"
-        @click.away="if (!_hiding) hideContent()"
+        @click.away="hideContent()"
         @keydown.down.prevent="if (items.length === 0) return;
           if (highlightedIndex === -1) highlightedIndex = 0;
           else if (highlightedIndex === items.length - 1) {
