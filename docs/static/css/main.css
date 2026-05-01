@@ -218,7 +218,7 @@
     }
 }
 
-@theme {
+@theme inline {
     --color-black: #000;
     --color-white: #fff;
     --spacing: .25rem;
