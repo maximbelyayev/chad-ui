@@ -1,90 +1,91 @@
 <c-vars variant="default" size="default" nativeButton="true" asChild htmx />
 
 <{% if nativeButton|lower == 'false' %}div{% else %}button{% endif %}
-    x-data="{
-        asChild: {{ asChild|yesno:'true,false' }},
-        htmx: {{ htmx|yesno:'true, false'}},
-        init() {
-            if (this.asChild) this.$nextTick(() => this.initAsChild());
-        },
-        initAsChild() {
-            let child, indicator, spinner;
-            if (this.htmx) {
-                indicator = this.$el.firstElementChild;
-                child = indicator?.firstElementChild;
-                spinner = indicator?.nextElementSibling;
-            }
-            else {
-                child = this.$el.firstElementChild;
-            }
-            if (!child) return;
-            [...this.$el.attributes].forEach(attr => {
-                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
-                if (attr.name === 'x-data') {
-                    const newData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
-                    child.setAttribute('x-data', newData);
-                    return;
-                }
-                child.setAttribute(attr.name, attr.value);
-            });
-            child.classList.add(...this.$el.classList);
-            if (this.htmx && indicator && spinner) {
-                const element = child.cloneNode()
-                indicator = element.appendChild(indicator.cloneNode())
-                element.appendChild(spinner);
-                [...child.childNodes].forEach(node => indicator.appendChild(node))
-
-                this.$el.replaceWith(element);
-                htmx.process(element);
-            }
-            else {
-                this.$el.replaceWith(child);
-            }
+  x-data="{
+    asChild: {{ asChild|yesno:'true,false' }},
+    htmx: {{ htmx|yesno:'true, false'}},
+    init() {
+      if (this.asChild) this.$nextTick(() => this.initAsChild());
+    },
+    initAsChild() {
+      let child, indicator, spinner;
+      if (this.htmx) {
+        indicator = this.$el.firstElementChild;
+        child = indicator?.firstElementChild;
+        spinner = indicator?.nextElementSibling;
+      }
+      else {
+        child = this.$el.firstElementChild;
+      }
+      if (!child) return;
+      [...this.$el.attributes].forEach(attr => {
+        if (child.hasAttribute(attr.name) || attr.name === 'class') return;
+        if (attr.name === 'x-data') {
+          const newData = attr.value.replace(/asChild:\s*true/, 'asChild: false');
+          child.setAttribute('x-data', newData);
+          return;
         }
-    }"
-    class="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none
-        {% if variant == 'default' %}border-transparent bg-primary text-primary-foreground hover:bg-primary/80
-        {% elif variant == 'outline' %}border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground shadow-xs
-        {% elif variant == 'secondary' %}border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground
-        {% elif variant == 'ghost' %}border-transparent hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground
-        {% elif variant == 'destructive' %}border-transparent bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30
-        {% elif variant == 'link' %}border-transparent text-primary underline-offset-4 hover:underline
-        {% endif %}
-        {% if size == 'default' %}h-9 gap-1.5 rounded-md px-2.5 text-sm in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-4
-        {% elif size == 'xs' %}h-6 gap-1 rounded-[min(var(--radius-md),8px)] px-2 text-xs in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3
-        {% elif size == 'sm' %}h-8 gap-1 rounded-[min(var(--radius-md),10px)] px-2.5 text-sm in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-4
-        {% elif size == 'lg' %}h-10 gap-1.5 rounded-md px-2.5 text-sm as-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&_svg:not([class*='size-'])]:size-4
-        {% elif size == 'icon' %}size-9 rounded-md text-sm [&_svg:not([class*='size-'])]:size-4
-        {% elif size == 'icon-xs' %}size-6 rounded-[min(var(--radius-md),8px)] text-sm in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-3
-        {% elif size == 'icon-sm' %}size-8 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-4
-        {% elif size == 'icon-lg' %}size-10 rounded-md text-sm [&_svg:not([class*='size-'])]:size-4
-        {% endif %}
-        {% if class %}{{ class }}{% endif %}
-    "
-    {% if htmx %}
-    @click="$el.classList.add('htmx')"
-        {% if hx_get or hx_post or hx_put or hx_patch or hx_delete %}
-        hx-indicator="this"
-        {% endif %}
-        {% if hx_disabled_elt %}
-        {{ hx_disabled_elt }}
-        {% else %}
-        hx-disabled-elt="this"
-        {% endif %}
+        child.setAttribute(attr.name, attr.value);
+      });
+      child.classList.add(...this.$el.classList);
+      if (this.htmx && indicator && spinner) {
+        const element = child.cloneNode()
+        indicator = element.appendChild(indicator.cloneNode())
+        element.appendChild(spinner);
+        [...child.childNodes].forEach(node => indicator.appendChild(node))
+
+        this.$el.replaceWith(element);
+        htmx.process(element);
+      }
+      else {
+        this.$el.replaceWith(child);
+      }
+    }
+  }"
+  class="focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border bg-clip-padding font-medium focus-visible:ring-3 aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 [&_svg]:shrink-0 [&_svg]:pointer-events-none outline-none group/button select-none active:not-aria-[haspopup]:translate-y-px
+    {% if variant == 'default' %}border-transparent bg-primary text-primary-foreground hover:bg-primary/80
+    {% elif variant == 'outline' %}border-border bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 aria-expanded:bg-muted aria-expanded:text-foreground shadow-xs
+    {% elif variant == 'secondary' %}border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground
+    {% elif variant == 'ghost' %}border-transparent hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground
+    {% elif variant == 'destructive' %}border-transparent bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30
+    {% elif variant == 'link' %}border-transparent text-primary underline-offset-4 hover:underline
     {% endif %}
-    {{ attrs }}
-    data-slot="button"
-    {% if not asChild %}
-    type="button"
-    tabindex="0"
+    {% if size == 'default' %}h-9 gap-1.5 rounded-md px-2.5 text-sm in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-4
+    {% elif size == 'xs' %}h-6 gap-1 rounded-[min(var(--radius-md),8px)] px-2 text-xs in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3
+    {% elif size == 'sm' %}h-8 gap-1 rounded-[min(var(--radius-md),10px)] px-2.5 text-sm in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-4
+    {% elif size == 'lg' %}h-10 gap-1.5 rounded-md px-2.5 text-sm as-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3 [&_svg:not([class*='size-'])]:size-4
+    {% elif size == 'icon' %}size-9 rounded-md text-sm [&_svg:not([class*='size-'])]:size-4
+    {% elif size == 'icon-xs' %}size-6 rounded-[min(var(--radius-md),8px)] text-sm in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-3
+    {% elif size == 'icon-sm' %}size-8 rounded-[min(var(--radius-md),10px)] text-sm in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-4
+    {% elif size == 'icon-lg' %}size-10 rounded-md text-sm [&_svg:not([class*='size-'])]:size-4
     {% endif %}
->
-    {% if htmx %}
-    <span class="htmx-indicator-hide">
-        {{ slot }}
-    </span>
-    <c-spinner htmx class="absolute m-auto" />
+    {% if class %}{{ class }}{% endif %}
+  "
+  {% if htmx %}
+  @click="$el.classList.add('htmx')"
+    {% if hx_get or hx_post or hx_put or hx_patch or hx_delete %}
+    hx-indicator="this"
+    {% endif %}
+    {% if hx_disable %}
+    {{ hx_disable }}
     {% else %}
-    {{ slot }}
+    hx-disable="this"
     {% endif %}
+  {% endif %}
+  {{ attrs }}
+  data-slot="button"
+  data-size="{{ size|lower }}"
+  {% if not asChild %}
+  type="button"
+  tabindex="0"
+  {% endif %}
+>
+  {% if htmx %}
+  <span class="htmx-indicator-hide">
+    {{ slot }}
+  </span>
+  <c-spinner htmx class="absolute m-auto" />
+  {% else %}
+  {{ slot }}
+  {% endif %}
 </{% if nativeButton|lower == 'false' %}div{% else %}button{% endif %}>
