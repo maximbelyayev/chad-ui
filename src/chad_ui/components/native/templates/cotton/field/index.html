@@ -4,110 +4,111 @@
 <c-vars field handle validationMode="submit" validationDebounceTime="200" invalidStyling orientation="vertical" />
 
 <div data-slot="field"
-    x-data="{
-        handle: '{{ handle }}',
-        validationMode: '{{ validationMode|lower }}',
-        validationDebounceTime: {{ validationDebounceTime }}, 
-        invalidStyling: {{ invalidStyling|yesno:'true,false' }}, 
-        fieldId: '{{ field.id_for_label}}',
-        fieldLabel: '{{ field.label }}',
-        fieldErrors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
-        fieldDescription: '{{ field.help_text|escapejs }}',
-        initStore() {
-            this.$store['chad-ui'] ??= {};
-            this.$store['chad-ui'][this.component] ??= {};
-            this.$store['chad-ui'][this.component][`${$el.id}`] ??= {};
-        },
-        getStore(global = false) {
-            if (global) return this.$store['chad-ui']
-            return this.$store['chad-ui'][this.component];
-        },
-        findControl() {
-            const controls = this.$el.querySelectorAll('input, select, textarea');
-            if (controls.length !== 1) throw new Error(`[chad-ui] field (id: '${$el.id}') expects exactly one form control.`);
-            this._control = controls[0];
-            this.control = this._control.closest(`[data-slot=${this._control.tagName.toLowerCase()}]`);
-            if (!this.control || !this.control.id) throw new Error(`[chad-ui] field (id: '${$el.id}') expects a form control with the correct 'data-slot' attribute.`);
-        },
-        findErrorElt() {
-            this._errorElt = this.$el.querySelector('[x-data][data-slot=field-error]')
-                ?? Array.from(document.querySelectorAll('[x-data][data-slot=field-error]'))
-                    .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
-            if (this._errorElt) this._errorEltUl = this._errorElt.querySelector('ul');
-        },
-        clearErrors() {
-            const cData = Alpine.$data(this.control);
-            if (cData.unsetErrorStyle) cData.unsetErrorStyle();
-            Alpine.$data(this._errorElt).show = false;
-            this._errorEltUl.innerHTML = '';
-            $el.setAttribute('data-invalid', null);
-        },
-        renderErrors() {
-            if (!this._errorElt) return;
-            this.clearErrors();
-            if (this._errorElt && this.fieldErrors.length > 0 && this._control.value) {
-                const eData = Alpine.$data(this._errorElt);
-                const errorLimit = Number.isInteger(Number(eData.errorLimit)) && Number(eData.errorLimit) > 0 ? Number(eData.errorLimit) : Infinity;
-                if (errorLimit !== 0) eData.show = true;
-                this.fieldErrors.slice(0, errorLimit).forEach(error => {
-                    const li = document.createElement('li');
-                    li.textContent = error;
-                    this._errorEltUl.appendChild(li);
-                });
-                if (this.invalidStyling) {
-                    this.$el.setAttribute('data-invalid', 'true');
-                    const cData = Alpine.$data(this.control);
-                    cData.setErrorStyle();
-                };
-            }
-        },
-        setFormSubmit(e) {
-            const ctx = e.detail?.ctx;
-            if (ctx?.sourceEvent instanceof SubmitEvent && ctx.sourceElement instanceof HTMLFormElement && ctx?.sourceElement.contains($el)) {
-                this.getStore()[`${$el.id}`].formSubmit = true;
-            } else this.getStore()[`${$el.id}`].formSubmit = false;
-        },
-        resetHtmxForValidation(validationMode) {
-            if (!['submit', 'blur', 'change'].includes(validationMode)) validationMode = 'submit';
-            const cData = Alpine.$data(this.control);
-            if (!cData.trigger && cData.setValidationTrigger) cData.setValidationTrigger(validationMode);
-            this._control.setAttribute('hx-target', `#${$el.id}`);
-            this._control.setAttribute('hx-select', `#${$el.id}`);
-            htmx.process(this._control);
-        },
-        init() {
-            this.initStore();
-            this._renderHandler = () => {
-                if (this.fieldId) {
-                    this.resetHtmxForValidation(this.validationMode);
-                    this.renderErrors();
-                }
-            }
-            $el.addEventListener('htmx:after:swap', this._renderHandler);
-            this.$nextTick(() => {
-                if (this.fieldId) {
-                    this.findControl();
-                    this.findErrorElt();
-                    this.resetHtmxForValidation(this.validationMode);
-                    this.renderErrors();
-                }
-            });
-        },
-        destroy() {
-            $el.removeEventListener('htmx:after:swap', this._renderHandler);
+  x-data="{
+    handle: '{{ handle }}',
+    validationMode: '{{ validationMode|lower }}',
+    validationDebounceTime: {{ validationDebounceTime }}, 
+    invalidStyling: {{ invalidStyling|yesno:'true,false' }}, 
+    fieldId: '{{ field.id_for_label}}',
+    fieldLabel: '{{ field.label }}',
+    fieldErrors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+    fieldDescription: '{{ field.help_text|escapejs }}',
+    initStore() {
+      this.$store['chad-ui'] ??= {};
+      this.$store['chad-ui'][this.component] ??= {};
+      this.$store['chad-ui'][this.component][`${$el.id}`] ??= {};
+    },
+    getStore(global = false) {
+      if (global) return this.$store['chad-ui']
+      return this.$store['chad-ui'][this.component];
+    },
+    findControl() {
+      const controls = this.$el.querySelectorAll('input, select, textarea');
+      if (controls.length !== 1) throw new Error(`[chad-ui] field (id: '${$el.id}') expects exactly one form control.`);
+      this._control = controls[0];
+      this.control = this._control.closest(`[data-slot=${this._control.tagName.toLowerCase()}]`);
+      if (!this.control || !this.control.id) throw new Error(`[chad-ui] field (id: '${$el.id}') expects a form control with the correct 'data-slot' attribute.`);
+    },
+    findErrorElt() {
+      this._errorElt = this.$el.querySelector('[x-data][data-slot=field-error]')
+        ?? Array.from(document.querySelectorAll('[x-data][data-slot=field-error]'))
+          .find(n => { try { return Alpine.$data(n).handle === this.handle; } catch { return false; } });
+      if (this._errorElt) this._errorEltUl = this._errorElt.querySelector('ul');
+    },
+    clearErrors() {
+      if (!this._errorElt) return;
+      const cData = Alpine.$data(this.control);
+      if (cData.unsetErrorStyle) cData.unsetErrorStyle();
+      Alpine.$data(this._errorElt).show = false;
+      this._errorEltUl.innerHTML = '';
+      $el.setAttribute('data-invalid', null);
+    },
+    renderErrors() {
+      if (!this._errorElt) return;
+      this.clearErrors();
+      if (this._errorElt && this.fieldErrors.length > 0 && this._control.value) {
+        const eData = Alpine.$data(this._errorElt);
+        const errorLimit = Number.isInteger(Number(eData.errorLimit)) && Number(eData.errorLimit) > 0 ? Number(eData.errorLimit) : Infinity;
+        if (errorLimit !== 0) eData.show = true;
+        this.fieldErrors.slice(0, errorLimit).forEach(error => {
+          const li = document.createElement('li');
+          li.textContent = error;
+          this._errorEltUl.appendChild(li);
+        });
+        if (this.invalidStyling) {
+          this.$el.setAttribute('data-invalid', 'true');
+          const cData = Alpine.$data(this.control);
+          cData.setErrorStyle();
+        };
+      }
+    },
+    setFormSubmit(e) {
+      const ctx = e.detail?.ctx;
+      if (ctx?.sourceEvent instanceof SubmitEvent && ctx.sourceElement instanceof HTMLFormElement && ctx?.sourceElement.contains($el)) {
+        this.getStore()[`${$el.id}`].formSubmit = true;
+      } else this.getStore()[`${$el.id}`].formSubmit = false;
+    },
+    resetHtmxForValidation(validationMode) {
+      if (!['submit', 'blur', 'change'].includes(validationMode)) validationMode = 'submit';
+      const cData = Alpine.$data(this.control);
+      if (!cData.trigger && cData.setValidationTrigger) cData.setValidationTrigger(validationMode);
+      this._control.setAttribute('hx-target', `#${$el.id}`);
+      this._control.setAttribute('hx-select', `#${$el.id}`);
+      htmx.process(this._control);
+    },
+    init() {
+      this.initStore();
+      this._renderHandler = () => {
+        if (this.fieldId) {
+          this.resetHtmxForValidation(this.validationMode);
+          this.renderErrors();
         }
-    }"
-    @htmx:before:swap.window="setFormSubmit($event);"
-    id="{% if attrs.id %}{{ attrs.id }}{% else %}{{ field.id_for_label}}-field{% endif %}"
-    role="group"
-    data-orientation="{{ orientation|lower }}"
-    {% if disabled %}
-    data-disabled="true"
-    {% endif %}
-    class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full{% if orientation == 'vertical' %} flex-col *:w-full [&>.sr-only]:w-auto{% elif orientation == 'horizontal' %} flex-row items-center *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% elif orientation == 'responsive' %} flex-col *:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:*:data-[slot=field-label]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% endif %}{% if class %} {{ class }}{% endif %}"
-    {{ attrs }}
+      }
+      $el.addEventListener('htmx:after:swap', this._renderHandler);
+      this.$nextTick(() => {
+        if (this.fieldId) {
+          this.findControl();
+          this.findErrorElt();
+          this.resetHtmxForValidation(this.validationMode);
+          this.renderErrors();
+        }
+      });
+    },
+    destroy() {
+      $el.removeEventListener('htmx:after:swap', this._renderHandler);
+    }
+  }"
+  @htmx:before:swap.window="setFormSubmit($event);"
+  id="{% if attrs.id %}{{ attrs.id }}{% else %}{{ field.id_for_label}}-field{% endif %}"
+  role="group"
+  data-orientation="{{ orientation|lower }}"
+  {% if disabled %}
+  data-disabled="true"
+  {% endif %}
+  class="data-[invalid=true]:text-destructive gap-3 group/field flex w-full{% if orientation == 'vertical' %} flex-col *:w-full [&>.sr-only]:w-auto{% elif orientation == 'horizontal' %} flex-row items-center *:data-[slot=field-label]:flex-auto has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% elif orientation == 'responsive' %} flex-col *:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:*:data-[slot=field-label]:flex-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px{% endif %}{% if class %} {{ class }}{% endif %}"
+  {{ attrs }}
 >
-    {{ slot }}
+  {{ slot }}
 </div>
 
 {% endwith %}
