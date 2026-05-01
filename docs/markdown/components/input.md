@@ -39,7 +39,7 @@ pipx run chad-ui add input
 
 ### Field
 
-Use `<c-field>`, `<c-field.label>`, and `<c-field.description>` to create an input with a label and description. See the [Field](/docs/components/field) documentation for more details.
+Use `c-field`, `c-field.label`, and `c-field.description` to create an input with a label and description. See the [Field](/docs/components/field) documentation for more details.
 
 :::example
 ```html
@@ -59,12 +59,40 @@ Use `<c-field>`, `<c-field.label>`, and `<c-field.description>` to create an inp
 
 ### Field Group
 
-Use `<c-field.group>` to show multiple `<c-field>` blocks and to build forms. See the [Field](/docs/components/field) documentation for more details.
+Use `c-field.group` to show multiple `c-field` blocks and to build forms. See the [Field](/docs/components/field) documentation for more details.
+
+:::example
+```html
+<c-field.group>
+  <c-field>
+    <c-field.label for="fieldgroup-name">Name</c-field.label>
+    <c-input id="fieldgroup-name" placeholder="Jordan Lee" />
+  </c-field>
+  <c-field>
+    <c-field.label for="fieldgroup-email">Email</c-field.label>
+    <c-input
+      id="fieldgroup-email"
+      type="email"
+      placeholder="name@example.com"
+    />
+    <c-field.description>
+      We'll send updates to this address.
+    </c-field.description>
+  </c-field>
+  <c-field orientation="horizontal">
+    <c-button type="reset" variant="outline">
+      Reset
+    </c-button>
+    <c-button type="submit">Submit</c-button>
+  </c-field>
+</c-field.group>
+```
+:::
 
 
 ### Disabled
 
-Use the `disabled` prop to disable the input. To style the disabled state, add the `disabled` prop to the `<c-field>` component.
+Use the `disabled` prop to disable the input. To style the disabled state, add the `disabled` prop to the `c-field` component.
 
 :::example
 ```html
@@ -85,7 +113,7 @@ Use the `disabled` prop to disable the input. To style the disabled state, add t
 
 For automatic invalid styling using Django form field validation and/or HTMX, please see the [Field Validation](/docs/components/field/#validation) documentation.
 
-For manual invalid styling, set `aria-invalid="true"` on `<c-input>` to mark it as invalid. To style the invalid state, set `data-invalid="true"` on the `<c-field>` component. 
+For manual invalid styling, set `aria-invalid="true"` on `c-input` to mark it as invalid. To style the invalid state, set `data-invalid="true"` on the `c-field` component. 
 
 :::example
 ```html
@@ -113,7 +141,7 @@ Use the `type="file"` prop to create a file input.
 
 ### Inline
 
-Use `<c-field>` with `orientation="horizontal"` to create an inline input. Pair with `<c-button>` to create a search input with a button.
+Use `c-field` with `orientation="horizontal"` to create an inline input. Pair with `c-button` to create a search input with a button.
 
 :::example
 ```html
@@ -167,7 +195,7 @@ Use the `required` attribute to indicate required inputs.
 
 ### Badge
 
-Use `<c-badge>` in the label to highlight a recommended field.
+Use `c-badge` in the label to highlight a recommended field.
 
 :::example
 ```html
@@ -189,16 +217,31 @@ Use `<c-badge>` in the label to highlight a recommended field.
 
 ### Input Group
 
-To add icons, text, or buttons inside an input, use the `<c-input-group>` component. See the [Input Group](/docs/components/input-group/) component for more examples.
+To add icons, text, or buttons inside an input, use the `c-input-group` component. See the [Input Group](/docs/components/input-group/) component for more examples.
 
 :::example
 ```html
+<c-field>
+  <c-field.label for="input-group-url">Website URL</c-field.label>
+  <c-input-group>
+    <c-input-group.input
+      id="input-group-url"
+      placeholder="example.com"
+    />
+    <c-input-group.addon>
+      <c-input-group.text>https://</c-input-group.text>
+    </c-input-group.addon>
+    <c-input-group.addon align="inline-end">
+      {% heroicon_outline 'information-circle' stroke_width=2 %}
+    </c-input-group.addon>
+  </c-input-group>
+</c-field>
 ```
 :::
 
 ### Button Group
 
-To add buttons to an input, use the `<c-button-group>` component. See the [Button Group](/docs/components/button-group/) component for more examples.
+To add buttons to an input, use the `c-button-group` component. See the [Button Group](/docs/components/button-group/) component for more examples.
 
 :::example
 ```html
@@ -218,7 +261,7 @@ To add buttons to an input, use the `<c-button-group>` component. See the [Butto
 
 A full form example with multiple inputs, a select, and a button.
 
-Use the `:field` prop on `<c-field>` and `<c-input>` to automatically map attributes from a Django form field passed as a context variable.
+Use the `:field` prop on `c-field` and `c-input` to automatically map attributes from a Django form field passed as a context variable.
 
 :::example
 ```html
@@ -291,6 +334,9 @@ class InputForm(forms.Form):
   )
 
 # views.py
+from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
+
 def form(request: HttpRequest) -> HttpResponse:
   template_name = 'docs/components/input/form.html'
   context = {

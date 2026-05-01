@@ -8,7 +8,7 @@ description: Add addons, buttons, and helper content to inputs.
 <c-input-group class="max-w-xs">
   <c-input-group.input placeholder="Search..." />
   <c-input-group.addon>
-    {% heroicon_outline 'magnifying-glass' %}
+    {% heroicon_outline 'magnifying-glass' stroke_width=2 %}
   </c-input-group.addon>
   <c-input-group.addon align="inline-end">12 results</c-input-group.addon>
 </c-input-group>
@@ -27,12 +27,14 @@ pipx run chad-ui add input-group
 <c-input-group>
   <c-input-group.input placeholder="Search..." />
   <c-input-group.addon>
-    {% heroicon_outline 'magnifying-glass' %}
+    {% heroicon_outline 'magnifying-glass' stroke_width=2 %}
   </c-input-group.addon>
 </c-input-group>
 ```
 
 ## Composition
+
+Use the following composition to build an input group:
 
 ```text
 c-input-group
@@ -88,7 +90,7 @@ Use `align="inline-end"` to position the addon at the end of the input.
       placeholder="Enter password"
     />
     <c-input-group.addon align="inline-end">
-      {% heroicon_outline 'eye-slash' %}
+      {% heroicon_outline 'eye-slash' stroke_width=2 %}
     </c-input-group.addon>
   </c-input-group>
   <c-field.description>
@@ -199,29 +201,29 @@ Use `align="block-end"` to position the addon below the input.
   <c-input-group>
     <c-input-group.input placeholder="Search..." />
     <c-input-group.addon>
-      {% heroicon_outline 'magnifying-glass' %}
+      {% heroicon_outline 'magnifying-glass' stroke_width=2 %}
     </c-input-group.addon>
   </c-input-group>
   <c-input-group>
     <c-input-group.input type="email" placeholder="Enter your email" />
     <c-input-group.addon>
-      {% heroicon_outline 'envelope' %}
+      {% heroicon_outline 'envelope' stroke_width=2 %}
     </c-input-group.addon>
   </c-input-group>
   <c-input-group>
     <c-input-group.input placeholder="Card number" />
     <c-input-group.addon>
-      {% heroicon_outline 'credit-card' %}
+      {% heroicon_outline 'credit-card' stroke_width=2 %}
     </c-input-group.addon>
     <c-input-group.addon align="inline-end">
-      {% heroicon_outline 'check' %}
+      {% heroicon_outline 'check' stroke_width=2 %}
     </c-input-group.addon>
   </c-input-group>
   <c-input-group>
     <c-input-group.input placeholder="Card number" />
     <c-input-group.addon align="inline-end">
-      {% heroicon_outline 'star' %}
-      {% heroicon_outline 'information-circle' %}
+      {% heroicon_outline 'star' stroke_width=2 %}
+      {% heroicon_outline 'information-circle' stroke_width=2 %}
     </c-input-group.addon>
   </c-input-group>
 </div>
@@ -324,7 +326,6 @@ Use `align="block-end"` to position the addon below the input.
         align="start"
         class="flex flex-col p-2.5! gap-1! rounded-xl! text-sm!"
       >
-        <c-input />
         <p class="font-medium">Your connection is not secure.</p>
         <p>
           You should not enter any sensitive information on this site.
@@ -394,7 +395,7 @@ Use `align="block-end"` to position the addon below the input.
       </c-dropdown-menu>
     </c-input-group.addon>
   </c-input-group>
-  <c-input-group class="rounded-full! **:rounded-full!">
+  <c-input-group>
     <c-input-group.input placeholder="Enter search query" />
     <c-input-group.addon align="inline-end">
       <c-dropdown-menu>
@@ -500,6 +501,13 @@ The main component that wraps inputs and addons.
 | Prop | Type | Default | Description |
 |---|---|---|---|
 
+```html
+<c-input-group>
+  <c-input-group.input />
+  <c-input-group.addon />
+</c-input-group>
+```
+
 ### c-input-group.addon
 
 Displays icons, text, buttons, or other content alongside inputs.
@@ -537,7 +545,7 @@ Displays buttons within input groups.
 ```html
 <c-input-group.button>Button</c-input-group.button>
 <c-input-group.button size="icon-xs">
-  {% heroicon_outline 'square-2-stack' %}
+  {% heroicon_outline 'square-2-stack' stroke_width=2 %}
 </c-input-group.button>
 ```
 
@@ -554,7 +562,7 @@ All props are passed through to the underlying `<c-input />` component.
 <c-input-group>
   <c-input-group.input placeholder="Enter text..." />
   <c-input-group.addon>
-    {% heroicon_outline 'magnifying-glass' %}
+    {% heroicon_outline 'magnifying-glass' stroke_width=2 %}
   </c-input-group.addon>
 </c-input-group>
 ```

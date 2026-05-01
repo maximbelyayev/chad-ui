@@ -80,6 +80,8 @@ pipx run chad-ui add button-group
 
 ## Composition
 
+Use the following composition to build a button group:
+
 ```text
 c-button-group
 ├── c-button or c-input or text
@@ -89,7 +91,7 @@ c-button-group
 
 ## Accessibility
 
-- The `c-button-group` component has the role attribute set to group.
+- The `c-button-group` component has the `role` attribute set to `group`.
 - Use <c-kbd>Tab</c-kbd> to navigate between the buttons in the group.
 - Use `aria-label` or `aria-labelledby` to label the button group.
 
@@ -175,7 +177,7 @@ Control the size of buttons using the size `prop` on individual buttons.
 
 ### Nested
 
-Nest `<c-button-group>` components to create button groups with spacing.
+Nest `c-button-group` components to create button groups with spacing.
 
 :::example
 ```html
@@ -383,7 +385,7 @@ Pair with a `c-select` component.
   </c-button-group>
   <c-button-group>
     <c-button aria-label="Send" size="icon" variant="outline">
-      {% heroicon_outline 'arrow-right' %}
+      {% heroicon_outline 'arrow-right' stroke_width=2 %}
     </c-button>
   </c-button-group>
 </c-button-group>
@@ -450,7 +452,7 @@ Use with a `c-popover` component.
 
 ### c-button-group
 
-The `c-button-group` component is a container that groups related buttons together with consistent styling.
+A container that groups related buttons together with consistent styling.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -492,9 +494,9 @@ Visually divides buttons within a group.
 
 Use this component to display text within a button group.
 
-| Prop      | Type      | Default |
-| --------- | --------- | ------- |
-| `asChild` | `boolean` | `false` |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `asChild` | `boolean` | `false` | nigger |
 
 ```html
 <c-button-group>

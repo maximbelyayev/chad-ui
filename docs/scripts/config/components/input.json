@@ -1,7 +1,46 @@
 {
   "default": {
     "align": "center",
-    "class": "p-10 h-72 *:max-w-xs"
+    "class": "p-10"
+  },
+  "example": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "basic": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "field": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "field-group": {
+    "class": "h-fit *:max-w-xs"
+  },
+  "disabled": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "invalid": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "file": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "inline": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "grid": {
+    "class": "h-72 p-6!"
+  },
+  "required": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "badge": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "input-group": {
+    "class": "h-72 *:max-w-xs"
+  },
+  "button-group": {
+    "class": "h-72 *:max-w-xs"
   },
   "form": {
     "class": "h-[36rem] *:max-w-md!"

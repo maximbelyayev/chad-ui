@@ -7,7 +7,7 @@ description: Displays a callout for user attention.
 ```html
 <div class="grid gap-4 items-start w-full max-w-md">
   <c-alert>
-    {% heroicon_outline 'check-circle' %}
+    {% heroicon_outline 'check-circle' stroke_width=2 %}
     <c-alert.title>Payment successful</c-alert.title>
     <c-alert.description>
       Your payment of $29.99 has been processed. A receipt has been sent to
@@ -15,7 +15,7 @@ description: Displays a callout for user attention.
     </c-alert.description>
   </c-alert>
   <c-alert>
-    {% heroicon_outline 'information-circle' %}
+    {% heroicon_outline 'information-circle' stroke_width=2 %}
     <c-alert.title>New feature available</c-alert.title>
     <c-alert.description>
       We've added dark mode support. You can enable it in your account
@@ -36,7 +36,7 @@ pipx run chad-ui add alert
 
 ```html
 <c-alert>
-  {% heroicon_outline 'information-circle' %}
+  {% heroicon_outline 'information-circle' stroke_width=2 %}
   <c-alert.title>Heads up!</c-alert.title>
   <c-alert.description>
     You can add components and dependencies to your app using the cli.
@@ -68,7 +68,7 @@ A basic alert with an icon, title and description.
 :::example
 ```html
 <c-alert class="max-w-md">
-  {% heroicon_outline 'check-circle' %}
+  {% heroicon_outline 'check-circle' stroke_width=2 %}
   <c-alert.title>Account updated successfully</c-alert.title>
   <c-alert.description>
     Your profile information has been saved. Changes will be reflected
@@ -85,7 +85,7 @@ Use `variant="destructive"` to create a destructive alert.
 :::example
 ```html
 <c-alert variant="destructive" class="max-w-md">
-  {% heroicon_outline 'information-circle' %}
+  {% heroicon_outline 'information-circle' stroke_width=2 %}
   <c-alert.title>Payment failed</c-alert.title>
   <c-alert.description>
     Your payment could not be processed. Please check your payment method
@@ -122,7 +122,7 @@ You can customize the alert colors by adding custom classes such as `bg-amber-50
 :::example
 ```html
 <c-alert class="max-w-md border-amber-200! bg-amber-50! text-amber-900! dark:border-amber-900! dark:bg-amber-950! dark:text-amber-50!">
-  {% heroicon_outline 'exclamation-triangle' %}
+  {% heroicon_outline 'exclamation-triangle' stroke_width=2 %}
   <c-alert.title>Your subscription will expire in 3 days.</c-alert.title>
   <c-alert.description>
     Renew now to avoid service interruption or upgrade to a paid plan to

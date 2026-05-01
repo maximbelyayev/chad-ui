@@ -8,7 +8,7 @@ description: Displays a button or a component that looks like a button.
 <div class="flex flex-wrap items-center gap-2 md:flex-row">
   <c-button variant="outline">Button</c-button>
   <c-button variant="outline" size="icon" aria-label="Submit">
-    {% heroicon_outline 'arrow-up' %}
+    {% heroicon_outline 'arrow-up' stroke_width=2 %}
   </c-button>
 </div>
 ```
@@ -137,7 +137,7 @@ Use the `size` prop to change the size of the button.
 :::example
 ```html
 <c-button variant="outline" size="icon">
-  {% heroicon_outline 'arrow-up-circle' %}
+  {% heroicon_outline 'arrow-up-circle' stroke_width=2 %}
 </c-button>
 ```
 :::
@@ -169,7 +169,7 @@ Use the `rounded-full` class to make the button rounded.
 <div class="flex gap-2">
   <c-button class="rounded-full!">Get Started</c-button>
   <c-button variant="outline" size="icon" class="rounded-full!">
-    {% heroicon_outline 'arrow-up' %}
+    {% heroicon_outline 'arrow-up' stroke_width=2 %}
   </c-button>
 </div>
 ```
@@ -203,7 +203,7 @@ To create a button group, use the `<c-button-group>` component. See the [Button 
 <c-button-group>
   <c-button-group class="hidden sm:flex">
     <c-button variant="outline" size="icon" aria-label="Go Back">
-      {% heroicon_outline 'arrow-left' %}
+      {% heroicon_outline 'arrow-left' stroke_width=2 %}
     </c-button>
   </c-button-group>
   <c-button-group>
@@ -215,28 +215,28 @@ To create a button group, use the `<c-button-group>` component. See the [Button 
     <c-dropdown-menu>
       <c-dropdown-menu.trigger asChild>
         <c-button variant="outline" size="icon" aria-label="More Options">
-          {% heroicon_outline 'ellipsis-horizontal' %}
+          {% heroicon_outline 'ellipsis-horizontal' stroke_width=2 %}
         </c-button>
       </c-dropdown-menu.trigger>
       <c-dropdown-menu.content align="end" class="w-40">
         <c-dropdown-menu.group>
           <c-dropdown-menu.item>
-            {% heroicon_outline 'envelope-open' %}
+            {% heroicon_outline 'envelope-open' stroke_width=2 %}
             Mark as Read
           </c-dropdown-menu.item>
           <c-dropdown-menu.item>
-            {% heroicon_outline 'archive-box' %}
+            {% heroicon_outline 'archive-box' stroke_width=2 %}
             Archive
           </c-dropdown-menu.item>
         </c-dropdown-menu.group>
         <c-dropdown-menu.separator />
         <c-dropdown-menu.group>
           <c-dropdown-menu.item>
-            {% heroicon_outline 'clock' %}
+            {% heroicon_outline 'clock' stroke_width=2 %}
             Snooze
           </c-dropdown-menu.item>
           <c-dropdown-menu.item>
-            {% heroicon_outline 'calendar' %}
+            {% heroicon_outline 'calendar' stroke_width=2 %}
             Add to Calendar
           </c-dropdown-menu.item>
           <c-dropdown-menu.item>
@@ -247,7 +247,7 @@ To create a button group, use the `<c-button-group>` component. See the [Button 
         <c-dropdown-menu.separator />
         <c-dropdown-menu.group>
           <c-dropdown-menu.item variant="destructive">
-            {% heroicon_outline 'trash' %}
+            {% heroicon_outline 'trash' stroke_width=2 %}
             Trash
           </c-dropdown-menu.item>
         </c-dropdown-menu.group>
@@ -289,6 +289,7 @@ Use the `htmx` prop with [HTMX attributes](https://htmx.org/reference/#attribute
 ```
 ```python
 from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse
 import random
 import time
 

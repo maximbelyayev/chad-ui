@@ -1,12 +1,49 @@
 ---
-title: Components
-description: Here you can find all the components available in the library. We are working on adding more components.
+title: Installation
+description: How to install dependencies and structure your app.
 ---
 
-This is not a component library. It is how you build your component library.
+## Add Components
+The easiest way to interact with chad/ui components is via the CLI using `pipx` or `uvx`:
 
-You know how most traditional component libraries work: you install a package from NPM, import the components, and use them in your app.
+```bash
+pipx run chad-ui -h
+```
 
-This approach works well until you need to customize a component to fit your design system or require one that isn’t included in the library. Often, you end up wrapping library components, writing workarounds to override styles, or mixing components from different libraries with incompatible APIs.
+```bash
+pipx run chad-ui -h
+```
 
-This is what shadcn/ui aims to solve. It is built around the following principles:
+To view an index of all available components:
+
+```bash
+pipx run chad-ui -h
+```
+
+To add a component:
+
+```bash
+pipx run chad-ui add <component>
+```
+
+## HTMX
+
+### hx-indicator
+
+```css
+.htmx-indicator {
+    display: none;
+}
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+.htmx-request.htmx-indicator {
+    display: inline-block;
+}
+.htmx-request.htmx-indicator-hide {
+    visibility: hidden;
+}
+.htmx-request .htmx-indicator-hide {
+    visibility: hidden;
+}
+```

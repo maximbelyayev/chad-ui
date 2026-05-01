@@ -21,10 +21,19 @@
   "icon": {
     "class": "h-80"
   },
-  "text": {
-    "class": "h-80"
-  },
   "button": {
     "class": "h-72"
+  },
+  "kbd": {
+    "class": "h-40"
+  },
+  "dropdown": {
+    "class": "h-56"
+  },
+  "spinner": {
+    "class": "h-80"
+  },
+  "textarea": {
+    "class": "h-96"
   }
 }
