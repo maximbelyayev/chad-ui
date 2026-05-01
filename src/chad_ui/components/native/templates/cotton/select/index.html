@@ -81,7 +81,7 @@
     hideContent();
   }"
   x-id="[`${this.id}-label`, `${this.id}-item`]"
-  class="*:w-full"
+  class="{% if class %} {{ class }}{% endif %}"
 >
   {{ slot }}
     <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" 
