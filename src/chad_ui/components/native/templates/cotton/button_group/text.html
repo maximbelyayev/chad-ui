@@ -1,0 +1,38 @@
+{% with component='button-group' %}
+
+<c-vars asChild />
+
+<div 
+  x-data="{
+    asChild: {{ asChild|yesno:'true,false' }},
+    component: '{{ component }}',
+    root: null,
+    tId: '{{ attrs.id }}',
+    findRoot() {
+      const p = this.$el.parentElement;
+      if (p.getAttribute('data-slot') === this.component) return p;
+      return Array.from(document.querySelectorAll(`[x-data][data-slot='${this.component}']`))
+        .find(n => { try { return Alpine.$data(n).id === this.id; } catch { return false; } });
+    },
+    initMount() {
+      this.root = this.findRoot();
+      if (this.asChild && this.root) {
+        const rData = Alpine.$data(this.root);
+        if (rData.initAsChild(this.$el)) return true;
+      }
+      return false;
+    },
+    init() {
+      this.$nextTick(() => {
+        if (this.initMount()) return;
+      })
+    },
+  }"
+  data-slot="button-group-text" 
+  class="bg-muted gap-2 rounded-md border px-2.5 text-sm font-medium shadow-xs [&_svg:not([class*='size-'])]:size-4 flex items-center [&_svg]:pointer-events-none{% if class %} {{ class }}{% endif %}"
+  {{ attrs }}
+>
+  {{ slot }}
+</div>
+
+{% endwith %}
