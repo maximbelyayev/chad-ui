@@ -21,5 +21,6 @@ COMPONENTS = [
     'button_group',
     'field',
     'input',
-    'input_group'
+    'input_group',
+    'select',
 ]

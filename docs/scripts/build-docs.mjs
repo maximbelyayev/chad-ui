@@ -657,7 +657,7 @@ async function processMarkdown(markdownContent, dir, name) {
 				</c-example.code>
 			</c-example>
 		`;
-		if (exampleCodeIncludesPython) {
+		if (headingName !== 'example' && exampleCodeIncludesPython) {
 			html = html.replace(`<div data-directive="${i}"></div>`, `<div id="${headingName}-partial" hx-get="{% url 'docs:components:${name}:${headingName}' %}" hx-trigger="load"></div>` );
 			partials.push({ heading: headingName, partial: block})
 		}

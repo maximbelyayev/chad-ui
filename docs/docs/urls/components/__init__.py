@@ -11,4 +11,5 @@ urlpatterns = [
     path('field/', include('docs.urls.components.field')),
     path('input/', include('docs.urls.components.input')),
     path('input-group/', include('docs.urls.components.input_group')),
+    path('select/', include('docs.urls.components.select')),
 ]
