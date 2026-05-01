@@ -107,11 +107,6 @@
             } else highlightedIndex--;
             handleFocus(items[highlightedIndex]);
           "
-          @keydown.escape.window="if (open) {
-            $event.preventDefault();
-            $event.stopImmediatePropagation();
-            hideContent();
-          }"
           x-trap="open"
           x-transition:enter="transition-all ease-out duration-100"
           x-transition:enter-start="opacity-0 scale-99 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"

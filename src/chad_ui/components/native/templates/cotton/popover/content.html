@@ -23,7 +23,6 @@
           this.initContent();
           this.$watch('open', open => {
             if (open) htmx.process($el);
-            else this.$nextTick(() => $focus.lastFocused()?.focus());
           })
         },
       }"
@@ -57,11 +56,12 @@
           :data-open="open ? '' : null"
           :data-closed="open ? null : ''"
           @click.away="hideContent()"
+          @click.stop="trap = true;"
           @mouseenter="hoverCloseTimeout = destroyTimeout(hoverCloseTimeout)"
           @mouseleave="if (openedOnHover && trigger) {d
-            triggerData = Alpine.$data(trigger)
+            tData = Alpine.$data(trigger)
             hoverCloseTimeout = destroyTimeout(hoverCloseTimeout);
-            createHoverCloseTimeout($el, $event, triggerData.closeDelay);
+            createHoverCloseTimeout($el, $event, tData.closeDelay);
           }"
           x-trap="open"
           x-transition:enter="transition-all ease-out duration-200"

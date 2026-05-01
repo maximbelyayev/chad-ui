@@ -158,7 +158,7 @@
   :id="id"
   @{{ handle }}.window="toggleContent($event)"
   @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideContent()"
-  @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
+  @keydown.escape.window="if (open && content?.contains($event.target)) {
     $event.preventDefault();
     $event.stopImmediatePropagation();
     hideContent();

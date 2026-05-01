@@ -12,7 +12,6 @@
     hoverOpenTimeout: null,
     hoverCloseTimeout: null,
     hoverTargetCorners: null,
-    trap: false,
     trigger: null,
     content: null,
     component: '{{ component }}',
@@ -70,14 +69,23 @@
       this.initState();
     },
     showContent(event) {
-      this.trigger = event.target.closest(`[data-slot=${this.component}-trigger]`);
-      this._lastFocused = $focus.within($el).focused();
+      if (this._hiding) return;
+      const aEl = document.activeElement;
+      if (aEl && aEl !== document.body) this._lastFocused = aEl;
+      this.trigger = event?.target.closest(`[data-slot=${this.component}-trigger]`);
       this.open = true;
     },
     hideContent() {
+      if (this._hiding) return;
+      this._hiding = true;
       this.trigger = null;
       this.open = false;
-      this.$nextTick(() => $focus.focus(this._lastFocused));
+      this.$nextTick(() => {
+        if (this._lastFocused && document.contains(this._lastFocused)) {
+          this._lastFocused.focus();
+        }
+        this._hiding = false;
+      });
     },
     toggleContent(event) {
       if (this.open) this.hideContent();
@@ -149,7 +157,7 @@
   :id="id"
   @{{ handle }}.window="toggleContent($event)"
   @hide-{{ component }}.window="if (open && (!$event.detail || !$event.detail.handle || $event.detail.handle === handle)) hideContent()"
-  @keydown.escape.window="if (open && ($event.target === content || content.contains($event.target))) {
+  @keydown.escape.window="if (open && content?.contains($event.target)) {
     $event.preventDefault();
     $event.stopImmediatePropagation();
     hideContent();
