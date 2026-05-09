@@ -1,7 +1,6 @@
 <c-vars placeholder="Select an option" />
 
 <span
-  x-cloak
   {{ attrs }}
   class="block truncate{% if class %} {{ class }}{% endif %}"
   x-text="selectedText.join(', ') || '{{ placeholder }}'"

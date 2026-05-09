@@ -1,4 +1,4 @@
-<c-vars value disabled />
+<c-vars value disabled only/>
 
 <div x-data="{ 
     value: '{{ value|escapejs }}',
@@ -10,6 +10,9 @@
       if (!multiple) hideContent();
       this._handling = false;
     },
+    init() {
+      if (this.disabled) setDisabled($el);
+    }
   }"
   :id="'{{ attrs.id }}' ? '{{ attrs.id }}' : $id(`${id}-item`)"
   :data-selected="selected[value] ? '' : null"

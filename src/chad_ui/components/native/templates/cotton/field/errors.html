@@ -1,17 +1,21 @@
 {% with component='field' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars errorLimit handle />
+<c-vars list errorLimit handle />
 
 <div 
-    x-data="{ errorLimit: '{{ errorLimit }}', handle: '{{ handle }}', show: false }"
-    x-show="show"
+    x-data="{ errorLimit: '{{ errorLimit }}', list: {{ list|yesno:'true,false' }}, handle: '{{ handle }}', show: false }"
     role="alert"
     data-slot="field-error"
     class="text-destructive text-sm font-normal{% if class %} {{ class }}{% endif %}"
     {{ attrs }}
 >
-    <ul class="flex flex-col gap-1 ml-4 list-disc"></ul>
+    <ul 
+      :class="list ? 'ml-4 list-disc' : null"
+      class="flex flex-col gap-1"
+    >
+      <li>{{ slot }}</li>
+    </ul>
 </div>
 
 {% endwith %}

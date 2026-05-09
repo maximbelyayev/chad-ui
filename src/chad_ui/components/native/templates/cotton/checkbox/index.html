@@ -1,116 +1,116 @@
 <c-vars defaultChecked indeterminate nativeButton disabled readOnly asChild />
 <!--TODO: indeterminate, parent -->
 <span
-  x-data="{
-    checked: {{ defaultChecked|yesno:'true,false' }},
-    nativeButton: {{ nativeButton|yesno:'true,false' }},
-    disabled: {{ disabled|yesno:'true,false' }},
-    readOnly: {{ readOnly|yesno:'true,false' }},
-    asChild: {{ asChild|yesno:'true,false' }},
-    isFormControl: true,
-    init() {
-      this.isFormControl = {{ attrs.form|yesno:'true,false' }} ? true : this.$el.closest('form') !== null;
-      if (this.asChild) {
-        this.wrapper = this.$el;
-        this.$nextTick(() => this.$nextTick(() => this.initAsChild()));
-      }
-    }, 
-    initAsChild() {
-      const wrapper = this.wrapper || this.$el;
-      const child = wrapper.firstElementChild;
-      if (!child) return;
-      if (this.nativeButton) child.setAttribute('type', 'button');
-      [...wrapper.attributes].forEach(attr => {
-        if (child.hasAttribute(attr.name) || attr.name === 'class') return;
-        if (attr.name === 'x-data') {
-          child.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
-          return;
-        }
-        child.setAttribute(attr.name, attr.value);
-      });
-      child.classList.add(...wrapper.classList);
-      [...wrapper.childNodes].forEach(node => {
-        if (node !== child) {
-          if (node.type === 'checkbox') this.hiddenInput = node;
-          child.appendChild(node);
-        }
-      });
-      if (this.hiddenInput) this.hiddenInput.checked = this.checked;
-      wrapper.replaceWith(child);
-    },
-    toggle() {
-      if (!this.disabled && !this.readOnly) {
-        this.checked = !this.checked;
-        if (this.hiddenInput) this.hiddenInput.checked = this.checked;
-      }
-    },
-    getCheckedState() {
-      return this.checked ? 'checked' : 'unchecked';
-    },
-  }"
-  @click.stop="toggle()"
-  @keyup.enter.self.stop="if (!nativeButton) toggle()"
-  role="checkbox"
-  :tabindex="disabled ? '-1' : '0'"
-  :data-checked="checked ? '' : null"
-  :data-unchecked="checked ? null : ''"
-  :aria-checked="checked"
-  data-slot="checkbox"
-  {% if attrs.disabled %}
-  data-disabled
-  aria-disabled="true"
-  {% endif %}
-  :data-readonly="readOnly ? '': null"
-  {% if attrs.required %}
-  data-required
-  aria-required="true"
-  {% endif %}
-  {% with form_attrs='name,required,form,value,checked,disabled,id' vars='defaultChecked,indeterminate,value,nativeButton,disabled,readOnly,asChild' %}
-    {% for key, value in attrs.items %}
-      {% if key not in form_attrs and key not in vars %}
-        {{ key }}{% if value != True %}="{{ value }}"{% endif %}
-      {% endif %}
-    {% endfor %}
-  {% endwith %}
-  {% if attrs.id %}
-  :id="isFormControl ? null : '{{ attrs.id }}'"
-  {% endif %}
-  class="flex relative justify-center items-center border transition-shadow outline-none disabled:opacity-50 disabled:cursor-not-allowed group-has-disabled/field:opacity-50 aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive aria-invalid:aria-checked:border-primary data-checked:border-primary data-checked:text-primary-foreground data-checked:bg-primary border-input peer size-4 rounded-[4px] shadow-xs shrink-0 after:absolute after:-inset-x-3 after:-inset-y-2 dark:aria-invalid:ring-destructive/40 dark:aria-invalid:border-destructive/50 dark:data-checked:bg-primary dark:bg-input/30 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring{% if class %} {{ class }}{% endif %}"
->   
-  {% if not asChild %}
-  <span 
-    x-show="checked"
+    x-data="{
+        checked: {{ defaultChecked|yesno:'true,false' }},
+        nativeButton: {{ nativeButton|yesno:'true,false' }},
+        disabled: {{ disabled|yesno:'true,false' }},
+        readOnly: {{ readOnly|yesno:'true,false' }},
+        asChild: {{ asChild|yesno:'true,false' }},
+        isFormControl: true,
+        init() {
+            this.isFormControl = {{ attrs.form|yesno:'true,false' }} ? true : this.$el.closest('form') !== null;
+            if (this.asChild) {
+                this.wrapper = this.$el;
+                this.$nextTick(() => this.$nextTick(() => this.initAsChild()));
+            }
+        }, 
+        initAsChild() {
+            const wrapper = this.wrapper || this.$el;
+            const child = wrapper.firstElementChild;
+            if (!child) return;
+            if (this.nativeButton) child.setAttribute('type', 'button');
+            [...wrapper.attributes].forEach(attr => {
+                if (child.hasAttribute(attr.name) || attr.name === 'class') return;
+                if (attr.name === 'x-data') {
+                    child.setAttribute('x-data', attr.value.replace(/asChild:\s*true/, 'asChild: false'));
+                    return;
+                }
+                child.setAttribute(attr.name, attr.value);
+            });
+            child.classList.add(...wrapper.classList);
+            [...wrapper.childNodes].forEach(node => {
+                if (node !== child) {
+                    if (node.type === 'checkbox') this.hiddenInput = node;
+                    child.appendChild(node);
+                }
+            });
+            if (this.hiddenInput) this.hiddenInput.checked = this.checked;
+            wrapper.replaceWith(child);
+        },
+        toggle() {
+            if (!this.disabled && !this.readOnly) {
+                this.checked = !this.checked;
+                if (this.hiddenInput) this.hiddenInput.checked = this.checked;
+            }
+        },
+        getCheckedState() {
+            return this.checked ? 'checked' : 'unchecked';
+        },
+    }"
+    @click.stop="toggle()"
+    @keyup.enter.self.stop="if (!nativeButton) toggle()"
+    role="checkbox"
+    :tabindex="disabled ? '-1' : '0'"
     :data-checked="checked ? '' : null"
     :data-unchecked="checked ? null : ''"
-    :data-readonly="readOnly ? '' : null"
-    data-slot="checkbox-indicator"
-    class="[&>svg]:size-3.5 grid place-content-center text-current transition-none" 
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-      aria-hidden="true"
+    :aria-checked="checked"
+    data-slot="checkbox"
+    {% if attrs.disabled %}
+    data-disabled
+    aria-disabled="true"
+    {% endif %}
+    :data-readonly="readOnly ? '': null"
+    {% if attrs.required %}
+    data-required
+    aria-required="true"
+    {% endif %}
+    {% with form_attrs='name,required,form,value,checked,disabled,id' vars='defaultChecked,indeterminate,value,nativeButton,disabled,readOnly,asChild' %}
+        {% for key, value in attrs.items %}
+            {% if key not in form_attrs and key not in vars %}
+                {{ key }}{% if value != True %}="{{ value }}"{% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endwith %}
+    {% if attrs.id %}
+    :id="isFormControl ? null : '{{ attrs.id }}'"
+    {% endif %}
+    class="flex relative justify-center items-center border transition-shadow outline-none disabled:opacity-50 disabled:cursor-not-allowed group-has-disabled/field:opacity-50 aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive aria-invalid:aria-checked:border-primary data-checked:border-primary data-checked:text-primary-foreground data-checked:bg-primary border-input peer size-4 rounded-[4px] shadow-xs shrink-0 after:absolute after:-inset-x-3 after:-inset-y-2 dark:aria-invalid:ring-destructive/40 dark:aria-invalid:border-destructive/50 dark:data-checked:bg-primary dark:bg-input/30 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring{% if class %} {{ class }}{% endif %}"
+>   
+    {% if not asChild %}
+    <span 
+        x-show="checked"
+        :data-checked="checked ? '' : null"
+        :data-unchecked="checked ? null : ''"
+        :data-readonly="readOnly ? '' : null"
+        data-slot="checkbox-indicator"
+        class="[&>svg]:size-3.5 grid place-content-center text-current transition-none" 
     >
-      <path d="M20 6 9 17l-5-5"></path>
-    </svg>
-  </span>
-  {% else %}
-  {{ slot }}
-  {% endif %}
-  <template x-if="isFormControl">
-    <input
-      x-init="if (asChild) $nextTick(() => initAsChild())"
-      {% if attrs.disabled %}disabled{% endif %}
-      {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
-      tabindex="-1"
-      aria-hidden="true"
-      {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
-      type="checkbox"
-      :checked="checked"
-      @change="checked = $event.target.checked"
-      {% if attrs.value %}value="{{ value }}"{% endif %}
-      {% if attrs.form %}form="{{ attrs.form }}"{% endif %}
-      {% if attrs.required %}required{% endif %}
-      style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: absolute;"
-    />
-  </template>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+            aria-hidden="true"
+        >
+            <path d="M20 6 9 17l-5-5"></path>
+        </svg>
+    </span>
+    {% else %}
+    {{ slot }}
+    {% endif %}
+    <template x-if="isFormControl">
+        <input
+            x-init="if (asChild) $nextTick(() => initAsChild())"
+            {% if attrs.disabled %}disabled{% endif %}
+            {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+            tabindex="-1"
+            aria-hidden="true"
+            {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+            type="checkbox"
+            :checked="checked"
+            @change="checked = $event.target.checked"
+            {% if attrs.value %}value="{{ value }}"{% endif %}
+            {% if attrs.form %}form="{{ attrs.form }}"{% endif %}
+            {% if attrs.required %}required{% endif %}
+            style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: absolute;"
+        />
+    </template>
 </span>

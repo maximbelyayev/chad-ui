@@ -1,10 +1,11 @@
 {% with component='select' %}
 
-<c-vars side="bottom" sideOffset="4" align="center" alignOffset="0" />
+<c-vars alignItemWithTrigger=True side="bottom" sideOffset="4" align="center" alignOffset="0" />
 
 <template x-teleport="body">
   <div :id="`${id}-portal`">
     <div x-data="{ 
+        alignItemWithTrigger: {{ alignItemWithTrigger|yesno:'true,false,false' }},
         side: '{{ side }}',
         sideOffset: {{ sideOffset }},
         align: '{{ align }}',
@@ -22,20 +23,12 @@
           this.anchor = this.findAnchor();
           if (!this.cId) this.cId = $id(`${id}-content`) || $id(`chad-ui_r_${this.component}-content`);
         },
-        init() {  
+        init() {
           this.initContent()
           this.$nextTick(() => {
             this.items = this.indexItems();
+            this.handleAlignment(this.anchor.offsetWidth);
           });
-          this.$watch('open', open => {
-            if (open) { 
-              htmx.process($el);
-              const lastValue = Object.keys(selected).findLast(value => selected[value]);
-              if (!lastValue) return;
-              this.highlightedIndex = values.indexOf(lastValue);
-              this.handleFocus(this.items[this.highlightedIndex]);
-            }
-          })
         },
         indexItems: () => Array.from($el.querySelectorAll(`[data-slot=${component}-item]`)),
         handleFocus(el) {
@@ -50,6 +43,32 @@
           el.blur();
           el.setAttribute('tabindex', -1);
           el.removeAttribute('data-highlighted')
+        },
+        handleAlignmentWithTrigger() {
+          content.style.transform = '';
+          let item = Array.from(content.querySelectorAll(`[data-slot=${this.component}-item][data-selected]`)).pop();
+          if (!item) item = this.items[0];
+          const tRect = trigger.getBoundingClientRect();
+          const tMid = tRect.y + tRect.height/2;
+          this.$nextTick(() => {
+            const iRect = item.getBoundingClientRect();
+            const iMid = Math.round(iRect.y) + Math.round(iRect.height/2);
+            content.style.transform = `translate(-1px, ${tMid - iMid}px)`
+          });
+        },
+        handleAlignment(width) {
+          if (!Number(width) || Number(width) <= 0) return;
+          let translation;
+          if (['top', 'bottom'].includes(this.side)) {
+            translation = `${this.alignOffset}px, 0`
+            content.style.transform = `translate(${translation.trim()})`
+            content.style.minWidth = `${width}px`;
+          }
+          else {
+            translation = `0, ${this.alignOffset}px`
+            content.style.transform = `translate(${translation.trim()})`
+            content.style.minWidth = '100%'
+          }
         },
       }"
       x-effect="if (open) $el.removeAttribute('aria-hidden');"
@@ -68,31 +87,13 @@
         class="pointer-events-none"
       >
         <div
-          x-data="{
-            init() {
-              this.$nextTick(() => this.handleAlignment(anchor.offsetWidth))
-            },
-            handleAlignment(width) {
-              if (!Number(width) || Number(width) <= 0) return;
-              let translation;
-              if (['top', 'bottom'].includes(this.side)) {
-                translation = `${this.alignOffset}px, 0`
-                $el.style.transform = `translate(${translation.trim()})`
-                $el.style.minWidth = `${width}px`;
-              }
-              else {
-                translation = `0, ${this.alignOffset}px`
-                $el.style.transform = `translate(${translation.trim()})`
-                $el.style.minWidth = '100%'
-              }
-            }
-          }"
           x-show="open"
           x-effect="handleAlignment(width);"
           @htmx:before:init.window="if ($event.target.contains(anchor)) handleAlignment(anchor.offsetWidth);"
+          :id="cId"
           :data-open="open ? '' : null"
           :data-closed="open ? null : ''"
-          @click.away="hideContent()"
+          @click.away.stop="hideContent()"
           @keydown.down.prevent="if (items.length === 0) return;
             if (highlightedIndex === -1) highlightedIndex = 0;
             else if (highlightedIndex === items.length - 1) {
@@ -107,17 +108,17 @@
             } else highlightedIndex--;
             handleFocus(items[highlightedIndex]);
           "
-          x-trap="open"
-          x-transition:enter="transition-all ease-out duration-100"
+          x-trap.noscroll="open"
+          x-transition:enter="transition-all ease-out"
           x-transition:enter-start="opacity-0 scale-99 {% if side == 'bottom' %}-translate-y-2{% elif side == 'top' %}translate-y-2{% elif side == 'left' %}translate-x-2{% elif side == 'right' %}-translate-x-2{% endif %}"
           x-transition:enter-end="opacity-100 scale-100"
-          x-transition:leave="transition-all ease-in duration-100"
+          x-transition:leave="transition-all ease-in"
           x-transition:leave-start="opacity-100 scale-100"
           x-transition:leave-end="opacity-0 scale-95"
           tabindex="-1"
           role="menu"
           data-slot="{{ component }}-content"
-          class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md p-1 shadow-md ring-1 duration-100 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
+          class="pointer-events-auto ring-foreground/10 bg-popover text-popover-foreground min-w-32 rounded-md shadow-md ring-1 duration-0 overflow-x-hidden overflow-y-auto outline-none data-closed:overflow-hidden{% if class %} {{ class }}{% endif %}"
           {{ attrs }}
         >
           {{ slot }}

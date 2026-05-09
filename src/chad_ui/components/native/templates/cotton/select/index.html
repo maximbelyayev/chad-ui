@@ -1,28 +1,31 @@
 {% with component='select' %}
 {% firstof handle 'handle-'|add:component as handle %}
 
-<c-vars field defaultValue defaultOpen items modal multiple />
+<c-vars field defaultValue defaultOpen items modal multiple disabled :required="True" />
 
 <div data-slot="{{ component }}" 
   x-data="{
     defaultValue: '{% if defaultValue %}{{ defaultValue }}{% elif field.value %}{{ field.value }}{% endif %}',
     open: {{ defaultOpen|yesno:'true,false' }},
-    items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}}{% elif items %}{{ items }}{% else %}null{% endif %},
+    items: {% if field %}{ {% for value, text in field.field.choices %}{% if value %}label: '{{ text }}', value: '{{ value }}'{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %} }{% else %}null{% endif %},
     modal: {{ modal|yesno:'true,false' }},
     multiple: {{ multiple|yesno:'true,false' }},
-    content: null,
+    disabled: {{ disabled|yesno:'true,false' }},
+    required: {{ required|yesno:'true,false,true' }},
     values: [],
     selected: {},
     selectedText: [],
+    content: null,
+    field: null,
     component: '{{ component }}',
     id: '{{ attrs.id }}',
     init() {
-      this._field = this.$el.closest('[x-data][data-slot=field]');
+      this.field = this.$el.closest('[x-data][data-slot=field]');
       this._control = $el.querySelector('select');
       this.trigger = $el.querySelector(`[data-slot=${this.component}-trigger]`);
-      if (this._field) {
-        const fData = Alpine.$data(this._field);
-        this.id ||= fData.getStore()[`${this._field.id}`]?.controlId
+      if (this.field) {
+        const fData = Alpine.$data(this.field);
+        this.id ||= fData.getStore()[`${this.field.id}`]?.controlId
       }
       this.id ||= $id(`chad-ui_r_${this.component}`);
       this.$nextTick(() => {
@@ -34,7 +37,25 @@
           const defaultValues = this.defaultValue.split(',').map((value) => value.trim());
           defaultValues.forEach(value => this.toggle(value));
         }
+        if (this.$el._stopWatcher) this.$el._stopWatcher();
+        this.$el._stopWatcher = this.$watch('open', open => {
+          if (!open) return;
+          htmx.process(this.content);
+          let lastValue = Object.keys(this.selected).findLast(value => this.selected[value]);
+          if (!lastValue) lastValue =  Object.keys(this.selected)[0];
+          const cData = Alpine.$data(this.content);
+          cData.highlightedIndex = this.values.indexOf(lastValue);
+          cData.handleFocus(cData.items[cData.highlightedIndex]);
+          if (cData.alignItemWithTrigger) cData.handleAlignmentWithTrigger();
+        });
       });
+    },
+    setDisabled(el) {
+      if (el.matches('button, input, textarea, select, fieldset')) {
+        el.setAttribute('disabled', '');
+        el.setAttribute('aria-disabled', 'true');
+      }
+      el.setAttribute('data-disabled', '');
     },
     setErrorStyle() {
       if (this.trigger) this.trigger.setAttribute('aria-invalid', 'true');
@@ -56,7 +77,7 @@
       this.open = false;
       this.$nextTick(() => {
         if (this._lastFocused && document.contains(this._lastFocused)) _lastFocused.focus();
-        if (this._field && validationMode === 'blur' && Object.values(this.selected).some(Boolean)) htmx.trigger(this._control, 'change');
+        if (this.field && validationMode === 'blur' && Object.values(this.selected).some(Boolean)) htmx.trigger(this._control, 'change');
         this._hiding = false;
       });
     },
@@ -65,11 +86,18 @@
       else this.showContent(event);
     },
     toggle(value) {
-      if (!this.multiple) this.selected = { [value]: !this.selected[value] };
-      else this.selected[value] = !this.selected[value];
+      const selectedKeys = Object.keys(this.selected).filter(k => this.selected[k]);
+      if (!this.multiple) this.selected = { [value]: this.required ? true : !this.selected[value] };
+      else this.selected[value] = !this.required ? !this.selected[value] : selectedKeys.length > 1 ? !this.selected[value] : true;
       const selectedItems = Array.from(this.content.querySelectorAll(`[data-slot=${this.component}-item]`))
         .filter(item => this.selected[Alpine.$data(item).value]);
       this.selectedText = selectedItems.map(item => item.firstElementChild?.textContent?.trim()).filter(Boolean);
+    },
+    destroy() {
+      if (this.$el._stopWatcher) {
+        this.$el._stopWatcher();
+        this.$el._stopWatcher = null;
+      }
     },
   }"
   :id="id"
@@ -84,13 +112,13 @@
   class="{% if class %} {{ class }}{% endif %}"
 >
   {{ slot }}
-    <select name="{{ field.name }}" class="left-1/2 sr-only transform-x-1/2" 
+    <select name="{% if field %}{{ field.name }}{% else %}{{ attrs.name }}{% endif %}" class="left-1/2 sr-only transform-x-1/2" 
       x-data="{
         init() {
           if (!this._field) return;
           const fData = Alpine.$data(this._field);
           $watch('selected', (selected) => {
-            if (fData.getStore()[`${this._field.id}`].formSubmit) {
+            if (fData.getStore()[`${this._field?.id}`]?.formSubmit) {
               fData.renderErrors();
               fData.getStore()[`${this._field.id}`].formSubmit = false;
               return;
@@ -98,7 +126,6 @@
             if (Object.values(selected).filter(Boolean).length > 0) {
               if (validationMode !== 'change') clearErrors();
               if (validationMode === 'change') htmx.trigger(this._control, 'change');
-              trigger.focus();
             }
             else {
               fData.clearErrors();
@@ -111,7 +138,6 @@
       id="{{ field.id_for_label}}"
       hx-swap="outerMorph"
       tabindex="-1"
-      required
       {{ attrs|cut:"disabled"|cut:"hx-trigger" }}
     >
       <template x-for="val in values">

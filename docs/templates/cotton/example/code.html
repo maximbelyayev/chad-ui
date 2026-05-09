@@ -9,6 +9,15 @@
         init() {
             const lines = $el.querySelectorAll('code span[data-line]')
             if (lines.length && lines.length < 4) this.open = true;
+            const focusEls = $el.querySelectorAll('figure pre, figure button');
+            focusEls.forEach(el => {
+              el.removeAttribute(':tabindex')
+              el.removeAttribute('tabindex');
+            })
+            this.$watch('open', open => {
+              if (!open) return;
+              focusEls.forEach(el => el.setAttribute('tabindex', 0));
+            });
         },
         async copy(text) {
             if (!text) return;

@@ -8,10 +8,11 @@
     handle: '{{ handle }}',
     validationMode: '{{ validationMode|lower }}',
     validationDebounceTime: {{ validationDebounceTime }}, 
-    invalidStyling: {{ invalidStyling|yesno:'true,false' }}, 
+    invalidStyling: {{ invalidStyling|yesno:'true,false' }},
+    control: null,
     fieldId: '{{ field.id_for_label}}',
     fieldLabel: '{{ field.label }}',
-    fieldErrors: [{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+    fieldErrors: {% if field %}[{% for error in field.errors %}'{{ error|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}[]{% endif %},
     fieldDescription: '{{ field.help_text|escapejs }}',
     initStore() {
       this.$store['chad-ui'] ??= {};

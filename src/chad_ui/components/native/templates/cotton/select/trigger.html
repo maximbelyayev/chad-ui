@@ -5,7 +5,6 @@
 
 <button data-slot="{{ component }}-trigger"
   x-data="{
-    disabled: {{ disabled|yesno:'true,false' }},
     asChild: {{ asChild|yesno:'true,false' }},
     component: '{{ component }}',
     root: null,
@@ -25,9 +24,9 @@
       this.$nextTick(() => this.initState());
     },
     handleTrigger(event) {
-      if (!this.root || this.disabled) return;
+      if (!this.root) return;
       const rData = Alpine.$data(this.root);
-      if (rData._hiding) return;
+      if (rData.disabled || rData._hiding) return;
       if (content) content.removeAttribute('aria-hidden');
       if (!this.detached) toggleContent(event);
       else $dispatch(this.handle);
@@ -43,6 +42,8 @@
   }"
   x-resize="handleResize({ width: $width, height: $height});"
   :id="tId"
+  :disabled="disabled ? '' : null"
+  :data-disabled="disabled ? '' : null"
   @click="handleTrigger($event)"
   @keydown.enter="handleKeydown($event)"
   type="button"
