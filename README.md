@@ -1,6 +1,3 @@
-[![PyPI version](https://img.shields.io/pypi/v/chad-ui.svg)](https://pypi.org/project/chad-ui/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/chad-ui.svg)](https://pypi.org/project/chad-ui/)
-
 # chad/ui
 
 Beautifully designed components based on the Cotton/HTMX/Alpine.js stack for Django.
