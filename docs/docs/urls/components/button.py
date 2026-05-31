@@ -1,8 +1,8 @@
-from django.urls import path, include
+from django.urls import path
 
 from docs.views.components import button
 
-app_name="button"
+app_name = 'button'
 
 urlpatterns = [
     path('', button.index, name='index'),

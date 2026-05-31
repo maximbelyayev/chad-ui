@@ -1,11 +1,12 @@
-from django.http import Http404
+import json
+import os
+
 from django.conf import settings
+from django.http import Http404
 from django.utils.translation import gettext_lazy as _
 
-from .registry import SECTIONS, COMPONENTS
+from .registry import COMPONENTS, SECTIONS
 
-import os
-import json
 
 def get_docs_template_and_context(name: str):
     if name in SECTIONS:
@@ -14,7 +15,7 @@ def get_docs_template_and_context(name: str):
         group = 'components'
     else:
         raise Http404('Requested resource was not found.')
-    
+
     template_name = f'docs/{group}/{name}/index.html'
     file_path_md_data = os.path.join(settings.BASE_DIR, f'static/docs/{group}/{name}.json')
     try:
@@ -22,13 +23,13 @@ def get_docs_template_and_context(name: str):
             md_data = json.load(file)
     except FileNotFoundError:
         raise Http404('Requested resource was not found.')
-    
+
     md_frontmatter = md_data.get('frontmatter', {})
     md_context = md_data.get('context', {})
     context = {
         'title': _(md_frontmatter.get('title')),
         'description': _(md_frontmatter.get('description')),
-        'headings': md_context.get('headings')
+        'headings': md_context.get('headings'),
     }
 
     return template_name, context
