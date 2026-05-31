@@ -34,9 +34,13 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 120
 target-version = "py310"
+exclude = [
+    "justfile",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 
 [tool.ruff.format]
 indent-style = "space"
+quote-style = "single"

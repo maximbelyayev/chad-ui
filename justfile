@@ -1,12 +1,16 @@
 default:
-  just --list
+    just --list
+
+fmt:
+    poetry run ruff format
 
 lint:
-  ruff check .
+    poetry run ruff check .
 
 test:
-  poetry run pytest
+    poetry run pytest
 
 check:
-  just lint
-  just test
+    just fmt
+    just lint
+    just test
