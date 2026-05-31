@@ -1,8 +1,8 @@
-from django.urls import path, include
+from django.urls import path
 
 from docs.views.components import accordion
 
-app_name="accordion"
+app_name = 'accordion'
 
 urlpatterns = [
     path('', accordion.index, name='index'),

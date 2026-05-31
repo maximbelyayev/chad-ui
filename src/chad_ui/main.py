@@ -1,17 +1,17 @@
 import argparse
-from pathlib import Path
-from importlib import resources, util
+import re
 import shutil
-from rich import print
+from pathlib import Path
+
 from rich.console import Console
 from rich.panel import Panel
-import re
 
 APP_NAME = 'chad/ui'
 BASE_DIR = Path(__file__).parent
 COMPONENTS_DIR = BASE_DIR / 'components'
 
-console=Console()
+console = Console()
+
 
 def cli() -> None:
     parser = argparse.ArgumentParser(
@@ -19,9 +19,7 @@ def cli() -> None:
     )
 
     subparsers = parser.add_subparsers(
-        title='commands',
-        description=f'The command to provide to the {APP_NAME} command-line interface',
-        required=True
+        title='commands', description=f'The command to provide to the {APP_NAME} command-line interface', required=True
     )
 
     # 'index' subcommand
@@ -29,14 +27,26 @@ def cli() -> None:
     parser_index.set_defaults(func=index)
 
     # 'add' subcommand
-    parser_add = subparsers.add_parser('add', help=f'add a component', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser_add = subparsers.add_parser(
+        'add', help='add a component', formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser_add.add_argument('component', nargs=1, type=str, help='name of the component to add')
-    parser_add.add_argument('-d', '--dest',type=str, default='chad-ui', help='directory (absolute or relative path) to copy assets into', metavar='DIR')
-    parser_add.add_argument('-o', '--overwrite', action='store_true', help='overwrite existing files in the destination directory')
+    parser_add.add_argument(
+        '-d',
+        '--dest',
+        type=str,
+        default='chad-ui',
+        help='directory (absolute or relative path) to copy assets into',
+        metavar='DIR',
+    )
+    parser_add.add_argument(
+        '-o', '--overwrite', action='store_true', help='overwrite existing files in the destination directory'
+    )
     parser_add.set_defaults(func=add)
 
     args = parser.parse_args()
     args.func(args)
+
 
 def index(args: argparse.Namespace) -> None:
     """
@@ -49,22 +59,26 @@ def index(args: argparse.Namespace) -> None:
     components_native.sort()
     components_thirdparty.sort()
 
+    native = '\n'.join(components_native)
+    third_party = '\n'.join(components_thirdparty)
+
     msg_native = f"""
-Native components:
-[green]{'\n'.join(components_native)}[/green]
+    Native components:
+    [green]{native}[/green]
     """
     msg_third_party = f"""
-Third-party integrations:
-[green]{'\n'.join(components_thirdparty)}[/green]
+    Third-party integrations:
+    [green]{third_party}[/green]
     """
-    msg = ""
 
-    if len(components_native) > 0:
+    msg = ''
+    if components_native:
         msg += msg_native
-    if len(components_thirdparty) > 0:
+    if components_thirdparty:
         msg += msg_third_party
 
     console.print(Panel(msg, title=f'{APP_NAME} components index', expand=False))
+
 
 def add(args: argparse.Namespace) -> None:
     """
@@ -89,7 +103,7 @@ def add(args: argparse.Namespace) -> None:
         if component in copying:
             errors.append(f"Circular dependency detected between '{component}' and '{copying[-1]}'")
             return False
-        
+
         copying.append(component)
         try:
             index_match = _match_index(component)
@@ -99,10 +113,10 @@ def add(args: argparse.Namespace) -> None:
                 else:
                     errors.append(f"'{component}' not found in component index")
                 return False
-            
+
             if len(index_match) > 1:
                 errors.append(f"Multiple component directories found for '{component}'")
-            
+
             root_dir = _find_component_root_dir(index_match[0])
             if root_dir is None:
                 errors.append(f"Could not find root directory for '{component}'")
@@ -111,10 +125,10 @@ def add(args: argparse.Namespace) -> None:
             deps = _get_dependencies(component)
             for dep in deps:
                 copy_with_dependencies(dep)
-                    
-            if errors: 
+
+            if errors:
                 return False
-            
+
             try:
                 _copy(component, root_dir, arg_dst_dir, arg_overwrite)
                 copied.add(component)
@@ -122,16 +136,17 @@ def add(args: argparse.Namespace) -> None:
             except Exception as e:
                 errors.append(f"Copy operation failed for '{component}' - {e}")
                 return False
-            
+
         finally:
             copying.remove(component)
-    
+
     success = copy_with_dependencies(arg_component)
     if not success:
         console.print(f"[bold red]ERROR: Failed to add component '{arg_component}'[/bold red]")
         for error in errors:
-            console.print(f"[red] -> {error}[/red]")
-        console.print(f"[yellow]If this is unexpected behavior, please report this issue.[/yellow]")
+            console.print(f'[red] -> {error}[/red]')
+        console.print('[yellow]If this is unexpected behavior, please report this issue.[/yellow]')
+
 
 def _get_dependencies(component: str) -> list[str]:
     """
@@ -150,12 +165,14 @@ def _get_dependencies(component: str) -> list[str]:
 
     return dependencies
 
+
 def _match_index(component: str) -> list[Path]:
     """
     Match paths to the 'index.html' file for a component.
     """
     index_path = COMPONENTS_DIR.rglob(f'templates/cotton/{component}/index.html')
     return [path for path in index_path]
+
 
 def _find_component_root_dir(component_index: Path) -> Path | None:
     """
@@ -166,6 +183,7 @@ def _find_component_root_dir(component_index: Path) -> Path | None:
         if parent.name in root_dirs:
             return parent
     return None
+
 
 def _copy(component: str, src: Path, dst: Path, overwrite: bool = False):
     """

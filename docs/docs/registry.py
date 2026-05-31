@@ -1,4 +1,3 @@
-
 MENU = [
     'home',
     'docs',
@@ -6,12 +5,7 @@ MENU = [
     'blocks',
 ]
 
-SECTIONS = [
-    'introduction',
-    'components',
-    'installation',
-    'usage_patterns'
-]
+SECTIONS = ['introduction', 'components', 'installation', 'usage_patterns']
 
 COMPONENTS = [
     'accordion',
